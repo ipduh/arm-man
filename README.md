@@ -1,25 +1,18 @@
 # arm-man
 arm (Advanced RISC Machines) man(ual) pages
 
-# arm-man-pages
-The ./arm-main-pages directory contains a man page
-for each instruction in the A32/T32 and A64 Instruction Sets
-of the Armv8-A v86A xml specification.
-
-arm.7  , arm-man man
-arm32.7, The A32/T32 Instruction set index
-arm64.7, The A64 Instruction set index
-
-**Arm86A_xml**
-Armv8-A v86A, the xml used to produce the man pages.
-
-##### Install arm manual pages
-  If, you just want the arm-man pages you
-do not need to congigure or run the generator.
-Just copy the contents of the ./arm-man-pages directory
-into your local man-pages/man-section directory.
-ie /usr/local/share/man/man7/
+#### Install arm manual pages
+  If, you just want the arm-man pages you     <br>
+do not need to congigure or run the generator. <br>
+Just copy the contents of the ./arm-man-pages directory <br>
+into your local man-pages/man-section directory. <br>
+ie /usr/local/share/man/man7/ <br>
 See install.sh
+
+##### arm-man-pages
+The ./arm-main-pages directory contains instruction indexes <br>
+and a man page for each instruction in the A32/T32 and A64 Instruction Sets <br>
+of the Armv8-A v86A xml specification.
 
 ##### Man Info
 ```
@@ -31,13 +24,22 @@ $ man arm
 ```
 $ man ./arm-man-pages/arm32.7
 $ man arm32
+$ man arm32 |grep add |grep sp
+   arm32-add-sp-i     Add to SP (immediate).
+   arm32-add-sp-r     Add to SP (register).
 ```
 
 ##### Armv8-A A64 Instruction Set Index
 ```
 $ man ./arm-man-pages/arm64.7
 $ man arm64
+$ man arm64 |grep movz
+  arm64-mov-movz                Move (wide immediate): an alias of MOVZ.
+  arm64-movz                    Move wide with zero.
 ```
+
+##### Arm86A_xml
+Armv8-A v86A, the xml used to produce the man pages.
 
 ##### Generate man pages from the spec xml.
 ```
