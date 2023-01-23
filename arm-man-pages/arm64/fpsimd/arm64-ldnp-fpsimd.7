@@ -1,0 +1,230 @@
+.nh
+.TH "LDNP (SIMD&FP) -- A64" "7" " "  "instruction" "fpsimd"
+.SS LDNP (SIMD&FP)
+ Load Pair of SIMD&FP registers, with Non-temporal hint
+
+ Load Pair of SIMD&FP registers, with Non-temporal hint. This instruction loads
+ a pair of SIMD&FP registers from memory, issuing a hint to the memory system
+ that the access is non-temporal. The address that is used for the load is
+ calculated from a base register value and an optional immediate offset.
+
+ For information about non-temporal pair instructions, see Load/Store SIMD and
+ Floating-point Non-temporal pair.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+ For information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly LDNP (SIMD&FP).
+
+
+
+.SS Signed offset - A64 - signed_scaled_offset
+ 
+                                                                   
+                                                                   
+             26      22                                            
+     30    27 |    23 |            15        10         5         0
+      |     | |     | |             |         |         |         |
+  |. .|1 0 1|1|0 0 0|1|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  |         |       | |             |         |         |
+  `-opc     `-V     | `-imm7        `-Rt2     `-Rn      `-Rt
+                    `-L
+  
+  
+ 
+.SS 32-bit(opc == 00)
+ 
+ LDNP  <St1>, <St2>, [<Xn|SP>{, #<imm>}]
+.SS 64-bit(opc == 01)
+ 
+ LDNP  <Dt1>, <Dt2>, [<Xn|SP>{, #<imm>}]
+.SS 128-bit(opc == 10)
+ 
+ LDNP  <Qt1>, <Qt2>, [<Xn|SP>{, #<imm>}]
+ 
+ boolean wback  = FALSE;
+ boolean postindex = FALSE;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer t2 = UInt(Rt2);
+ AccType acctype = AccType_VECSTREAM;
+ MemOp memop = if L == '1' then MemOp_LOAD else MemOp_STORE;
+ if opc == '11' then UNDEFINED;
+ integer scale = 2 + UInt(opc);
+ integer datasize = 8 << scale;
+ bits(64) offset = LSL(SignExtend(imm7, 64), scale);
+ boolean tag_checked = wback || n != 31;
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(datasize) data1;
+ bits(datasize) data2;
+ constant integer dbytes = datasize DIV 8;
+ boolean rt_unknown = FALSE;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if memop == MemOp_LOAD && t == t2 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_LDPOVERLAP);
+     assert c IN {Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // result is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data1 = V[t];
+         data2 = V[t2];
+         Mem[address + 0     , dbytes, acctype] = data1;
+         Mem[address + dbytes, dbytes, acctype] = data2;
+ 
+     when MemOp_LOAD
+         data1 = Mem[address + 0     , dbytes, acctype];
+         data2 = Mem[address + dbytes, dbytes, acctype];
+         if rt_unknown then
+             data1 = bits(datasize) UNKNOWN;
+             data2 = bits(datasize) UNKNOWN;
+         V[t]  = data1;
+         V[t2] = data2;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Dt1>
+  Encoded in Rt
+  Is the 64-bit name of the first SIMD&FP register to be transferred, encoded in
+  the "Rt" field.
+
+ <Dt2>
+  Encoded in Rt2
+  Is the 64-bit name of the second SIMD&FP register to be transferred, encoded
+  in the "Rt2" field.
+
+ <Qt1>
+  Encoded in Rt
+  Is the 128-bit name of the first SIMD&FP register to be transferred, encoded
+  in the "Rt" field.
+
+ <Qt2>
+  Encoded in Rt2
+  Is the 128-bit name of the second SIMD&FP register to be transferred, encoded
+  in the "Rt2" field.
+
+ <St1>
+  Encoded in Rt
+  Is the 32-bit name of the first SIMD&FP register to be transferred, encoded in
+  the "Rt" field.
+
+ <St2>
+  Encoded in Rt2
+  Is the 32-bit name of the second SIMD&FP register to be transferred, encoded
+  in the "Rt2" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <imm>
+  Encoded in imm7
+  For the 32-bit variant: is the optional signed immediate byte offset, a
+  multiple of 4 in the range -256 to 252, defaulting to 0 and encoded in the
+  "imm7" field as <imm>/4.
+
+ <imm>
+  Encoded in imm7
+  For the 64-bit variant: is the optional signed immediate byte offset, a
+  multiple of 8 in the range -512 to 504, defaulting to 0 and encoded in the
+  "imm7" field as <imm>/8.
+
+ <imm>
+  Encoded in imm7
+  For the 128-bit variant: is the optional signed immediate byte offset, a
+  multiple of 16 in the range -1024 to 1008, defaulting to 0 and encoded in the
+  "imm7" field as <imm>/16.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(datasize) data1;
+ bits(datasize) data2;
+ constant integer dbytes = datasize DIV 8;
+ boolean rt_unknown = FALSE;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if memop == MemOp_LOAD && t == t2 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_LDPOVERLAP);
+     assert c IN {Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // result is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data1 = V[t];
+         data2 = V[t2];
+         Mem[address + 0     , dbytes, acctype] = data1;
+         Mem[address + dbytes, dbytes, acctype] = data2;
+ 
+     when MemOp_LOAD
+         data1 = Mem[address + 0     , dbytes, acctype];
+         data2 = Mem[address + dbytes, dbytes, acctype];
+         if rt_unknown then
+             data1 = bits(datasize) UNKNOWN;
+             data2 = bits(datasize) UNKNOWN;
+         V[t]  = data1;
+         V[t2] = data2;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

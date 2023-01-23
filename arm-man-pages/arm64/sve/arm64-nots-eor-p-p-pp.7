@@ -1,0 +1,64 @@
+.nh
+.TH "NOTS" "7" " "  "alias" "sve"
+.SS NOTS
+ NOTS is an alias of EORS
+
+ Bitwise invert predicate, setting the condition flags
+
+ Bitwise invert each active element of the source predicate, and place the
+ results in the corresponding elements of the destination predicate. Inactive
+ elements in the destination predicate register are set to zero. Sets the First
+ (N), None (Z), !Last (C) condition flags based on the predicate result, and the
+ V flag to zero.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS Setting the condition flags - A64 - eors_p_p_pp_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|1|0 0|. . . .|0 1|. . . .|1|. . . .|0|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS Setting the condition flags
+ 
+ NOTS    <Pd>.B, <Pg>/Z, <Pn>.B
+ 
+ EORS <Pd>.B, <Pg>/Z, <Pn>.B, <Pg>.B
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+
+
+.SS Operation
+
+ The manual of EORS gives pseudocode for NOTS.

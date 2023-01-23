@@ -1,0 +1,232 @@
+.nh
+.TH "VMVN (immediate) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMVN (immediate)
+ Vector Bitwise NOT (immediate)
+
+ Vector Bitwise NOT (immediate) places the bitwise inverse of an immediate
+ integer constant into every element of the destination register.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD one register and modified immediate for
+ the T32 instruction set, or Advanced SIMD one register and modified immediate
+ for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1, A2 and A3) and  T32 (T1, T2 and T3).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|0 x x 0|0|.|1|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 0 x 0|0|.|1|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I16 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I16 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS A3 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 1 0 x|0|.|1|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|0 x x 0|0|.|1|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 0 x 0|0|.|1|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I16 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I16 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 1 0 x|0|.|1|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMVN{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMVN{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if (cmode<0> == '1' && cmode<3:2> != '11') || cmode<3:1> == '111' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ imm64 = AdvSIMDExpandImm('1', cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         D[d+r] = NOT(imm64);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1, A2 and A3: see Standard assembler syntax fields. This
+  encoding must be unconditional.
+
+ <c>
+  For encoding T1, T2 and T3: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <imm>
+  Is a constant of the specified type that is replicated to fill the destination
+  register. For details of the range of constants available and the encoding of
+  <imm>, see Modified immediate constants in T32 and A32 Advanced SIMD
+  instructions.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         D[d+r] = NOT(imm64);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

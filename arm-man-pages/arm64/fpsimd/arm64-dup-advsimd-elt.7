@@ -1,0 +1,188 @@
+.nh
+.TH "DUP (element) -- A64" "7" " "  "instruction" "advsimd"
+.SS DUP (element)
+ Duplicate vector element to vector or scalar
+
+ Duplicate vector element to vector or scalar. This instruction duplicates the
+ vector element at the specified element index in the source SIMD&FP register
+ into a scalar or each element in a vector, and writes the result to the
+ destination SIMD&FP register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - DUP_asisdone_only
+ 
+                                                                   
+                                                                   
+       29                          15        10                    
+     30 |              21        16 |      11 |         5         0
+      | |               |         | |       | |         |         |
+   0 1|0|1 1 1 1 0 0 0 0|. . . . .|0|0 0 0 0|1|. . . . .|. . . . .|
+      |                 |           |         |         |
+      `-op              `-imm5      `-imm4    `-Rn      `-Rd
+  
+  
+ 
+.SS Scalar
+ 
+ DUP  <V><d>, <Vn>.<T>[<index>]
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer size = LowestSetBit(imm5);
+ if size > 3 then UNDEFINED;
+ 
+ integer index = UInt(imm5<4:size+1>);
+ integer idxdsize = if imm5<4> == '1' then 128 else 64; 
+ 
+ integer esize = 8 << size;
+ integer datasize = esize;
+ integer elements = 1;
+.SS Vector - A64 - DUP_asimdins_DV_v
+ 
+                                                                   
+       29                                                          
+     30 |                          15        10                    
+   31 | |              21        16 |      11 |         5         0
+    | | |               |         | |       | |         |         |
+   0|.|0|0 1 1 1 0 0 0 0|. . . . .|0|0 0 0 0|1|. . . . .|. . . . .|
+    | |                 |           |         |         |
+    | `-op              `-imm5      `-imm4    `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Vector
+ 
+ DUP  <Vd>.<T>, <Vn>.<Ts>[<index>]
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer size = LowestSetBit(imm5);
+ if size > 3 then UNDEFINED;
+ 
+ integer index = UInt(imm5<4:size+1>);
+ integer idxdsize = if imm5<4> == '1' then 128 else 64; 
+ 
+ if size == 3 && Q == '0' then UNDEFINED;
+ integer esize = 8 << size;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(idxdsize) operand = V[n];
+ bits(datasize) result;
+ bits(esize) element;
+ 
+ element = Elem[operand, index, esize];
+ for e = 0 to elements-1
+     Elem[result, e, esize] = element;
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <T>
+  Encoded in imm5
+  For the scalar variant: is the element width specifier,
+
+  imm5  <T>      
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <T>
+  Encoded in imm5:Q
+  For the vector variant: is an arrangement specifier,
+
+  imm5  Q <T>      
+  x0000 x RESERVED 
+  xxxx1 0 8B       
+  xxxx1 1 16B      
+  xxx10 0 4H       
+  xxx10 1 8H       
+  xx100 0 2S       
+  xx100 1 4S       
+  x1000 0 RESERVED 
+  x1000 1 2D       
+
+ <Ts>
+  Encoded in imm5
+  Is an element size specifier,
+
+  imm5  <Ts>     
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <V>
+  Encoded in imm5
+  Is the destination width specifier,
+
+  imm5  <V>      
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <index>
+  Encoded in imm5
+  Is the element index
+
+  imm5  <index>   
+  x0000 RESERVED  
+  xxxx1 imm5<4:1> 
+  xxx10 imm5<4:2> 
+  xx100 imm5<4:3> 
+  x1000 imm5<4>   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(idxdsize) operand = V[n];
+ bits(datasize) result;
+ bits(esize) element;
+ 
+ element = Elem[operand, index, esize];
+ for e = 0 to elements-1
+     Elem[result, e, esize] = element;
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,84 @@
+.nh
+.TH "LSL (immediate) -- A64" "7" " "  "alias" "general"
+.SS LSL (immediate)
+ LSL is an alias of UBFM
+
+ Logical Shift Left (immediate)
+
+ Logical Shift Left (immediate) shifts a register value left by an immediate
+ number of bits, shifting in zeros, and writes the result to the destination
+ register.
+
+
+
+.SS With zeros to left and right - A64 - zero_fill
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |.|1 0|1 0 0 1 1 0|.|. . . . . .|. . . . . .|. . . . .|. . . . .|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      |           `-Rn      `-Rd
+  `-sf              `-N           `-imms(!= x11111)
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0 && imms != 011111)
+ 
+ LSL  <Wd>, <Wn>, #<shift>
+ 
+ UBFM <Wd>, <Wn>, #(-<shift> MOD 32), #(31-<shift>)
+.SS 64-bit(sf == 1 && N == 1 && imms != 111111)
+ 
+ LSL  <Xd>, <Xn>, #<shift>
+ 
+ UBFM <Xd>, <Xn>, #(-<shift> MOD 64), #(63-<shift>)
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <shift>
+  For the 32-bit variant: is the shift amount, in the range 0 to 31.
+
+ <shift>
+  For the 64-bit variant: is the shift amount, in the range 0 to 63.
+
+
+
+.SS Operation
+
+ The manual of UBFM gives pseudocode for LSL.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

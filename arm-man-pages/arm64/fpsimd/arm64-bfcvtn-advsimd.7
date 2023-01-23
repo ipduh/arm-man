@@ -1,0 +1,99 @@
+.nh
+.TH "BFCVTN, BFCVTN2 -- A64" "7" " "  "instruction" "advsimd"
+.SS BFCVTN, BFCVTN2
+ Floating-point convert from single-precision to BFloat16 format (vector)
+
+ Floating-point convert from single-precision to BFloat16 format (vector) reads
+ each single-precision element in the SIMD&FP source vector, converts each value
+ to BFloat16 format, and writes the results in the lower or upper half of the
+ SIMD&FP destination vector. The result elements are half the width of the
+ source elements.
+
+ The BFCVTN instruction writes the half-width results to the lower half of the
+ destination vector and clears the upper half to zero, while the BFCVTN2
+ instruction writes the results to the upper half of the destination vector
+ without affecting the other bits in the register.
+
+ Unlike the BFloat16 multiplication instructions, this instruction honors all of
+ the control bits in the FPCR that apply to single-precision arithmetic,
+ including the rounding mode. It can also generate a floating-point exception
+ that causes cumulative exception bits in the FPSR to be set, or a synchronous
+ exception to be taken, depending on the enable bits in the FPCR.
+
+
+
+.SS Vector single-precision and BFloat16 - A64 - BFCVTN_asimdmisc_4S
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |        24  22        17        12  10         5         0
+    | | |         |   |         |         |   |         |         |
+   0|.|0|0 1 1 1 0|1 0|1 0 0 0 0|1 0 1 1 0|1 0|. . . . .|. . . . .|
+    | |           |             |             |         |
+    | `-U         `-size        `-opcode      `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Vector single-precision and BFloat16
+ 
+ BFCVTN{2}  <Vd>.<Ta>, <Vn>.4S
+ 
+ if !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Rn);
+ integer d = UInt(Rd);
+ integer part = UInt(Q);
+ integer elements = 64 DIV 16;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand = V[n];
+ bits(64) result;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, 16] = FPConvertBF(Elem[operand, e, 32], FPCR);
+ 
+ Vpart[d, part] = result;
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ta>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <Ta> 
+  0 4H   
+  1 8H   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand = V[n];
+ bits(64) result;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, 16] = FPConvertBF(Elem[operand, e, 32], FPCR);
+ 
+ Vpart[d, part] = result;
+

@@ -1,0 +1,267 @@
+.nh
+.TH "STR (register) -- A64" "7" " "  "instruction" "general"
+.SS STR (register)
+ Store Register (register)
+
+ Store Register (register) calculates an address from a base register value and
+ an offset register value, and stores a 32-bit word or a 64-bit doubleword to
+ the calculated address, from a register. For information about memory accesses,
+ see Load/Store addressing modes.
+
+ The instruction uses an offset addressing mode, that calculates the address
+ used for the memory access from a base register value and an offset register
+ value. The offset can be optionally shifted and extended.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+                                                                   
+             26        21                12                        
+     30    27 |  24  22 |        16    13 |  10         5         0
+      |     | |   |   | |         |     | |   |         |         |
+  |1 x|1 1 1|0|0 0|0 0|1|. . . . .|. . .|.|1 0|. . . . .|. . . . .|
+  |         |     |     |         |     |     |         |
+  `-size    `-V   `-opc `-Rm      |     `-S   `-Rn      `-Rt
+                                  `-option
+  
+  
+ 
+.SS 32-bit(size == 10)
+ 
+ STR  <Wt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
+.SS 64-bit(size == 11)
+ 
+ STR  <Xt>, [<Xn|SP>, (<Wm>|<Xm>){, <extend> {<amount>}}]
+ 
+ boolean wback = FALSE;
+ boolean postindex = FALSE;
+ integer scale = UInt(size);
+ if option<1> == '0' then UNDEFINED;             // sub-word index
+ ExtendType extend_type = DecodeRegExtend(option);
+ integer shift = if S == '1' then scale else 0;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer m = UInt(Rm);
+ AccType acctype = AccType_NORMAL;
+ MemOp memop;
+ boolean signed;
+ integer regsize;
+ 
+ if opc<1> == '0' then
+     // store or zero-extending load
+     memop = if opc<0> == '1' then MemOp_LOAD else MemOp_STORE;
+     regsize = if size == '11' then 64 else 32;
+     signed = FALSE;
+ else
+     if size == '11' then
+         memop = MemOp_PREFETCH;
+         if opc<0> == '1' then UNDEFINED;
+     else
+         // sign-extending load
+         memop = MemOp_LOAD;
+         if size == '10' && opc<0> == '1' then UNDEFINED;
+         regsize = if opc<0> == '1' then 32 else 64;
+         signed = TRUE;
+ 
+ integer datasize = 8 << scale;
+ boolean tag_checked = memop != MemOp_PREFETCH;
+ 
+ bits(64) offset = ExtendReg(m, extend_type, shift);
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ bits(64) address;
+ bits(datasize) data;
+ 
+ boolean wb_unknown = FALSE;
+ boolean rt_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;       // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;   // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;  // value stored is original value
+         when Constraint_UNKNOWN    rt_unknown = TRUE;   // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     if memop != MemOp_PREFETCH then CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown then
+             data = bits(datasize) UNKNOWN;
+         else
+             data = X[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         if signed then
+             X[t] = SignExtend(data, regsize);
+         else
+             X[t] = ZeroExtend(data, regsize);
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be transferred, encoded
+  in the "Rt" field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be transferred, encoded
+  in the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  When option<0> is set to 0, is the 32-bit name of the general-purpose index
+  register, encoded in the "Rm" field.
+
+ <Xm>
+  Encoded in Rm
+  When option<0> is set to 1, is the 64-bit name of the general-purpose index
+  register, encoded in the "Rm" field.
+
+ <extend>
+  Encoded in option
+  Is the index extend/shift specifier, defaulting to LSL, and which must be
+  omitted for the LSL option when <amount> is omitted.
+
+  option <extend> 
+  010    UXTW     
+  011    LSL      
+  110    SXTW     
+  111    SXTX     
+
+ <amount>
+  Encoded in S
+  For the 32-bit variant: is the index shift amount, optional only when <extend>
+  is not LSL. Where it is permitted to be optional, it defaults to #0. It is
+
+  S <amount> 
+  0 #0       
+  1 #2       
+
+ <amount>
+  Encoded in S
+  For the 64-bit variant: is the index shift amount, optional only when <extend>
+  is not LSL. Where it is permitted to be optional, it defaults to #0. It is
+
+  S <amount> 
+  0 #0       
+  1 #3       
+
+
+
+.SS Operation
+
+ bits(64) offset = ExtendReg(m, extend_type, shift);
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ bits(64) address;
+ bits(datasize) data;
+ 
+ boolean wb_unknown = FALSE;
+ boolean rt_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;       // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;   // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;  // value stored is original value
+         when Constraint_UNKNOWN    rt_unknown = TRUE;   // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     if memop != MemOp_PREFETCH then CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown then
+             data = bits(datasize) UNKNOWN;
+         else
+             data = X[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         if signed then
+             X[t] = SignExtend(data, regsize);
+         else
+             X[t] = ZeroExtend(data, regsize);
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

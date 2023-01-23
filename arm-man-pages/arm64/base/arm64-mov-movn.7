@@ -1,0 +1,87 @@
+.nh
+.TH "MOV (inverted wide immediate) -- A64" "7" " "  "alias" "general"
+.SS MOV (inverted wide immediate)
+ MOV is an alias of MOVN
+
+ Move (inverted wide immediate)
+
+ Move (inverted wide immediate) moves an inverted 16-bit immediate value to a
+ register.
+
+
+
+.SS Immediate packed into 16-bit value and 2-bit shift - A64 - imm18_packed
+ 
+                                                                   
+                                                                   
+                                                                   
+   31  29          23  21                               5         0
+    |   |           |   |                               |         |
+  |.|0 0|1 0 0 1 0 1|. .|. . . . . . . . . . . . . . . .|. . . . .|
+  | |               |   |                               |
+  | `-opc           |   `-imm16                         `-Rd
+  `-sf              `-hw
+  
+  
+ 
+.SS 32-bit(sf == 0 && hw == 0x)
+ 
+ MOV  <Wd>, #<imm>
+ 
+ MOVN <Wd>, #<imm16>, LSL #<shift>
+.SS 64-bit(sf == 1)
+ 
+ MOV  <Xd>, #<imm>
+ 
+ MOVN <Xd>, #<imm16>, LSL #<shift>
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <imm>
+  Encoded in hw:imm16
+  For the 32-bit variant: is a 32-bit immediate, the bitwise inverse of which
+  can be encoded in "imm16:hw", but excluding 0xffff0000 and 0x0000ffff
+
+ <imm>
+  Encoded in hw:imm16
+  For the 64-bit variant: is a 64-bit immediate, the bitwise inverse of which
+  can be encoded in "imm16:hw".
+
+ <shift>
+  Encoded in hw
+  For the 32-bit variant: is the amount by which to shift the immediate left,
+  either 0 (the default) or 16, encoded in the "hw" field as <shift>/16.
+
+ <shift>
+  Encoded in hw
+  For the 64-bit variant: is the amount by which to shift the immediate left,
+  either 0 (the default), 16, 32 or 48, encoded in the "hw" field as <shift>/16.
+
+
+
+.SS Operation
+
+ The manual of MOVN gives pseudocode for MOV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

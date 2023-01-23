@@ -1,0 +1,97 @@
+.nh
+.TH "AUTDA, AUTDZA -- A64" "7" " "  "instruction" "general"
+.SS AUTDA, AUTDZA
+ Authenticate Data address, using key A
+
+ Authenticate Data address, using key A. This instruction authenticates a data
+ address, using a modifier and key A.
+
+ The address is in the general-purpose register that is specified by <Xd>.
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTDA.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTDA.
+
+ The value zero, for AUTDZA.
+
+
+ If the authentication passes, the upper bits of the address are restored to
+ enable subsequent use of the address. If the authentication fails, the upper
+ bits are corrupted and any subsequent use of the address results in a
+ Translation fault.
+
+
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|1 1 0|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS AUTDA(Z == 0)
+ 
+ AUTDA  <Xd>, <Xn|SP>
+.SS AUTDZA(Z == 1 && Rn == 11111)
+ 
+ AUTDZA  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // AUTDA
+     if n == 31 then source_is_sp = TRUE;
+ else // AUTDZA
+     if n != 31 then UNDEFINED;
+ 
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthDA(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthDA(X[d], X[n], auth_then_branch);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthDA(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthDA(X[d], X[n], auth_then_branch);
+

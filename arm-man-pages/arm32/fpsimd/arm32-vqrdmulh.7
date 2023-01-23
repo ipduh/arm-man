@@ -1,0 +1,226 @@
+.nh
+.TH "VQRDMULH -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VQRDMULH
+ Vector Saturating Rounding Doubling Multiply Returning High Half
+
+ Vector Saturating Rounding Doubling Multiply Returning High Half multiplies
+ corresponding elements in two vectors, doubles the results, and places the most
+ significant half of the final results in the destination vector. The results
+ are rounded. For truncated results see VQDMULH.
+
+ The second operand can be a scalar instead of a vector. For more information
+ about scalars see Advanced SIMD scalars.
+
+ If any of the results overflow, they are saturated. The cumulative saturation
+ bit, FPSCR.QC, is set if saturation occurs. For details see Pseudocode details
+ of saturation.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD data-processing for the T32 instruction
+ set, or Advanced SIMD data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|. .|. . . .|. . . .|1 0 1 1|.|.|.|0|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '00' || size == '11' then UNDEFINED;
+ scalar_form = FALSE;  esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. .|. . . .|. . . .|1 1 0 1|.|1|.|0|. . . .|
+                |   | |   |       |       |       |   |   |
+                `-Q | |   `-Vn    `-Vd    `-opc   `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Dd>,} <Dn>, <Dm[x]>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Qd>,} <Qn>, <Dm[x]>
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ scalar_form = TRUE;  d = UInt(D:Vd);  n = UInt(N:Vn);  regs = if Q == '0' then 1 else 2;
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|. .|. . . .|. . . .|1 0 1 1|.|.|.|0|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '00' || size == '11' then UNDEFINED;
+ scalar_form = FALSE;  esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. .|. . . .|. . . .|1 1 0 1|.|1|.|0|. . . .|
+        |           | |   |       |       |       |   |   |
+        `-Q         | |   `-Vn    `-Vd    `-opc   `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Dd>,} <Dn>, <Dm[x]>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRDMULH{<c>}{<q>}.<dt> {<Qd>,} <Qn>, <Dm[x]>
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ scalar_form = TRUE;  d = UInt(D:Vd);  n = UInt(N:Vn);  regs = if Q == '0' then 1 else 2;
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     round_const = 1 << (esize-1);
+     if scalar_form then op2 = SInt(Elem[D[m],index,esize]);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = SInt(Elem[D[n+r],e,esize]);
+             if !scalar_form then op2 = SInt(Elem[D[m+r],e,esize]);
+             (result, sat) = SignedSatQ((2*op1*op2 + round_const) >> esize, esize);
+             Elem[D[d+r],e,esize] = result;
+             if sat then FPSCR.QC = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1 and A2: see Standard assembler syntax fields. This encoding
+  must be unconditional.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in size
+  Is the data type for the elements of the operands,
+
+  size <dt> 
+  01   S16  
+  10   S32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm[x]>
+  Is the 64-bit name of the second SIMD&FP source register holding the scalar.
+  If <dt> is S16, Dm is restricted to D0-D7. Dm is encoded in "Vm<2:0>", and x
+  is encoded in "M:Vm<3>". If <dt> is S32, Dm is restricted to D0-D15. Dm is
+  encoded in "Vm", and x is encoded in "M".
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     round_const = 1 << (esize-1);
+     if scalar_form then op2 = SInt(Elem[D[m],index,esize]);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = SInt(Elem[D[n+r],e,esize]);
+             if !scalar_form then op2 = SInt(Elem[D[m+r],e,esize]);
+             (result, sat) = SignedSatQ((2*op1*op2 + round_const) >> esize, esize);
+             Elem[D[d+r],e,esize] = result;
+             if sat then FPSCR.QC = '1';
+

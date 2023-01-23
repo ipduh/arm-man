@@ -1,0 +1,87 @@
+.nh
+.TH "BX -- AArch32" "7" " "  "instruction" "general"
+.SS BX
+ Branch and Exchange
+
+ Branch and Exchange causes a branch to an address and instruction set specified
+ by a register.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+         28              20 | | |16 | | |12 | | 9 8       4       0
+          |               | | | | | | | | | | | | |       |       |
+  |. . . .|0 0 0 1 0 0 1 0|1|1|1|1|1|1|1|1|1|1|1|1|0 0 0 1|. . . .|
+  |                                                       |
+  `-cond(!= 1111)                                         `-Rm
+  
+  
+ 
+.SS A1
+ 
+ BX{<c>}{<q>} <Rm>
+ 
+ m = UInt(Rm);
+.SS T1 - T32
+ 
+                                  0                                
+                                1 |                                
+                    7         2 | |                                
+                  8 |       3 | | |                                
+                  | |       | | | |                                
+   0 1 0 0 0 1 1 1|0|. . . .|0|0|0|                                
+                  | |
+                  | `-Rm
+                  `-L
+  
+  
+ 
+.SS T1
+ 
+ BX{<c>}{<q>} <Rm>
+ 
+ m = UInt(Rm);
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     BXWritePC(R[m], BranchType_INDIR);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the general-purpose register holding the address to be
+  branched to, encoded in the "Rm" field. The PC can be used.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T1: is the general-purpose register holding the address to be
+  branched to, encoded in the "Rm" field. The PC can be used.
+  If <Rm> is the PC at a non word-aligned address, it results in unpredictable
+  behavior because the address passed to the BXWritePC() pseudocode function has
+  bits<1:0> = '10'.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     BXWritePC(R[m], BranchType_INDIR);
+

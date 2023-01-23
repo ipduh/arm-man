@@ -1,0 +1,127 @@
+.nh
+.TH "VEXT (multibyte elements) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VEXT (multibyte elements)
+ VEXT is an alias of VEXT
+
+ Vector Extract
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+                   23 |  20      16      12       8 7 6 5 4       0
+                    | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1 0 1|.|1 1|. . . .|. . . .|. . . .|.|.|.|0|. . . .|
+                    |     |       |       |       | | |   |
+                    `-D   `-Vn    `-Vd    `-imm4  | | `-M `-Vm
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VEXT{<c>}{<q>}.<size> {<Dd>,} <Dn>, <Dm>, #<imm>
+ 
+ VEXT{<c>}{<q>}.8 {<Dd>,} <Dn>, <Dm>, #<imm*(size/8)>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VEXT{<c>}{<q>}.<size> {<Qd>,} <Qn>, <Qm>, #<imm>
+ 
+ VEXT{<c>}{<q>}.8 {<Qd>,} <Qn>, <Qm>, #<imm*(size/8)>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                                            
+                   08 |  05      01      12       8 7 6 5 4       0
+                    | |   |       |       |       | | | | |       |
+   1 1 1 0 1 1 1 1 1|.|1 1|. . . .|. . . .|. . . .|.|.|.|0|. . . .|
+                    |     |       |       |       | | |   |
+                    `-D   `-Vn    `-Vd    `-imm4  | | `-M `-Vm
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VEXT{<c>}{<q>}.<size> {<Dd>,} <Dn>, <Dm>, #<imm>
+ 
+ VEXT{<c>}{<q>}.8 {<Dd>,} <Dn>, <Dm>, #<imm*(size/8)>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VEXT{<c>}{<q>}.<size> {<Qd>,} <Qn>, <Qm>, #<imm>
+ 
+ VEXT{<c>}{<q>}.8 {<Qd>,} <Qn>, <Qm>, #<imm*(size/8)>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  For the 64-bit SIMD vector variant: is the size of the operation, and can be
+  one of 16 or 32.
+
+ <size>
+  For the 128-bit SIMD vector variant: is the size of the operation, and can be
+  one of 16, 32 or 64.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <imm>
+  For the 64-bit SIMD vector variant: is the location of the extracted result in
+  the concatenation of the operands, as a number of bytes from the least
+  significant end, in the range 0 to (128/<size>)-1.
+
+ <imm>
+  For the 128-bit SIMD vector variant: is the location of the extracted result
+  in the concatenation of the operands, as a number of bytes from the least
+  significant end, in the range 0 to (64/<size>)-1.
+
+
+
+.SS Operation
+
+ The manual of VEXT gives pseudocode for VEXT.

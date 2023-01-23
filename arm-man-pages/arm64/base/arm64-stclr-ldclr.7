@@ -1,0 +1,90 @@
+.nh
+.TH "STCLR, STCLRL -- A64" "7" " "  "alias" "general"
+.SS STCLR, STCLRL
+ STCLRL is an alias of LDCLRL
+
+ Atomic bit clear on word or doubleword in memory, without return
+
+ Atomic bit clear on word or doubleword in memory, without return, atomically
+ loads a 32-bit word or 64-bit doubleword from memory, performs a bitwise AND
+ with the complement of the value held in a register on it, and stores the
+ result back to memory.
+
+ STCLR has no memory ordering semantics.
+
+ STCLRL stores to memory with release semantics, as described in Load-Acquire,
+ Store-Release.
+
+ STCLRL stores to memory with release semantics, as described in Load-Acquire,
+ Store-Release.
+
+
+ For information about memory accesses see Load/Store addressing modes.
+
+
+
+.SS Integer - A64 - general
+ 
+                       21                                          
+                     22 |                                          
+             26    23 | |          15                              
+     30    27 |  24 | | |        16 |    12  10         5         0
+      |     | |   | | | |         | |     |   |         |         |
+  |1 x|1 1 1|0|0 0|0|.|1|. . . . .|0|0 0 1|0 0|. . . . .|1 1 1 1 1|
+  |         |     | |   |         | |         |         |
+  `-size    `-V   | `-R `-Rs      | `-opc     `-Rn      `-Rt
+                  `-A             `-o3
+  
+  
+ 
+.SS 32-bit LDCLR alias(size == 10 && R == 0)
+ 
+ STCLR  <Ws>, [<Xn|SP>]
+ 
+ LDCLR <Ws>, WZR, [<Xn|SP>]
+.SS 32-bit LDCLRL alias(size == 10 && R == 1)
+ 
+ STCLRL  <Ws>, [<Xn|SP>]
+ 
+ LDCLRL <Ws>, WZR, [<Xn|SP>]
+.SS 64-bit LDCLR alias(size == 11 && R == 0)
+ 
+ STCLR  <Xs>, [<Xn|SP>]
+ 
+ LDCLR <Xs>, XZR, [<Xn|SP>]
+.SS 64-bit LDCLRL alias(size == 11 && R == 1)
+ 
+ STCLRL  <Xs>, [<Xn|SP>]
+ 
+ LDCLRL <Xs>, XZR, [<Xn|SP>]
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register holding the data value to
+  be operated on with the contents of the memory location, encoded in the "Rs"
+  field.
+
+ <Xs>
+  Encoded in Rs
+  Is the 64-bit name of the general-purpose register holding the data value to
+  be operated on with the contents of the memory location, encoded in the "Rs"
+  field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of LDCLRL gives pseudocode for STCLRL.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

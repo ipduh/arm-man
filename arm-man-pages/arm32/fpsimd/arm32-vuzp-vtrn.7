@@ -1,0 +1,79 @@
+.nh
+.TH "VUZP (alias) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VUZP (alias)
+ VUZP is an alias of VTRN
+
+ Vector Unzip
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|0 0 0 1|0|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector
+ 
+ VUZP{<c>}{<q>}.32 <Dd>, <Dm>
+ 
+ VTRN{<c>}{<q>}.32 <Dd>, <Dm>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|0 0 0 1|0|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector
+ 
+ VUZP{<c>}{<q>}.32 <Dd>, <Dm>
+ 
+ VTRN{<c>}{<q>}.32 <Dd>, <Dm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ The manual of VTRN gives pseudocode for VUZP.

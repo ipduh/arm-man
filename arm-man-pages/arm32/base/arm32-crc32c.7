@@ -1,0 +1,141 @@
+.nh
+.TH "CRC32C -- AArch32" "7" " "  "instruction" "general"
+.SS CRC32C
+ CRC32C
+
+ CRC32C performs a cyclic redundancy check (CRC) calculation on a value held in
+ a general-purpose register. It takes an input CRC value in the first source
+ operand, performs a CRC on the input value in the second source operand, and
+ returns the output CRC value. The second source operand can be 8, 16, or 32
+ bits. To align with common usage, the bit order of the values is reversed as
+ part of the operation, and the polynomial 0x1EDC6F41 is used for the CRC
+ calculation.
+
+ In Armv8-A, this is an optional instruction, and in Armv8.1 it is mandatory for
+ all implementations to implement it.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                         20                11 |                    
+         28        23  21 |      16      12 | | 9 8       4       0
+          |         |   | |       |       | | | | |       |       |
+  |. . . .|0 0 0 1 0|. .|0|. . . .|. . . .|0|0|1|0|0 1 0 0|. . . .|
+  |                 |     |       |           |           |
+  `-cond(!= 1111)   `-sz  `-Rn    `-Rd        `-C         `-Rm
+  
+  
+ 
+.SS CRC32CB(sz == 00)
+ 
+ CRC32CB{<q>} <Rd>, <Rn>, <Rm>
+.SS CRC32CH(sz == 01)
+ 
+ CRC32CH{<q>} <Rd>, <Rn>, <Rm>
+.SS CRC32CW(sz == 10)
+ 
+ CRC32CW{<q>} <Rd>, <Rn>, <Rm>
+ 
+ if ! HaveCRCExt() then UNDEFINED;
+ d = UInt(Rd); n = UInt(Rn); m = UInt(Rm);
+ size = 8 << UInt(sz);
+ crc32c = (C == '1');
+ if d == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ if size == 64 then UNPREDICTABLE;
+ if cond != '1110' then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                   08  06 |      01      12       8   6   4       0
+                    |   | |       |       |       |   |   |       |
+   1 1 1 1 1 0 1 0 1|1 0|1|. . . .|1 1 1 1|. . . .|1 0|. .|. . . .|
+                        | |               |           |   |
+                        | `-Rn            `-Rd        |   `-Rm
+                        `-C                           `-sz
+  
+  
+ 
+.SS CRC32CB(sz == 00)
+ 
+ CRC32CB{<q>} <Rd>, <Rn>, <Rm>
+.SS CRC32CH(sz == 01)
+ 
+ CRC32CH{<q>} <Rd>, <Rn>, <Rm>
+.SS CRC32CW(sz == 10)
+ 
+ CRC32CW{<q>} <Rd>, <Rn>, <Rm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if ! HaveCRCExt() then UNDEFINED;
+ d = UInt(Rd); n = UInt(Rn); m = UInt(Rm);
+ size = 8 << UInt(sz);
+ crc32c = (C == '1');
+ if d == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ if size == 64 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     acc = R[n];             // accumulator
+     val = R[m]<size-1:0>;   // input value
+     poly = (if crc32c then 0x1EDC6F41 else 0x04C11DB7)<31:0>;
+     tempacc = BitReverse(acc):Zeros(size);
+     tempval = BitReverse(val):Zeros(32);
+     // Poly32Mod2 on a bitstring does a polynomial Modulus over {0,1} operation
+     R[d] = BitReverse(Poly32Mod2(tempacc EOR tempval, poly));
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields. An CRC32C instruction must be
+  unconditional.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose accumulator output register, encoded in the "Rd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose accumulator input register, encoded in the "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose data source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     acc = R[n];             // accumulator
+     val = R[m]<size-1:0>;   // input value
+     poly = (if crc32c then 0x1EDC6F41 else 0x04C11DB7)<31:0>;
+     tempacc = BitReverse(acc):Zeros(size);
+     tempval = BitReverse(val):Zeros(32);
+     // Poly32Mod2 on a bitstring does a polynomial Modulus over {0,1} operation
+     R[d] = BitReverse(Poly32Mod2(tempacc EOR tempval, poly));
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,87 @@
+.nh
+.TH "PACDA, PACDZA -- A64" "7" " "  "instruction" "general"
+.SS PACDA, PACDZA
+ Pointer Authentication Code for Data address, using key A
+
+ Pointer Authentication Code for Data address, using key A. This instruction
+ computes and inserts a pointer authentication code for a data address, using a
+ modifier and key A.
+
+ The address is in the general-purpose register that is specified by <Xd>.
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACDA.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACDA.
+
+ The value zero, for PACDZA.
+
+
+
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|0 1 0|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS PACDA(Z == 0)
+ 
+ PACDA  <Xd>, <Xn|SP>
+.SS PACDZA(Z == 1 && Rn == 11111)
+ 
+ PACDZA  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // PACDA
+     if n == 31 then source_is_sp = TRUE;
+ else // PACDZA
+     if n != 31 then UNDEFINED;
+ 
+ if source_is_sp then
+     X[d] = AddPACDA(X[d], SP[]);
+ else
+     X[d] = AddPACDA(X[d], X[n]);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ if source_is_sp then
+     X[d] = AddPACDA(X[d], SP[]);
+ else
+     X[d] = AddPACDA(X[d], X[n]);
+

@@ -1,0 +1,192 @@
+.nh
+.TH "USHL -- A64" "7" " "  "instruction" "advsimd"
+.SS USHL
+ Unsigned Shift Left (register)
+
+ Unsigned Shift Left (register). This instruction takes each element in the
+ vector of the first source SIMD&FP register, shifts each element by a value
+ from the least significant byte of the corresponding element of the second
+ source SIMD&FP register, places the results in a vector, and writes the vector
+ to the destination SIMD&FP register.
+
+ If the shift value is positive, the operation is a left shift. If the shift
+ value is negative, it is a truncating right shift. For a rounding shift, see
+ URSHL.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - USHL_asisdsame_only
+ 
+                                             10                    
+                                           11 |                    
+       29              21                12 | |                    
+     30 |        24  22 |        16    13 | | |         5         0
+      | |         |   | |         |     | | | |         |         |
+   0 1|1|1 1 1 1 0|. .|1|. . . . .|0 1 0|0|0|1|. . . . .|. . . . .|
+      |           |     |               | |   |         |
+      `-U         |     `-Rm            | `-S `-Rn      `-Rd
+                  `-size                `-R
+  
+  
+ 
+.SS Scalar
+ 
+ USHL  <V><d>, <V><n>, <V><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ boolean unsigned = (U == '1');
+ boolean rounding = (R == '1');
+ boolean saturating = (S == '1');
+ if S == '0' && size != '11' then UNDEFINED;
+.SS Vector - A64 - USHL_asimdsame_only
+ 
+                                             10                    
+       29                                  11 |                    
+     30 |              21                12 | |                    
+   31 | |        24  22 |        16    13 | | |         5         0
+    | | |         |   | |         |     | | | |         |         |
+   0|.|1|0 1 1 1 0|. .|1|. . . . .|0 1 0|0|0|1|. . . . .|. . . . .|
+    | |           |     |               | |   |         |
+    | `-U         |     `-Rm            | `-S `-Rn      `-Rd
+    `-Q           `-size                `-R
+  
+  
+ 
+.SS Vector
+ 
+ USHL  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size:Q == '110' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ boolean unsigned = (U == '1');
+ boolean rounding = (R == '1');
+ boolean saturating = (S == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ 
+ integer round_const = 0;
+ integer shift;
+ integer element;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     shift = SInt(Elem[operand2, e, esize]<7:0>);
+     if rounding then
+         round_const = 1 << (-shift - 1); // 0 for left shift, 2^(n-1) for right shift 
+     element = (Int(Elem[operand1, e, esize], unsigned) + round_const) << shift;
+     if saturating then
+         (Elem[result, e, esize], sat) = SatQ(element, esize, unsigned);
+         if sat then FPSR.QC = '1';
+     else
+         Elem[result, e, esize] = element<esize-1:0>;
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V>      
+  0x   RESERVED 
+  10   RESERVED 
+  11   D        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ 
+ integer round_const = 0;
+ integer shift;
+ integer element;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     shift = SInt(Elem[operand2, e, esize]<7:0>);
+     if rounding then
+         round_const = 1 << (-shift - 1); // 0 for left shift, 2^(n-1) for right shift 
+     element = (Int(Elem[operand1, e, esize], unsigned) + round_const) << shift;
+     if saturating then
+         (Elem[result, e, esize], sat) = SatQ(element, esize, unsigned);
+         if sat then FPSR.QC = '1';
+     else
+         Elem[result, e, esize] = element<esize-1:0>;
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

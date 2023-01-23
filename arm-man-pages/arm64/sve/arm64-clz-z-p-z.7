@@ -1,0 +1,99 @@
+.nh
+.TH "CLZ" "7" " "  "instruction" "sve"
+.SS CLZ
+ Count leading zero bits (predicated)
+
+ Count leading zero bits in each active element of the source vector, and place
+ the results in the corresponding elements of the destination vector. Inactive
+ elements in the destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - clz_z_p_z_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |    13    10         5         0
+                  |   |     |   | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 1 1|0 0|1|1 0 1|. . .|. . . . .|. . . . .|
+                  |         |   |       |     |         |
+                  `-size    |   |       `-Pg  `-Zn      `-Zd
+                            |   `-opc<0>
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ CLZ     <Zd>.<T>, <Pg>/M, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = CountLeadingZeroBits(element)<esize-1:0>;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = CountLeadingZeroBits(element)<esize-1:0>;
+ 
+ Z[d] = result;
+

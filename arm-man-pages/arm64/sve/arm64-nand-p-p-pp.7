@@ -1,0 +1,137 @@
+.nh
+.TH "NAND, NANDS" "7" " "  "instruction" "sve"
+.SS NAND, NANDS
+ Bitwise NAND predicates
+
+ Bitwise NAND active elements of the second source predicate with corresponding
+ elements of the first source predicate and place the results in the
+ corresponding elements of the destination predicate. Inactive elements in the
+ destination predicate register are set to zero. Optionally sets the First (N),
+ None (Z), !Last (C) condition flags based on the predicate result, and the V
+ flag to zero.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Not setting the condition flags and Setting the condition flags
+
+.SS Not setting the condition flags - A64 - nand_p_p_pp_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|1|0|0 0|. . . .|0 1|. . . .|1|. . . .|1|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS Not setting the condition flags
+ 
+ NAND    <Pd>.B, <Pg>/Z, <Pn>.B, <Pm>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ integer m = UInt(Pm);
+ integer d = UInt(Pd);
+ boolean setflags = FALSE;
+.SS Setting the condition flags - A64 - nands_p_p_pp_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|1|1|0 0|. . . .|0 1|. . . .|1|. . . .|1|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS Setting the condition flags
+ 
+ NANDS   <Pd>.B, <Pg>/Z, <Pn>.B, <Pm>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ integer m = UInt(Pm);
+ integer d = UInt(Pd);
+ boolean setflags = TRUE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand1 = P[n];
+ bits(PL) operand2 = P[m];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bit element1 = ElemP[operand1, e, esize];
+     bit element2 = ElemP[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         ElemP[result, e, esize] = NOT(element1 AND element2);
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+ <Pm>
+  Encoded in Pm
+  Is the name of the second source scalable predicate register, encoded in the
+  "Pm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand1 = P[n];
+ bits(PL) operand2 = P[m];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bit element1 = ElemP[operand1, e, esize];
+     bit element2 = ElemP[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         ElemP[result, e, esize] = NOT(element1 AND element2);
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+

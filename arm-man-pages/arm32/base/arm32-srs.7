@@ -1,0 +1,246 @@
+.nh
+.TH "SRS, SRSDA, SRSDB, SRSIA, SRSIB -- AArch32" "7" " "  "instruction" "general"
+.SS SRS, SRSDA, SRSDB, SRSIA, SRSIB
+ Store Return State
+
+ Store Return State stores the LR_<current_mode> and SPSR_<current_mode> to the
+ stack of a specified mode. For information about memory accesses see Memory
+ accesses.
+
+ SRS is undefined in Hyp mode.
+
+ SRS is constrained unpredictable if it is executed in User or System mode, or
+ if the specified mode is any of the following:
+
+ A mode that Table G1-5 does not show.
+
+ Monitor mode, if the SRS instruction is executed in Non-secure state.
+
+
+ If EL3 is using AArch64 and an SRS instruction that is executed in a Secure EL1
+ mode specifies Monitor mode, it is trapped to EL3.
+
+ See Traps to EL3 of Secure monitor functionality from Secure EL1 using AArch32.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly SRS (T32) and SRS (A32).
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16                     5         0
+                | | | | | |       |                     |         |
+   1 1 1 1 1 0 0|.|.|1|.|0|1 1 0 1|0 0 0 0 0 1 0 1 0 0 0|. . . . .|
+                | | | | | |       |                     |
+                | | | | | `-Rn    `-op                  `-mode
+                | | | | `-L
+                | | | `-W
+                | | `-S
+                | `-U
+                `-P
+  
+  
+ 
+.SS Decrement After(P == 0 && U == 0)
+ 
+ SRSDA{<c>}{<q>} SP{!}, #<mode>
+.SS Decrement Before(P == 1 && U == 0)
+ 
+ SRSDB{<c>}{<q>} SP{!}, #<mode>
+.SS Increment After(P == 0 && U == 1)
+ 
+ SRS{IA}{<c>}{<q>} SP{!}, #<mode>
+.SS Increment Before(P == 1 && U == 1)
+ 
+ SRSIB{<c>}{<q>} SP{!}, #<mode>
+ 
+ wback = (W == '1');  increment = (U == '1');  wordhigher = (P == U);
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                 5         0
+                |   | | | |       | | |                 |         |
+   1 1 1 0 1 0 0|0 0|0|.|0|1 1 0 1|1|1|0 0 0 0 0 0 0 0 0|. . . . .|
+                |     | | |       | |                   |
+                `-opc | | `-Rn    | `-M                 `-mode
+                      | `-L       `-P
+                      `-W
+  
+  
+ 
+.SS T1
+ 
+ SRSDB{<c>}{<q>} SP{!}, #<mode>
+ 
+ wback = (W == '1');  increment = FALSE;  wordhigher = FALSE;
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                 5         0
+                |   | | | |       | | |                 |         |
+   1 1 1 0 1 0 0|1 1|0|.|0|1 1 0 1|1|1|0 0 0 0 0 0 0 0 0|. . . . .|
+                |     | | |       | |                   |
+                `-opc | | `-Rn    | `-M                 `-mode
+                      | `-L       `-P
+                      `-W
+  
+  
+ 
+.SS T2
+ 
+ SRS{IA}{<c>}{<q>} SP{!}, #<mode>
+ 
+ wback = (W == '1');  increment = TRUE;  wordhigher = FALSE;
+ 
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         if PSTATE.EL == EL2 then          // UNDEFINED at EL2
+             UNDEFINED;
+     
+         // Check for UNPREDICTABLE cases. The definition of UNPREDICTABLE does not permit these
+         // to be security holes
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         elsif mode == M32_Hyp then        // Check for attempt to access Hyp mode SP
+             UNPREDICTABLE;
+         elsif mode == M32_Monitor then    // Check for attempt to access Monitor mode SP
+             if !HaveEL(EL3) || !IsSecure()  then
+                 UNPREDICTABLE;
+             elsif !ELUsingAArch32(EL3) then
+                 AArch64.MonitorModeTrap();
+         elsif BadMode(mode) then
+             UNPREDICTABLE;
+     
+         base = Rmode[13,mode];
+         address = if increment then base else base-8;
+         if wordhigher then address = address+4;
+         MemA[address,4]   = LR;
+         MemA[address+4,4] = SPSR[];
+         if wback then Rmode[13,mode] = if increment then base+8 else base-8;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         if PSTATE.EL == EL2 then          // UNDEFINED at EL2
+             UNDEFINED;
+     
+         // Check for UNPREDICTABLE cases. The definition of UNPREDICTABLE does not permit these
+         // to be security holes
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         elsif mode == M32_Hyp then        // Check for attempt to access Hyp mode SP
+             UNPREDICTABLE;
+         elsif mode == M32_Monitor then    // Check for attempt to access Monitor mode SP
+             if !HaveEL(EL3) || !IsSecure()  then
+                 UNPREDICTABLE;
+             elsif !ELUsingAArch32(EL3) then
+                 AArch64.MonitorModeTrap();
+         elsif BadMode(mode) then
+             UNPREDICTABLE;
+     
+         base = Rmode[13,mode];
+         address = if increment then base else base-8;
+         if wordhigher then address = address+4;
+         MemA[address,4]   = LR;
+         MemA[address+4,4] = SPSR[];
+         if wback then Rmode[13,mode] = if increment then base+8 else base-8;
+ 
+
+.SS Assembler Symbols
+
+ IA
+  For encoding A1: is an optional suffix to indicate the Increment After
+  variant.
+
+ IA
+  For encoding T2: is an optional suffix for the Increment After form.
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. <c> must be AL or
+  omitted.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+ <mode>
+  Encoded in mode
+  Is the number of the mode whose Banked SP is used as the base register,
+  encoded in the "mode" field. For details of PE modes and their numbers see
+  AArch32 PE mode descriptions.
+
+
+
+.SS Operation
+
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         if PSTATE.EL == EL2 then          // UNDEFINED at EL2
+             UNDEFINED;
+     
+         // Check for UNPREDICTABLE cases. The definition of UNPREDICTABLE does not permit these
+         // to be security holes
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         elsif mode == M32_Hyp then        // Check for attempt to access Hyp mode SP
+             UNPREDICTABLE;
+         elsif mode == M32_Monitor then    // Check for attempt to access Monitor mode SP
+             if !HaveEL(EL3) || !IsSecure()  then
+                 UNPREDICTABLE;
+             elsif !ELUsingAArch32(EL3) then
+                 AArch64.MonitorModeTrap();
+         elsif BadMode(mode) then
+             UNPREDICTABLE;
+     
+         base = Rmode[13,mode];
+         address = if increment then base else base-8;
+         if wordhigher then address = address+4;
+         MemA[address,4]   = LR;
+         MemA[address+4,4] = SPSR[];
+         if wback then Rmode[13,mode] = if increment then base+8 else base-8;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         if PSTATE.EL == EL2 then          // UNDEFINED at EL2
+             UNDEFINED;
+     
+         // Check for UNPREDICTABLE cases. The definition of UNPREDICTABLE does not permit these
+         // to be security holes
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         elsif mode == M32_Hyp then        // Check for attempt to access Hyp mode SP
+             UNPREDICTABLE;
+         elsif mode == M32_Monitor then    // Check for attempt to access Monitor mode SP
+             if !HaveEL(EL3) || !IsSecure()  then
+                 UNPREDICTABLE;
+             elsif !ELUsingAArch32(EL3) then
+                 AArch64.MonitorModeTrap();
+         elsif BadMode(mode) then
+             UNPREDICTABLE;
+     
+         base = Rmode[13,mode];
+         address = if increment then base else base-8;
+         if wordhigher then address = address+4;
+         MemA[address,4]   = LR;
+         MemA[address+4,4] = SPSR[];
+         if wback then Rmode[13,mode] = if increment then base+8 else base-8;
+

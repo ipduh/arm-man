@@ -1,0 +1,231 @@
+.nh
+.TH "FCVT" "7" " "  "instruction" "sve"
+.SS FCVT
+ Floating-point convert precision (predicated)
+
+ Convert the size and precision of each active floating-point element of the
+ source vector, and place the results in the corresponding elements of the
+ destination vector. Inactive elements in the destination vector register remain
+ unmodified.
+
+ Since the input and result types have a different size the smaller type is held
+ unpacked in the least significant bits of elements of the larger size. When the
+ input is the smaller type the upper bits of each source element are ignored.
+ When the result is the smaller type the results are zero-extended to fill each
+ destination element.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+It has encodings from 6 classes: Half-precision to single-precision, Half-precision to double-precision, Single-precision to half-precision, Single-precision to double-precision, Double-precision to half-precision and Double-precision to single-precision
+
+.SS Half-precision to single-precision - A64 - fcvt_z_p_z_h2s
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|0|0 0 1 0|0|1|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Half-precision to single-precision
+ 
+ FCVT    <Zd>.S, <Pg>/M, <Zn>.H
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 16;
+ integer d_esize = 32;
+.SS Half-precision to double-precision - A64 - fcvt_z_p_z_h2d
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 0 1 0|0|1|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Half-precision to double-precision
+ 
+ FCVT    <Zd>.D, <Pg>/M, <Zn>.H
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 16;
+ integer d_esize = 64;
+.SS Single-precision to half-precision - A64 - fcvt_z_p_z_s2h
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|0|0 0 1 0|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Single-precision to half-precision
+ 
+ FCVT    <Zd>.H, <Pg>/M, <Zn>.S
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 32;
+ integer d_esize = 16;
+.SS Single-precision to double-precision - A64 - fcvt_z_p_z_s2d
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 0 1 0|1|1|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Single-precision to double-precision
+ 
+ FCVT    <Zd>.D, <Pg>/M, <Zn>.S
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 32;
+ integer d_esize = 64;
+.SS Double-precision to half-precision - A64 - fcvt_z_p_z_d2h
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 0 1 0|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Double-precision to half-precision
+ 
+ FCVT    <Zd>.H, <Pg>/M, <Zn>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 64;
+ integer d_esize = 16;
+.SS Double-precision to single-precision - A64 - fcvt_z_p_z_d2s
+ 
+                                                                   
+                     22          16                                
+                   23 |        17 |                                
+                 24 | |      18 | |    13    10         5         0
+                  | | |       | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 0 1 0|1|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |         | |       |     |         |
+                  | `-opc<0>  | |       `-Pg  `-Zn      `-Zd
+                  `-opc<1>    | `-opc2<0>
+                              `-opc2<1>
+  
+  
+ 
+.SS Double-precision to single-precision
+ 
+ FCVT    <Zd>.S, <Pg>/M, <Zn>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 64;
+ integer d_esize = 32;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         bits(d_esize) res = FPConvertSVE(element<s_esize-1:0>, FPCR);
+         Elem[result, e, esize] = ZeroExtend(res);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         bits(d_esize) res = FPConvertSVE(element<s_esize-1:0>, FPCR);
+         Elem[result, e, esize] = ZeroExtend(res);
+ 
+ Z[d] = result;
+

@@ -1,0 +1,75 @@
+.nh
+.TH "WRFFR" "7" " "  "instruction" "sve"
+.SS WRFFR
+ Write the first-fault register
+
+ Read the source predicate register and place in the first-fault register (FFR).
+ This instruction is intended to restore a saved FFR and is not recommended for
+ general use by applications.
+
+ This instruction requires that the source predicate contains a monotonic
+ predicate value, in which starting from bit 0 there are zero or more 1 bits,
+ followed only by 0 bits in any remaining bit positions. If the source is not a
+ monotonic predicate value, then the resulting value in the FFR will be
+ UNPREDICTABLE. It is not possible to generate a non-monotonic value in FFR when
+ using SETFFR followed by first-fault or non-fault loads.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - wrffr_f_p_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+     30          24 | |  20                  10 9       5 4 3 2   0
+      |           | | |   |                   | |       | | | |   |
+   0 0|1 0 0 1 0 1|0|0|1 0|1 0 0 0 1 0 0 1 0 0|0|. . . .|0|0|0|0 0|
+                  | |                           |
+                  | `-opc<0>                    `-Pn
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ WRFFR   <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer n = UInt(Pn);
+ 
+ CheckSVEEnabled();
+ bits(PL) operand = P[n];
+ 
+ hsb = HighestSetBit(operand);
+ if hsb < 0 || IsOnes(operand<hsb:0>) then  
+     FFR[] = operand;
+ else // not a monotonic predicate
+     FFR[] = bits(PL) UNKNOWN;
+ 
+
+.SS Assembler Symbols
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(PL) operand = P[n];
+ 
+ hsb = HighestSetBit(operand);
+ if hsb < 0 || IsOnes(operand<hsb:0>) then  
+     FFR[] = operand;
+ else // not a monotonic predicate
+     FFR[] = bits(PL) UNKNOWN;
+

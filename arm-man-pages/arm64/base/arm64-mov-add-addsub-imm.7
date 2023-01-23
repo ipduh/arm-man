@@ -1,0 +1,63 @@
+.nh
+.TH "MOV (to/from SP) -- A64" "7" " "  "alias" "general"
+.SS MOV (to/from SP)
+ MOV is an alias of ADD
+
+ Move between register and stack pointer
+
+
+
+.SS Not setting the condition flags - A64 - no_s
+ 
+                                                                   
+       29                                                          
+     30 |            22                                            
+   31 | |          23 |                      10         5         0
+    | | |           | |                       |         |         |
+  |.|0|0|1 0 0 0 1 0|0|0 0 0 0 0 0 0 0 0 0 0 0|. . . . .|. . . . .|
+  | | |             | |                       |         |
+  | | `-S           | `-imm12                 `-Rn      `-Rd
+  | `-op            `-sh
+  `-sf
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ MOV  <Wd|WSP>, <Wn|WSP>
+ 
+ ADD <Wd|WSP>, <Wn|WSP>, #0
+.SS 64-bit(sf == 1)
+ 
+ MOV  <Xd|SP>, <Xn|SP>
+ 
+ ADD <Xd|SP>, <Xn|SP>, #0
+ 
+
+.SS Assembler Symbols
+
+ <Wd|WSP>
+  Encoded in Rd
+  Is the 32-bit name of the destination general-purpose register or stack
+  pointer, encoded in the "Rd" field.
+
+ <Wn|WSP>
+  Encoded in Rn
+  Is the 32-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Rn" field.
+
+ <Xd|SP>
+  Encoded in Rd
+  Is the 64-bit name of the destination general-purpose register or stack
+  pointer, encoded in the "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of ADD gives pseudocode for MOV.

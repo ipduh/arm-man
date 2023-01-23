@@ -1,0 +1,80 @@
+.nh
+.TH "UMMLA (vector) -- A64" "7" " "  "instruction" "advsimd"
+.SS UMMLA (vector)
+ Unsigned 8-bit integer matrix multiply-accumulate (vector)
+
+ Unsigned 8-bit integer matrix multiply-accumulate. This instruction multiplies
+ the 2x8 matrix of unsigned 8-bit integer values in the first source vector by
+ the 8x2 matrix of unsigned 8-bit integer values in the second source vector.
+ The resulting 2x2 32-bit integer matrix product is destructively added to the
+ 32-bit integer matrix accumulator in the destination vector. This is equivalent
+ to performing an 8-way dot product per destination element.
+
+ From Armv8.2 to Armv8.5, this is an optional instruction. From Armv8.6 it is
+ mandatory for implementations that include Advanced SIMD to support it.
+ ID_AA64ISAR1_EL1.I8MM indicates whether this instruction is supported.
+
+
+
+.SS Vector - A64 - UMMLA_asimdsame2_G
+ 
+                                                                   
+       29                                    10                    
+     30 |              21          15      11 |                    
+   31 | |        24  22 |        16 |    12 | |         5         0
+    | | |         |   | |         | |     | | |         |         |
+   0|1|1|0 1 1 1 0|1 0|0|. . . . .|1|0 1 0|0|1|. . . . .|. . . . .|
+    | |           |     |                 |   |         |
+    | `-U         |     `-Rm              `-B `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ UMMLA  <Vd>.4S, <Vn>.16B, <Vm>.16B
+ 
+ if !HaveInt8MatMulExt() then UNDEFINED;
+ case B:U of
+     when '00' op1_unsigned = FALSE; op2_unsigned = FALSE;
+     when '01' op1_unsigned = TRUE;  op2_unsigned = TRUE;
+     when '10' op1_unsigned = TRUE;  op2_unsigned = FALSE;
+     when '11' UNDEFINED;
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Rd);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(128) addend   = V[d];
+ 
+ V[d] = MatMulAdd(addend, operand1, operand2, op1_unsigned, op2_unsigned);
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP third source and destination register, encoded in
+  the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(128) addend   = V[d];
+ 
+ V[d] = MatMulAdd(addend, operand1, operand2, op1_unsigned, op2_unsigned);
+

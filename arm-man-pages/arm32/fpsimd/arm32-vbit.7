@@ -1,0 +1,161 @@
+.nh
+.TH "VBIT -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VBIT
+ Vector Bitwise Insert if True
+
+ Vector Bitwise Insert if True inserts each bit from the first source register
+ into the destination register if the corresponding bit of the second source
+ register is 1, otherwise leaves the bit in the destination register unchanged.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|1 0|. . . .|. . . .|0 0 0 1|.|.|.|1|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-op                        | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VBIT{<c>}{<q>}{.<dt>} {<Dd>,} <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VBIT{<c>}{<q>}{.<dt>} {<Qd>,} <Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if op == '00' then SEE "VEOR";
+ if op == '01' then operation = VBitOps_VBSL;
+ if op == '10' then operation = VBitOps_VBIT;
+ if op == '11' then operation = VBitOps_VBIF;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|1 0|. . . .|. . . .|0 0 0 1|.|.|.|1|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-op                        | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VBIT{<c>}{<q>}{.<dt>} {<Dd>,} <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VBIT{<c>}{<q>}{.<dt>} {<Qd>,} <Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if op == '00' then SEE "VEOR";
+ if op == '01' then operation = VBitOps_VBSL;
+ if op == '10' then operation = VBitOps_VBIT;
+ if op == '11' then operation = VBitOps_VBIF;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ enumeration VBitOps {VBitOps_VBIF, VBitOps_VBIT, VBitOps_VBSL};
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         case operation of
+             when VBitOps_VBIF  D[d+r] = (D[d+r] AND D[m+r]) OR (D[n+r] AND NOT(D[m+r]));
+             when VBitOps_VBIT  D[d+r] = (D[n+r] AND D[m+r]) OR (D[d+r] AND NOT(D[m+r]));
+             when VBitOps_VBSL  D[d+r] = (D[n+r] AND D[d+r]) OR (D[m+r] AND NOT(D[d+r]));
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  An optional data type. It is ignored by assemblers, and does not affect the
+  encoding.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ enumeration VBitOps {VBitOps_VBIF, VBitOps_VBIT, VBitOps_VBSL};
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         case operation of
+             when VBitOps_VBIF  D[d+r] = (D[d+r] AND D[m+r]) OR (D[n+r] AND NOT(D[m+r]));
+             when VBitOps_VBIT  D[d+r] = (D[n+r] AND D[m+r]) OR (D[d+r] AND NOT(D[m+r]));
+             when VBitOps_VBSL  D[d+r] = (D[n+r] AND D[d+r]) OR (D[m+r] AND NOT(D[d+r]));
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

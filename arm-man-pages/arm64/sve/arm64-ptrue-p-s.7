@@ -1,0 +1,155 @@
+.nh
+.TH "PTRUE, PTRUES" "7" " "  "instruction" "sve"
+.SS PTRUE, PTRUES
+ Initialise predicate from named constraint
+
+ Set elements of the destination predicate to true if the element number
+ satisfies the named predicate constraint, or to false otherwise. If the
+ constraint specifies more elements than are available at the current vector
+ length then all elements of the destination predicate are set to false.
+
+ The named predicate constraint limits the number of active elements in a single
+ predicate to:
+
+ * A fixed number (VL1 to VL256)
+
+ * The largest power of two (POW2)
+
+ * The largest multiple of three or four (MUL3 or MUL4)
+
+ * All available, implicitly a multiple of two (ALL).
+
+ Unspecified or out of range constraint encodings generate an empty predicate or
+ zero element count rather than Undefined Instruction exception. Optionally sets
+ the First (N), None (Z), !Last (C) condition flags based on the predicate
+ result, and the V flag to zero.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Not setting the condition flags and Setting the condition flags
+
+.SS Not setting the condition flags - A64 - ptrue_p_s_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22        17 |          10         5 4       0
+                  |   |         | |           |         | |       |
+   0 0 1 0 0 1 0 1|. .|0 1 1 0 0|0|1 1 1 0 0 0|. . . . .|0|. . . .|
+                  |             |             |           |
+                  `-size        `-S           `-pattern   `-Pd
+  
+  
+ 
+.SS Not setting the condition flags
+ 
+ PTRUE   <Pd>.<T>{, <pattern>}
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer d = UInt(Pd);
+ boolean setflags = FALSE;
+ bits(5) pat = pattern;
+.SS Setting the condition flags - A64 - ptrues_p_s_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22        17 |          10         5 4       0
+                  |   |         | |           |         | |       |
+   0 0 1 0 0 1 0 1|. .|0 1 1 0 0|1|1 1 1 0 0 0|. . . . .|0|. . . .|
+                  |             |             |           |
+                  `-size        `-S           `-pattern   `-Pd
+  
+  
+ 
+.SS Setting the condition flags
+ 
+ PTRUES  <Pd>.<T>{, <pattern>}
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer d = UInt(Pd);
+ boolean setflags = TRUE;
+ bits(5) pat = pattern;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer count = DecodePredCount(pat, esize);
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     ElemP[result, e, esize] = if e < count then '1' else '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(result, result, esize);
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <pattern>
+  Encoded in pattern
+  Is the optional pattern specifier, defaulting to ALL,
+
+  pattern <pattern> 
+  00000   POW2      
+  00001   VL1       
+  00010   VL2       
+  00011   VL3       
+  00100   VL4       
+  00101   VL5       
+  00110   VL6       
+  00111   VL7       
+  01000   VL8       
+  01001   VL16      
+  01010   VL32      
+  01011   VL64      
+  01100   VL128     
+  01101   VL256     
+  0111x   #uimm5    
+  101x1   #uimm5    
+  10110   #uimm5    
+  1x0x1   #uimm5    
+  1x010   #uimm5    
+  1xx00   #uimm5    
+  11101   MUL4      
+  11110   MUL3      
+  11111   ALL       
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer count = DecodePredCount(pat, esize);
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     ElemP[result, e, esize] = if e < count then '1' else '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(result, result, esize);
+ P[d] = result;
+

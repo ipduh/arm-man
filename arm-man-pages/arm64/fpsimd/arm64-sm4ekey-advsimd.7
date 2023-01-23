@@ -1,0 +1,122 @@
+.nh
+.TH "SM4EKEY -- A64" "7" " "  "instruction" "advsimd"
+.SS SM4EKEY
+ SM4 Key
+
+ SM4 Key takes an input as a 128-bit vector from the first source SIMD&FP
+ register and a 128-bit constant from the second SIMD&FP register. It derives
+ four iterations of the output key, in accordance with the SM4 standard,
+ returning the 128-bit result to the destination SIMD&FP register.
+
+ This instruction is implemented only when ARMv8.2-SM is implemented.
+
+
+
+.SS Advanced SIMD - A64 - SM4EKEY_VVV4_cryptosha512_3
+ 
+                                                                   
+                                     14                            
+                                   15 |                            
+                       21        16 | |  12  10         5         0
+                        |         | | |   |   |         |         |
+   1 1 0 0 1 1 1 0 0 1 1|. . . . .|1|1|0 0|1 0|. . . . .|. . . . .|
+                        |           |     |   |         |
+                        `-Rm        `-O   |   `-Rn      `-Rd
+                                          `-opcode
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SM4EKEY  <Vd>.4S, <Vn>.4S, <Vm>.4S
+ 
+ if !HaveSM4Ext() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(32) intval; 
+ bits(8) sboxout;
+ bits(128) result;
+ bits(32) const;
+ bits(128) roundresult;
+ 
+ roundresult = V[n];
+ for index = 0 to 3 
+     const = Elem[Vm,index,32];
+ 
+     intval = roundresult<127:96> EOR roundresult<95:64> EOR roundresult<63:32> EOR const; 
+ 
+     for i = 0 to 3  
+         Elem[intval,i,8] = Sbox(Elem[intval,i,8]); 
+ 
+     intval = intval EOR ROL(intval,13) EOR ROL(intval,23);
+     intval = intval EOR roundresult<31:0>; 
+ 
+     roundresult<31:0> = roundresult<63:32>;
+     roundresult<63:32> = roundresult<95:64>;
+     roundresult<95:64> = roundresult<127:96>;
+     roundresult<127:96> = intval; 
+ V[d] = roundresult;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(32) intval; 
+ bits(8) sboxout;
+ bits(128) result;
+ bits(32) const;
+ bits(128) roundresult;
+ 
+ roundresult = V[n];
+ for index = 0 to 3 
+     const = Elem[Vm,index,32];
+ 
+     intval = roundresult<127:96> EOR roundresult<95:64> EOR roundresult<63:32> EOR const; 
+ 
+     for i = 0 to 3  
+         Elem[intval,i,8] = Sbox(Elem[intval,i,8]); 
+ 
+     intval = intval EOR ROL(intval,13) EOR ROL(intval,23);
+     intval = intval EOR roundresult<31:0>; 
+ 
+     roundresult<31:0> = roundresult<63:32>;
+     roundresult<63:32> = roundresult<95:64>;
+     roundresult<95:64> = roundresult<127:96>;
+     roundresult<127:96> = intval; 
+ V[d] = roundresult;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

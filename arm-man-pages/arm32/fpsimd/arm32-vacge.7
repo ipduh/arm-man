@@ -1,0 +1,178 @@
+.nh
+.TH "VACGE -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VACGE
+ Vector Absolute Compare Greater Than or Equal
+
+ Vector Absolute Compare Greater Than or Equal takes the absolute value of each
+ element in a vector, and compares it with the absolute value of the
+ corresponding element of a second vector. If the first is greater than or equal
+ to the second, the corresponding element in the destination vector is set to
+ all ones. Otherwise, it is set to all zeros.
+
+ The operands and result can be quadword or doubleword vectors.  They must all
+ be the same size.
+
+ The operand vector elements are floating-point numbers. The result vector
+ elements are the same size as the operand vector elements.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16      12       8 7 6 5 4       0
+                | | | | | |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|0|.|. . . .|. . . .|1 1 1 0|.|.|.|1|. . . .|
+                |   | | | |       |       |       | | | | |
+                `-U | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VACGE{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VACGE{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ or_equal = (op == '0');
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12       8 7 6 5 4       0
+        | |         | | | |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|0|.|. . . .|. . . .|1 1 1 0|.|.|.|1|. . . .|
+        |           | | | |       |       |       | | | | |
+        `-U         | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VACGE{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VACGE{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ if sz == '1' && InITBlock() then UNPREDICTABLE;
+ or_equal = (op == '0');
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = FPAbs(Elem[D[n+r],e,esize]);  op2 = FPAbs(Elem[D[m+r],e,esize]);
+             if or_equal then
+                 test_passed = FPCompareGE(op1, op2, StandardFPSCRValue());
+             else
+                 test_passed = FPCompareGT(op1, op2, StandardFPSCRValue());
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in sz
+  Is the data type for the elements of the vectors,
+
+  sz <dt> 
+  0  F32  
+  1  F16  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = FPAbs(Elem[D[n+r],e,esize]);  op2 = FPAbs(Elem[D[m+r],e,esize]);
+             if or_equal then
+                 test_passed = FPCompareGE(op1, op2, StandardFPSCRValue());
+             else
+                 test_passed = FPCompareGT(op1, op2, StandardFPSCRValue());
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

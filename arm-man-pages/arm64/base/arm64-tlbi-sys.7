@@ -1,0 +1,144 @@
+.nh
+.TH "TLBI -- A64" "7" " "  "alias" "system"
+.SS TLBI
+ TLBI is an alias of SYS
+
+ TLB Invalidate operation
+
+ TLB Invalidate operation. For more information, see op0==0b01, cache
+ maintenance, TLB maintenance, and address translation instructions.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|. . .|1 0 0 0|. . . .|. . .|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ TLBI  <tlbi_op>{, <Xt>}
+ 
+ SYS #<op1>, C8, <Cm>, #<op2>{, <Xt>}
+ 
+
+.SS Assembler Symbols
+
+ <op1>
+  Encoded in op1
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op1"
+  field.
+
+ <Cm>
+  Encoded in CRm
+  Is a name 'Cm', with 'm' in the range 0 to 15, encoded in the "CRm" field.
+
+ <op2>
+  Encoded in op2
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op2"
+  field.
+
+ <tlbi_op>
+  Encoded in op1:CRm:op2
+  Is a TLBI instruction name, as listed for the TLBI system instruction group,
+
+  op1 CRm  op2 <tlbi_op>    Architectural Feature 
+  000 0001 000 VMALLE1OS    ARMv8.4-TLBI          
+  000 0001 001 VAE1OS       ARMv8.4-TLBI          
+  000 0001 010 ASIDE1OS     ARMv8.4-TLBI          
+  000 0001 011 VAAE1OS      ARMv8.4-TLBI          
+  000 0001 101 VALE1OS      ARMv8.4-TLBI          
+  000 0001 111 VAALE1OS     ARMv8.4-TLBI          
+  000 0010 001 RVAE1IS      ARMv8.4-TLBI          
+  000 0010 011 RVAAE1IS     ARMv8.4-TLBI          
+  000 0010 101 RVALE1IS     ARMv8.4-TLBI          
+  000 0010 111 RVAALE1IS    ARMv8.4-TLBI          
+  000 0011 000 VMALLE1IS                          
+  000 0011 001 VAE1IS                             
+  000 0011 010 ASIDE1IS                           
+  000 0011 011 VAAE1IS                            
+  000 0011 101 VALE1IS                            
+  000 0011 111 VAALE1IS                           
+  000 0101 001 RVAE1OS      ARMv8.4-TLBI          
+  000 0101 011 RVAAE1OS     ARMv8.4-TLBI          
+  000 0101 101 RVALE1OS     ARMv8.4-TLBI          
+  000 0101 111 RVAALE1OS    ARMv8.4-TLBI          
+  000 0110 001 RVAE1        ARMv8.4-TLBI          
+  000 0110 011 RVAAE1       ARMv8.4-TLBI          
+  000 0110 101 RVALE1       ARMv8.4-TLBI          
+  000 0110 111 RVAALE1      ARMv8.4-TLBI          
+  000 0111 000 VMALLE1                            
+  000 0111 001 VAE1                               
+  000 0111 010 ASIDE1                             
+  000 0111 011 VAAE1                              
+  000 0111 101 VALE1                              
+  000 0111 111 VAALE1                             
+  100 0000 001 IPAS2E1IS                          
+  100 0000 010 RIPAS2E1IS   ARMv8.4-TLBI          
+  100 0000 101 IPAS2LE1IS                         
+  100 0000 110 RIPAS2LE1IS  ARMv8.4-TLBI          
+  100 0001 000 ALLE2OS      ARMv8.4-TLBI          
+  100 0001 001 VAE2OS       ARMv8.4-TLBI          
+  100 0001 100 ALLE1OS      ARMv8.4-TLBI          
+  100 0001 101 VALE2OS      ARMv8.4-TLBI          
+  100 0001 110 VMALLS12E1OS ARMv8.4-TLBI          
+  100 0010 001 RVAE2IS      ARMv8.4-TLBI          
+  100 0010 101 RVALE2IS     ARMv8.4-TLBI          
+  100 0011 000 ALLE2IS                            
+  100 0011 001 VAE2IS                             
+  100 0011 100 ALLE1IS                            
+  100 0011 101 VALE2IS                            
+  100 0011 110 VMALLS12E1IS                       
+  100 0100 000 IPAS2E1OS    ARMv8.4-TLBI          
+  100 0100 001 IPAS2E1                            
+  100 0100 010 RIPAS2E1     ARMv8.4-TLBI          
+  100 0100 011 RIPAS2E1OS   ARMv8.4-TLBI          
+  100 0100 100 IPAS2LE1OS   ARMv8.4-TLBI          
+  100 0100 101 IPAS2LE1                           
+  100 0100 110 RIPAS2LE1    ARMv8.4-TLBI          
+  100 0100 111 RIPAS2LE1OS  ARMv8.4-TLBI          
+  100 0101 001 RVAE2OS      ARMv8.4-TLBI          
+  100 0101 101 RVALE2OS     ARMv8.4-TLBI          
+  100 0110 001 RVAE2        ARMv8.4-TLBI          
+  100 0110 101 RVALE2       ARMv8.4-TLBI          
+  100 0111 000 ALLE2                              
+  100 0111 001 VAE2                               
+  100 0111 100 ALLE1                              
+  100 0111 101 VALE2                              
+  100 0111 110 VMALLS12E1                         
+  110 0001 000 ALLE3OS      ARMv8.4-TLBI          
+  110 0001 001 VAE3OS       ARMv8.4-TLBI          
+  110 0001 101 VALE3OS      ARMv8.4-TLBI          
+  110 0010 001 RVAE3IS      ARMv8.4-TLBI          
+  110 0010 101 RVALE3IS     ARMv8.4-TLBI          
+  110 0011 000 ALLE3IS                            
+  110 0011 001 VAE3IS                             
+  110 0011 101 VALE3IS                            
+  110 0101 001 RVAE3OS      ARMv8.4-TLBI          
+  110 0101 101 RVALE3OS     ARMv8.4-TLBI          
+  110 0110 001 RVAE3        ARMv8.4-TLBI          
+  110 0110 101 RVALE3       ARMv8.4-TLBI          
+  110 0111 000 ALLE3                              
+  110 0111 001 VAE3                               
+  110 0111 101 VALE3                              
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the optional general-purpose source register, defaulting
+  to '11111', encoded in the "Rt" field.
+
+
+
+.SS Operation
+
+ The manual of SYS gives pseudocode for TLBI.

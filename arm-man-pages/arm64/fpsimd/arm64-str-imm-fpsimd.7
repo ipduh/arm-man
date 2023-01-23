@@ -1,0 +1,269 @@
+.nh
+.TH "STR (immediate, SIMD&FP) -- A64" "7" " "  "instruction" "fpsimd"
+.SS STR (immediate, SIMD&FP)
+ Store SIMD&FP register (immediate offset)
+
+ Store SIMD&FP register (immediate offset). This instruction stores a single
+ SIMD&FP register to memory. The address that is used for the store is
+ calculated from a base register value and an immediate offset.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 3 classes: Post-index, Pre-index and Unsigned offset
+
+.SS Post-index - A64 - post_indexed
+ 
+                                                                   
+                                                                   
+             26        21                                          
+     30    27 |  24  22 |                12  10         5         0
+      |     | |   |   | |                 |   |         |         |
+  |. .|1 1 1|1|0 0|x 0|0|. . . . . . . . .|0 1|. . . . .|. . . . .|
+  |         |     |     |                     |         |
+  `-size    `-V   `-opc `-imm9                `-Rn      `-Rt
+  
+  
+ 
+.SS 8-bit(size == 00 && opc == 00)
+ 
+ STR  <Bt>, [<Xn|SP>], #<simm>
+.SS 16-bit(size == 01 && opc == 00)
+ 
+ STR  <Ht>, [<Xn|SP>], #<simm>
+.SS 32-bit(size == 10 && opc == 00)
+ 
+ STR  <St>, [<Xn|SP>], #<simm>
+.SS 64-bit(size == 11 && opc == 00)
+ 
+ STR  <Dt>, [<Xn|SP>], #<simm>
+.SS 128-bit(size == 00 && opc == 10)
+ 
+ STR  <Qt>, [<Xn|SP>], #<simm>
+ 
+ boolean wback = TRUE;
+ boolean postindex = TRUE;
+ integer scale = UInt(opc<1>:size);
+ if scale > 4 then UNDEFINED;
+ bits(64) offset = SignExtend(imm9, 64);
+.SS Pre-index - A64 - pre_indexed
+ 
+                                                                   
+                                                                   
+             26        21                                          
+     30    27 |  24  22 |                12  10         5         0
+      |     | |   |   | |                 |   |         |         |
+  |. .|1 1 1|1|0 0|x 0|0|. . . . . . . . .|1 1|. . . . .|. . . . .|
+  |         |     |     |                     |         |
+  `-size    `-V   `-opc `-imm9                `-Rn      `-Rt
+  
+  
+ 
+.SS 8-bit(size == 00 && opc == 00)
+ 
+ STR  <Bt>, [<Xn|SP>, #<simm>]!
+.SS 16-bit(size == 01 && opc == 00)
+ 
+ STR  <Ht>, [<Xn|SP>, #<simm>]!
+.SS 32-bit(size == 10 && opc == 00)
+ 
+ STR  <St>, [<Xn|SP>, #<simm>]!
+.SS 64-bit(size == 11 && opc == 00)
+ 
+ STR  <Dt>, [<Xn|SP>, #<simm>]!
+.SS 128-bit(size == 00 && opc == 10)
+ 
+ STR  <Qt>, [<Xn|SP>, #<simm>]!
+ 
+ boolean wback = TRUE;
+ boolean postindex = FALSE;
+ integer scale = UInt(opc<1>:size);
+ if scale > 4 then UNDEFINED;
+ bits(64) offset = SignExtend(imm9, 64);
+.SS Unsigned offset - A64 - unsigned_scaled_offset
+ 
+                                                                   
+                                                                   
+             26                                                    
+     30    27 |  24  22                      10         5         0
+      |     | |   |   |                       |         |         |
+  |. .|1 1 1|1|0 1|x 0|. . . . . . . . . . . .|. . . . .|. . . . .|
+  |         |     |   |                       |         |
+  `-size    `-V   |   `-imm12                 `-Rn      `-Rt
+                  `-opc
+  
+  
+ 
+.SS 8-bit(size == 00 && opc == 00)
+ 
+ STR  <Bt>, [<Xn|SP>{, #<pimm>}]
+.SS 16-bit(size == 01 && opc == 00)
+ 
+ STR  <Ht>, [<Xn|SP>{, #<pimm>}]
+.SS 32-bit(size == 10 && opc == 00)
+ 
+ STR  <St>, [<Xn|SP>{, #<pimm>}]
+.SS 64-bit(size == 11 && opc == 00)
+ 
+ STR  <Dt>, [<Xn|SP>{, #<pimm>}]
+.SS 128-bit(size == 00 && opc == 10)
+ 
+ STR  <Qt>, [<Xn|SP>{, #<pimm>}]
+ 
+ boolean wback = FALSE;
+ boolean postindex = FALSE;
+ integer scale = UInt(opc<1>:size);
+ if scale > 4 then UNDEFINED;
+ bits(64) offset = LSL(ZeroExtend(imm12, 64), scale);
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ AccType acctype = AccType_VEC;
+ MemOp memop = if opc<0> == '1' then MemOp_LOAD else MemOp_STORE;
+ integer datasize = 8 << scale;
+ boolean tag_checked = memop != MemOp_PREFETCH && (wback || n != 31);
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(64) address;
+ bits(datasize) data;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data = V[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         V[t] = data;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Bt>
+  Encoded in Rt
+  Is the 8-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Dt>
+  Encoded in Rt
+  Is the 64-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Ht>
+  Encoded in Rt
+  Is the 16-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Qt>
+  Encoded in Rt
+  Is the 128-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <St>
+  Encoded in Rt
+  Is the 32-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <simm>
+  Encoded in imm9
+  Is the signed immediate byte offset, in the range -256 to 255, encoded in the
+  "imm9" field.
+
+ <pimm>
+  Encoded in imm12
+  For the 8-bit variant: is the optional positive immediate byte offset, in the
+  range 0 to 4095, defaulting to 0 and encoded in the "imm12" field.
+
+ <pimm>
+  Encoded in imm12
+  For the 16-bit variant: is the optional positive immediate byte offset, a
+  multiple of 2 in the range 0 to 8190, defaulting to 0 and encoded in the
+  "imm12" field as <pimm>/2.
+
+ <pimm>
+  Encoded in imm12
+  For the 32-bit variant: is the optional positive immediate byte offset, a
+  multiple of 4 in the range 0 to 16380, defaulting to 0 and encoded in the
+  "imm12" field as <pimm>/4.
+
+ <pimm>
+  Encoded in imm12
+  For the 64-bit variant: is the optional positive immediate byte offset, a
+  multiple of 8 in the range 0 to 32760, defaulting to 0 and encoded in the
+  "imm12" field as <pimm>/8.
+
+ <pimm>
+  Encoded in imm12
+  For the 128-bit variant: is the optional positive immediate byte offset, a
+  multiple of 16 in the range 0 to 65520, defaulting to 0 and encoded in the
+  "imm12" field as <pimm>/16.
+
+
+
+.SS Operation
+
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(64) address;
+ bits(datasize) data;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data = V[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         V[t] = data;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

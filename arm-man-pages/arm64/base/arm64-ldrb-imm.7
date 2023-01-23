@@ -1,0 +1,267 @@
+.nh
+.TH "LDRB (immediate) -- A64" "7" " "  "instruction" "general"
+.SS LDRB (immediate)
+ Load Register Byte (immediate)
+
+ Load Register Byte (immediate) loads a byte from memory, zero-extends it, and
+ writes the result to a register. The address that is used for the load is
+ calculated from a base register and an immediate offset. For information about
+ memory accesses, see Load/Store addressing modes.
+
+ For information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly LDRH (immediate).
+
+
+It has encodings from 3 classes: Post-index, Pre-index and Unsigned offset
+
+.SS Post-index - A64 - LDRB_32_ldst_immpost
+ 
+                                                                   
+                                                                   
+             26        21                                          
+     30    27 |  24  22 |                12  10         5         0
+      |     | |   |   | |                 |   |         |         |
+  |0 0|1 1 1|0|0 0|0 1|0|. . . . . . . . .|0 1|. . . . .|. . . . .|
+  |         |     |     |                     |         |
+  `-size    `-V   `-opc `-imm9                `-Rn      `-Rt
+  
+  
+ 
+.SS Post-index
+ 
+ LDRB  <Wt>, [<Xn|SP>], #<simm>
+ 
+ boolean wback = TRUE;
+ boolean postindex = TRUE;
+ integer scale = UInt(size);
+ bits(64) offset = SignExtend(imm9, 64);
+.SS Pre-index - A64 - LDRB_32_ldst_immpre
+ 
+                                                                   
+                                                                   
+             26        21                                          
+     30    27 |  24  22 |                12  10         5         0
+      |     | |   |   | |                 |   |         |         |
+  |0 0|1 1 1|0|0 0|0 1|0|. . . . . . . . .|1 1|. . . . .|. . . . .|
+  |         |     |     |                     |         |
+  `-size    `-V   `-opc `-imm9                `-Rn      `-Rt
+  
+  
+ 
+.SS Pre-index
+ 
+ LDRB  <Wt>, [<Xn|SP>, #<simm>]!
+ 
+ boolean wback = TRUE;
+ boolean postindex = FALSE;
+ integer scale = UInt(size);
+ bits(64) offset = SignExtend(imm9, 64);
+.SS Unsigned offset - A64 - LDRB_32_ldst_pos
+ 
+                                                                   
+                                                                   
+             26                                                    
+     30    27 |  24  22                      10         5         0
+      |     | |   |   |                       |         |         |
+  |0 0|1 1 1|0|0 1|0 1|. . . . . . . . . . . .|. . . . .|. . . . .|
+  |         |     |   |                       |         |
+  `-size    `-V   |   `-imm12                 `-Rn      `-Rt
+                  `-opc
+  
+  
+ 
+.SS Unsigned offset
+ 
+ LDRB  <Wt>, [<Xn|SP>{, #<pimm>}]
+ 
+ boolean wback = FALSE;
+ boolean postindex = FALSE;
+ integer scale = UInt(size);
+ bits(64) offset = LSL(ZeroExtend(imm12, 64), scale);
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ AccType acctype = AccType_NORMAL;
+ MemOp memop;
+ boolean signed;
+ integer regsize;
+ 
+ if opc<1> == '0' then
+     // store or zero-extending load
+     memop = if opc<0> == '1' then MemOp_LOAD else MemOp_STORE;
+     regsize = if size == '11' then 64 else 32;
+     signed = FALSE;
+ else
+     if size == '11' then
+         UNDEFINED;
+     else
+         // sign-extending load
+         memop = MemOp_LOAD;
+         if size == '10' && opc<0> == '1' then UNDEFINED;
+         regsize = if opc<0> == '1' then 32 else 64;
+         signed = TRUE;
+ 
+ integer datasize = 8 << scale;
+ boolean tag_checked = memop != MemOp_PREFETCH && (wback || n != 31);
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ bits(64) address;
+ bits(datasize) data;
+ 
+ boolean wb_unknown = FALSE;
+ boolean rt_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;       // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;   // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;  // value stored is original value
+         when Constraint_UNKNOWN    rt_unknown = TRUE;   // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     if memop != MemOp_PREFETCH then CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown then
+             data = bits(datasize) UNKNOWN;
+         else
+             data = X[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         if signed then
+             X[t] = SignExtend(data, regsize);
+         else
+             X[t] = ZeroExtend(data, regsize);
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be transferred, encoded
+  in the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <simm>
+  Encoded in imm9
+  Is the signed immediate byte offset, in the range -256 to 255, encoded in the
+  "imm9" field.
+
+ <pimm>
+  Encoded in imm12
+  Is the optional positive immediate byte offset, in the range 0 to 4095,
+  defaulting to 0 and encoded in the "imm12" field.
+
+
+
+.SS Operation
+
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ bits(64) address;
+ bits(datasize) data;
+ 
+ boolean wb_unknown = FALSE;
+ boolean rt_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;       // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;   // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && n == t && n != 31 then
+     c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;  // value stored is original value
+         when Constraint_UNKNOWN    rt_unknown = TRUE;   // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     if memop != MemOp_PREFETCH then CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown then
+             data = bits(datasize) UNKNOWN;
+         else
+             data = X[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         if signed then
+             X[t] = SignExtend(data, regsize);
+         else
+             X[t] = ZeroExtend(data, regsize);
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

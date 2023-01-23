@@ -1,0 +1,111 @@
+.nh
+.TH "USDOT (vector) -- A64" "7" " "  "instruction" "advsimd"
+.SS USDOT (vector)
+ Dot Product with unsigned and signed integers (vector)
+
+ Dot Product vector form with unsigned and signed integers. This instruction
+ performs the dot product of the four unsigned 8-bit integer values in each
+ 32-bit element of the first source register with the four signed 8-bit integer
+ values in the corresponding 32-bit element of the second source register,
+ accumulating the result into the corresponding 32-bit element of the
+ destination register.
+
+ From Armv8.2 to Armv8.5, this is an optional instruction. From Armv8.6 it is
+ mandatory for implementations that include Advanced SIMD to support it.
+ ID_AA64ISAR1_EL1.I8MM indicates whether this instruction is supported.
+
+
+
+.SS Vector - A64 - USDOT_asimdsame2_D
+ 
+                                                                   
+       29                                                          
+     30 |              21          15        10                    
+   31 | |        24  22 |        16 |      11 |         5         0
+    | | |         |   | |         | |       | |         |         |
+   0|.|0|0 1 1 1 0|1 0|0|. . . . .|1|0 0 1 1|1|. . . . .|. . . . .|
+    | |           |     |           |         |         |
+    | `-U         |     `-Rm        `-opcode  `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ USDOT  <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>
+ 
+ if !HaveInt8MatMulExt() then UNDEFINED;
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Rd);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV 32;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) operand3 = V[d];
+ bits(datasize) result;
+ 
+ for e = 0 to elements-1
+     bits(32) res = Elem[operand3, e, 32];
+     for b = 0 to 3
+         integer element1 = UInt(Elem[operand1, 4 * e + b, 8]);
+         integer element2 = SInt(Elem[operand2, 4 * e + b, 8]);
+         res = res + element1 * element2;
+     Elem[result, e, 32] = res;
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP third source and destination register, encoded in
+  the "Rd" field.
+
+ <Ta>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <Ta> 
+  0 2S   
+  1 4S   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Tb>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <Tb> 
+  0 8B   
+  1 16B  
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) operand3 = V[d];
+ bits(datasize) result;
+ 
+ for e = 0 to elements-1
+     bits(32) res = Elem[operand3, e, 32];
+     for b = 0 to 3
+         integer element1 = UInt(Elem[operand1, 4 * e + b, 8]);
+         integer element2 = SInt(Elem[operand2, 4 * e + b, 8]);
+         res = res + element1 * element2;
+     Elem[result, e, 32] = res;
+ 
+ V[d] = result;
+

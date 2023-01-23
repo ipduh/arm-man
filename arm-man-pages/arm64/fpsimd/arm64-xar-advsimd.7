@@ -1,0 +1,87 @@
+.nh
+.TH "XAR -- A64" "7" " "  "instruction" "advsimd"
+.SS XAR
+ Exclusive OR and Rotate
+
+ Exclusive OR and Rotate performs a bitwise exclusive OR of the 128-bit vectors
+ in the two source SIMD&FP registers, rotates each 64-bit element of the
+ resulting 128-bit vector right by the value specified by a 6-bit immediate
+ value, and writes the result to the destination SIMD&FP register.
+
+ This instruction is implemented only when ARMv8.2-SHA is implemented.
+
+
+
+.SS Advanced SIMD - A64 - XAR_VVV2_crypto3_imm6
+ 
+                                                                   
+                                                                   
+                                                                   
+                       21        16          10         5         0
+                        |         |           |         |         |
+   1 1 0 0 1 1 1 0 1 0 0|. . . . .|. . . . . .|. . . . .|. . . . .|
+                        |         |           |         |
+                        `-Rm      `-imm6      `-Rn      `-Rd
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ XAR  <Vd>.2D, <Vn>.2D, <Vm>.2D, #<imm6>
+ 
+ if !HaveSHA3Ext() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(128) Vn = V[n];
+ bits(128) tmp;
+ tmp = Vn EOR Vm; 
+ V[d] = ROR(tmp<127:64>, UInt(imm6)):ROR(tmp<63:0>, UInt(imm6));
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+ <imm6>
+  Encoded in imm6
+  Is a rotation right, encoded in "imm6".
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(128) Vn = V[n];
+ bits(128) tmp;
+ tmp = Vn EOR Vm; 
+ V[d] = ROR(tmp<127:64>, UInt(imm6)):ROR(tmp<63:0>, UInt(imm6));
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

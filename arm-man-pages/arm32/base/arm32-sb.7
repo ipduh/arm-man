@@ -1,0 +1,88 @@
+.nh
+.TH "SB -- AArch32" "7" " "  "instruction" "general"
+.SS SB
+ Speculation Barrier
+
+ Speculation Barrier is a barrier that controls speculation.
+
+ The semantics of the Speculation Barrier are that the execution, until the
+ barrier completes, of any instruction that appears later in the program order
+ than the barrier:
+
+
+ In particular, any instruction that appears later in the program order than the
+ barrier cannot cause a speculative allocation into any caching structure where
+ the allocation of that entry could be indicative of any data value present in
+ memory or in the registers.
+
+ The SB instruction:
+
+
+ When the prediction of the instruction stream is not informed by data taken
+ from the register outputs of the speculative execution of instructions
+ appearing in program order after an uncompleted SB instruction, the SB
+ instruction has no effect on the use of prediction resources to predict the
+ instruction stream that is being fetched.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+                         20 | | |16 | | |12 | | 9 8       4       0
+                          | | | | | | | | | | | | |       |       |
+   1 1 1 1 0 1 0 1 0 1 1 1|1|1|1|1|1|1|1|1|0|0|0|0|0 1 1 1|0 0 0 0|
+                                                  |       |
+                                                  |       `-option
+                                                  `-opcode
+  
+  
+ 
+.SS A1
+ 
+ SB{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |10 9 8       4       0
+                          | | | | |   | | | | | | |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 1|1|1|1|1|1 0|0|0|1|1|1|1|0 1 1 1|0 0 0 0|
+                                                  |       |
+                                                  `-opc   `-option
+  
+  
+ 
+.SS T1
+ 
+ SB{<q>}
+ 
+ if InITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SpeculationBarrier();
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SpeculationBarrier();
+

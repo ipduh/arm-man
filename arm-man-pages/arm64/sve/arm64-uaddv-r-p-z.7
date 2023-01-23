@@ -1,0 +1,100 @@
+.nh
+.TH "UADDV" "7" " "  "instruction" "sve"
+.SS UADDV
+ Unsigned add reduction to scalar
+
+ Unsigned add horizontally across all lanes of a vector, and place the result in
+ the SIMD&FP scalar destination register. Narrow elements are first zero-
+ extended to 64 bits. Inactive elements in the source vector are treated as
+ zero.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - uaddv_r_p_z_
+ 
+                                 16                                
+                               17 |                                
+                             18 | |                                
+                 24  22    19 | | |    13    10         5         0
+                  |   |     | | | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 0 0|0|0|1|0 0 1|. . .|. . . . .|. . . . .|
+                  |         | | |       |     |         |
+                  `-size    | | `-U     `-Pg  `-Zn      `-Vd
+                            | `-opc<0>
+                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ UADDV   <Dd>, <Pg>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Vd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ integer sum = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         integer element = UInt(Elem[operand, e, esize]);
+         sum = sum + element;
+ 
+ V[d] = sum<63:0>;
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in Vd
+  Is the 64-bit name of the destination SIMD&FP register, encoded in the "Vd"
+  field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ integer sum = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         integer element = UInt(Elem[operand, e, esize]);
+         sum = sum + element;
+ 
+ V[d] = sum<63:0>;
+

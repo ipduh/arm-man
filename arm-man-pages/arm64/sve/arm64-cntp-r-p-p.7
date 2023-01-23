@@ -1,0 +1,96 @@
+.nh
+.TH "CNTP" "7" " "  "instruction" "sve"
+.SS CNTP
+ Set scalar to count of true predicate elements
+
+ Counts the number of active and true elements in the source predicate and
+ places the scalar result in the destination general-purpose register. Inactive
+ predicate elements are not counted.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - cntp_r_p_p_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |  14      10 9       5         0
+                  |   |     |   | |   |       | |       |         |
+   0 0 1 0 0 1 0 1|. .|1 0 0|0 0|0|1 0|. . . .|0|. . . .|. . . . .|
+                  |         |   |     |       | |       |
+                  `-size    |   |     `-Pg    | `-Pn    `-Rd
+                            |   `-opc<0>      `-o2
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ CNTP    <Xd>, <Pg>, <Pn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ integer d = UInt(Rd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand = P[n];
+ bits(64) sum = Zeros();
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' && ElemP[operand, e, esize] == '1' then
+         sum = sum + 1;
+ X[d] = sum;
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the destination general-purpose register, encoded in the
+  "Rd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand = P[n];
+ bits(64) sum = Zeros();
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' && ElemP[operand, e, esize] == '1' then
+         sum = sum + 1;
+ X[d] = sum;
+

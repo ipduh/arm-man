@@ -1,0 +1,293 @@
+.nh
+.TH "LDPSW -- A64" "7" " "  "instruction" "general"
+.SS LDPSW
+ Load Pair of Registers Signed Word
+
+ Load Pair of Registers Signed Word calculates an address from a base register
+ value and an immediate offset, loads two 32-bit words from memory, sign-extends
+ them, and writes them to two registers. For information about memory accesses,
+ see Load/Store addressing modes.
+
+ For information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly LDPSW.
+
+
+It has encodings from 3 classes: Post-index, Pre-index and Signed offset
+
+.SS Post-index - A64 - LDPSW_64_ldstpair_post
+ 
+                                                                   
+                                                                   
+             26      22                                            
+     30    27 |    23 |            15        10         5         0
+      |     | |     | |             |         |         |         |
+  |0 1|1 0 1|0|0 0 1|1|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  |         |       | |             |         |         |
+  `-opc     `-V     | `-imm7        `-Rt2     `-Rn      `-Rt
+                    `-L
+  
+  
+ 
+.SS Post-index
+ 
+ LDPSW  <Xt1>, <Xt2>, [<Xn|SP>], #<imm>
+ 
+ boolean wback  = TRUE;
+ boolean postindex = TRUE;
+.SS Pre-index - A64 - LDPSW_64_ldstpair_pre
+ 
+                                                                   
+                                                                   
+             26      22                                            
+     30    27 |    23 |            15        10         5         0
+      |     | |     | |             |         |         |         |
+  |0 1|1 0 1|0|0 1 1|1|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  |         |       | |             |         |         |
+  `-opc     `-V     | `-imm7        `-Rt2     `-Rn      `-Rt
+                    `-L
+  
+  
+ 
+.SS Pre-index
+ 
+ LDPSW  <Xt1>, <Xt2>, [<Xn|SP>, #<imm>]!
+ 
+ boolean wback  = TRUE;
+ boolean postindex = FALSE;
+.SS Signed offset - A64 - LDPSW_64_ldstpair_off
+ 
+                                                                   
+                                                                   
+             26      22                                            
+     30    27 |    23 |            15        10         5         0
+      |     | |     | |             |         |         |         |
+  |0 1|1 0 1|0|0 1 0|1|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  |         |       | |             |         |         |
+  `-opc     `-V     | `-imm7        `-Rt2     `-Rn      `-Rt
+                    `-L
+  
+  
+ 
+.SS Signed offset
+ 
+ LDPSW  <Xt1>, <Xt2>, [<Xn|SP>{, #<imm>}]
+ 
+ boolean wback  = FALSE;
+ boolean postindex = FALSE;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer t2 = UInt(Rt2);
+ AccType acctype = AccType_NORMAL;
+ MemOp memop = if L == '1' then MemOp_LOAD else MemOp_STORE;
+ if L:opc<0> == '01' || opc == '11' then UNDEFINED;
+ boolean signed = (opc<0> != '0');
+ integer scale = 2 + UInt(opc<1>);
+ integer datasize = 8 << scale;
+ bits(64) offset = LSL(SignExtend(imm7, 64), scale);
+ boolean tag_checked = wback || n != 31;
+ 
+ bits(64) address;
+ bits(datasize) data1;
+ bits(datasize) data2;
+ constant integer dbytes = datasize DIV 8;
+ boolean rt_unknown = FALSE;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ boolean wb_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && (t == n || t2 == n) && n != 31 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;        // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;    // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && (t == n || t2 == n) && n != 31 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;   // value stored is pre-writeback
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_LOAD && t == t2 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_LDPOVERLAP);
+     assert c IN {Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // result is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown && t == n then
+             data1 = bits(datasize) UNKNOWN;
+         else
+             data1 = X[t];
+         if rt_unknown && t2 == n then
+             data2 = bits(datasize) UNKNOWN;
+         else
+             data2 = X[t2];
+         Mem[address + 0     , dbytes, acctype] = data1;
+         Mem[address + dbytes, dbytes, acctype] = data2;
+ 
+     when MemOp_LOAD
+         data1 = Mem[address + 0     , dbytes, acctype];
+         data2 = Mem[address + dbytes, dbytes, acctype];
+         if rt_unknown then
+             data1 = bits(datasize) UNKNOWN;
+             data2 = bits(datasize) UNKNOWN;
+         if signed then
+             X[t]  = SignExtend(data1, 64);
+             X[t2] = SignExtend(data2, 64);
+         else
+             X[t]  = data1;
+             X[t2] = data2;
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Xt1>
+  Encoded in Rt
+  Is the 64-bit name of the first general-purpose register to be transferred,
+  encoded in the "Rt" field.
+
+ <Xt2>
+  Encoded in Rt2
+  Is the 64-bit name of the second general-purpose register to be transferred,
+  encoded in the "Rt2" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <imm>
+  Encoded in imm7
+  For the post-index and pre-index variant: is the signed immediate byte offset,
+  a multiple of 4 in the range -256 to 252, encoded in the "imm7" field as
+  <imm>/4.
+
+ <imm>
+  Encoded in imm7
+  For the signed offset variant: is the optional signed immediate byte offset, a
+  multiple of 4 in the range -256 to 252, defaulting to 0 and encoded in the
+  "imm7" field as <imm>/4.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) data1;
+ bits(datasize) data2;
+ constant integer dbytes = datasize DIV 8;
+ boolean rt_unknown = FALSE;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ boolean wb_unknown = FALSE;
+ 
+ if memop == MemOp_LOAD && wback && (t == n || t2 == n) && n != 31 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_WBOVERLAPLD);
+     assert c IN {Constraint_WBSUPPRESS, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_WBSUPPRESS wback = FALSE;        // writeback is suppressed
+         when Constraint_UNKNOWN    wb_unknown = TRUE;    // writeback is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_STORE && wback && (t == n || t2 == n) && n != 31 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_WBOVERLAPST);
+     assert c IN {Constraint_NONE, Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_NONE       rt_unknown = FALSE;   // value stored is pre-writeback
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // value stored is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if memop == MemOp_LOAD && t == t2 then
+     Constraint c = ConstrainUnpredictable(Unpredictable_LDPOVERLAP);
+     assert c IN {Constraint_UNKNOWN, Constraint_UNDEF, Constraint_NOP};
+     case c of
+         when Constraint_UNKNOWN    rt_unknown = TRUE;    // result is UNKNOWN
+         when Constraint_UNDEF      UNDEFINED;
+         when Constraint_NOP        EndOfInstruction();
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         if rt_unknown && t == n then
+             data1 = bits(datasize) UNKNOWN;
+         else
+             data1 = X[t];
+         if rt_unknown && t2 == n then
+             data2 = bits(datasize) UNKNOWN;
+         else
+             data2 = X[t2];
+         Mem[address + 0     , dbytes, acctype] = data1;
+         Mem[address + dbytes, dbytes, acctype] = data2;
+ 
+     when MemOp_LOAD
+         data1 = Mem[address + 0     , dbytes, acctype];
+         data2 = Mem[address + dbytes, dbytes, acctype];
+         if rt_unknown then
+             data1 = bits(datasize) UNKNOWN;
+             data2 = bits(datasize) UNKNOWN;
+         if signed then
+             X[t]  = SignExtend(data1, 64);
+             X[t2] = SignExtend(data2, 64);
+         else
+             X[t]  = data1;
+             X[t2] = data2;
+ 
+ if wback then
+     if wb_unknown then
+         address = bits(64) UNKNOWN;
+     elsif postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

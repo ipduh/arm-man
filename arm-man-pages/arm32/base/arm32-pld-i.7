@@ -1,0 +1,162 @@
+.nh
+.TH "PLD, PLDW (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS PLD, PLDW (immediate)
+ Preload Data (immediate)
+
+ Preload Data (immediate) signals the memory system that data memory accesses
+ from a specified address are likely in the near future. The memory system can
+ respond by taking actions that are expected to speed up the memory accesses
+ when they do occur, such as preloading the cache line containing the specified
+ address into the data cache.
+
+ The PLD instruction signals that the likely memory access is a read, and the
+ PLDW instruction signals that it is a write.
+
+ The effect of a PLD or PLDW instruction is implementation defined.  For more
+ information, see Preloading caches.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                13                          
+                   23 |              14 |                          
+                 24 | |            15 | |                          
+               25 | | |  20      16 | | |12                       0
+                | | | |   |       | | | | |                       |
+   1 1 1 1 0 1 0|1|.|.|0 1|. . . .|1|1|1|1|. . . . . . . . . . . .|
+                | | |     |               |
+                | | `-R   `-Rn(!= 1111)   `-imm12
+                | `-U
+                `-D
+  
+  
+ 
+.SS Preload read(R == 1)
+ 
+ PLD{<c>}{<q>} [<Rn> {, #{+/-}<imm>}]
+.SS Preload write(R == 0)
+ 
+ PLDW{<c>}{<q>} [<Rn> {, #{+/-}<imm>}]
+ 
+ if Rn == '1111' then SEE "PLD (literal)";
+ n = UInt(Rn);  imm32 = ZeroExtend(imm12, 32);  add = (U == '1');  is_pldw = (R == '0');
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12                       0
+                    | | | |       |       |                       |
+   1 1 1 1 1 0 0 0 1|0|.|1|. . . .|1 1 1 1|. . . . . . . . . . . .|
+                      | | |       |       |
+                      | | |       `-Rt    `-imm12
+                      | | `-Rn(!= 1111)
+                      | `-L
+                      `-W
+  
+  
+ 
+.SS Preload read(W == 0)
+ 
+ PLD{<c>}{<q>} [<Rn> {, #{+}<imm>}]
+.SS Preload write(W == 1)
+ 
+ PLDW{<c>}{<q>} [<Rn> {, #{+}<imm>}]
+ 
+ if Rn == '1111' then SEE "PLD (literal)";
+ n = UInt(Rn);  imm32 = ZeroExtend(imm12, 32);  add = TRUE;  is_pldw = (W == '1');
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12       8               0
+                    | | | |       |       |       |               |
+   1 1 1 1 1 0 0 0 0|0|.|1|. . . .|1 1 1 1|1 1 0 0|. . . . . . . .|
+                      | | |       |               |
+                      | | |       `-Rt            `-imm8
+                      | | `-Rn(!= 1111)
+                      | `-L
+                      `-W
+  
+  
+ 
+.SS Preload read(W == 0)
+ 
+ PLD{<c>}{<q>} [<Rn> {, #-<imm>}]
+.SS Preload write(W == 1)
+ 
+ PLDW{<c>}{<q>} [<Rn> {, #-<imm>}]
+ 
+ if Rn == '1111' then SEE "PLD (literal)";
+ n = UInt(Rn);  imm32 = ZeroExtend(imm8, 32);  add = FALSE;  is_pldw = (W == '1');
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = if add then (R[n] + imm32) else (R[n] - imm32);
+     if is_pldw then
+         Hint_PreloadDataForWrite(address);
+     else
+         Hint_PreloadData(address);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field. If the PC is
+  used, see PLD (literal).
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ +
+  Specifies the offset is added to the base register.
+
+ <imm>
+  Encoded in imm12
+  For encoding A1: is the optional 12-bit unsigned immediate byte offset, in the
+  range 0 to 4095, defaulting to 0 and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T1: is an optional 12-bit unsigned immediate byte offset, in the
+  range 0 to 4095, defaulting to 0 and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm8
+  For encoding T2: is an 8-bit unsigned immediate byte offset, in the range 0 to
+  255, defaulting to 0 if omitted, and encoded in the "imm8" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = if add then (R[n] + imm32) else (R[n] - imm32);
+     if is_pldw then
+         Hint_PreloadDataForWrite(address);
+     else
+         Hint_PreloadData(address);
+

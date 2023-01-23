@@ -1,0 +1,47 @@
+.nh
+.TH "UDF -- A64" "7" " "  "instruction" "general"
+.SS UDF
+ Permanently Undefined
+
+ Permanently Undefined generates an Undefined Instruction exception (ESR_ELx.EC
+ = 0b000000). The encodings for UDF used in this section are defined as
+ permanently undefined in the Armv8-A architecture.
+
+
+
+.SS Integer - A64 - UDF_only_perm_undef
+ 
+                                                                   
+                                                                   
+                                                                   
+                                 16                               0
+                                  |                               |
+   0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0|. . . . . . . . . . . . . . . .|
+                                  |
+                                  `-imm16
+  
+  
+ 
+.SS Integer
+ 
+ UDF  #<imm>
+ 
+ // The imm16 field is ignored by hardware.
+ UNDEFINED;
+ 
+ // No operation.
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in imm16
+  is a 16-bit unsigned immediate, in the range 0 to 65535, encoded in the
+  "imm16" field. The PE ignores the value of this constant.
+
+
+
+.SS Operation
+
+ // No operation.
+

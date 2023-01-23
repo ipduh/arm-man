@@ -1,0 +1,85 @@
+.nh
+.TH "MOV (immediate, unpredicated)" "7" " "  "alias" "sve"
+.SS MOV (immediate, unpredicated)
+ MOV is an alias of DUP
+
+ Move signed immediate to vector elements (unpredicated)
+
+ Unconditionally broadcast the signed integer immediate into each element of the
+ destination vector. This instruction is unpredicated.
+
+ The immediate operand is a signed value in the range -128 to +127, and for
+ element widths of 16 bits or higher it may also be a signed multiple of 256 in
+ the range -32768 to +32512 (excluding 0).
+
+ The immediate is encoded in 8 bits with an optional left shift by 8. The
+ preferred disassembly when the shift option is specified is "#<simm8>, LSL #8".
+ However an assembler and disassembler may also allow use of the shifted 16-bit
+ value unless the immediate is 0 and the shift amount is 8, which must be
+ unambiguously described as "#0, LSL #8".
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dup_z_i_
+ 
+                                                                   
+                               17                                  
+                             18 |      13                          
+                 24  22    19 | |    14 |               5         0
+                  |   |     | | |     | |               |         |
+   0 0 1 0 0 1 0 1|. .|1 1 1|0|0|0 1 1|.|. . . . . . . .|. . . . .|
+                  |         | |       | |               |
+                  `-size    | |       | `-imm8          `-Zd
+                            | |       `-sh
+                            | `-opc<0>
+                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, #<imm>{, <shift>}
+ 
+ DUP     <Zd>.<T>, #<imm>{, <shift>}
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <imm>
+  Encoded in imm8
+  Is a signed immediate in the range -128 to 127, encoded in the "imm8" field.
+
+ <shift>
+  Encoded in sh
+  Is the optional left shift to apply to the immediate, defaulting to LSL #0 and
+
+  sh <shift> 
+  0  LSL #0  
+  1  LSL #8  
+
+
+
+.SS Operation
+
+ The manual of DUP gives pseudocode for MOV.

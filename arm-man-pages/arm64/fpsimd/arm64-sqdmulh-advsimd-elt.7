@@ -1,0 +1,212 @@
+.nh
+.TH "SQDMULH (by element) -- A64" "7" " "  "instruction" "advsimd"
+.SS SQDMULH (by element)
+ Signed saturating Doubling Multiply returning High half (by element)
+
+ Signed saturating Doubling Multiply returning High half (by element). This
+ instruction multiplies each vector element in the first source SIMD&FP register
+ by the specified vector element of the second source SIMD&FP register, doubles
+ the results, places the most significant half of the final results into a
+ vector, and writes the vector to the destination SIMD&FP register.
+
+ The results are truncated. For rounded results, see SQRDMULH.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - SQDMULH_asisdelem_R
+ 
+                                             10                    
+                         20                11 |                    
+       29              21 |              12 | |                    
+     30 |        24  22 | |      16    13 | | |         5         0
+      | |         |   | | |       |     | | | |         |         |
+   0 1|0|1 1 1 1 1|. .|.|.|. . . .|1 1 0|0|.|0|. . . . .|. . . . .|
+      |           |   | | |             | |   |         |
+      `-U         |   | | `-Rm          | `-H `-Rn      `-Rd
+                  |   | `-M             `-op
+                  |   `-L
+                  `-size
+  
+  
+ 
+.SS Scalar
+ 
+ SQDMULH  <V><d>, <V><n>, <Vm>.<Ts>[<index>]
+ 
+ integer idxdsize = if H == '1' then 128 else 64; 
+ integer index;
+ bit Rmhi;
+ case size of
+     when '01' index = UInt(H:L:M); Rmhi = '0';
+     when '10' index = UInt(H:L);   Rmhi = M;
+     otherwise UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rmhi:Rm);
+ 
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ 
+ boolean round = (op == '1');
+.SS Vector - A64 - SQDMULH_asimdelem_R
+ 
+                                             10                    
+       29                20                11 |                    
+     30 |              21 |              12 | |                    
+   31 | |        24  22 | |      16    13 | | |         5         0
+    | | |         |   | | |       |     | | | |         |         |
+   0|.|0|0 1 1 1 1|. .|.|.|. . . .|1 1 0|0|.|0|. . . . .|. . . . .|
+    | |           |   | | |             | |   |         |
+    | `-U         |   | | `-Rm          | `-H `-Rn      `-Rd
+    `-Q           |   | `-M             `-op
+                  |   `-L
+                  `-size
+  
+  
+ 
+.SS Vector
+ 
+ SQDMULH  <Vd>.<T>, <Vn>.<T>, <Vm>.<Ts>[<index>]
+ 
+ integer idxdsize = if H == '1' then 128 else 64; 
+ integer index;
+ bit Rmhi;
+ case size of
+     when '01' index = UInt(H:L:M); Rmhi = '0';
+     when '10' index = UInt(H:L);   Rmhi = M;
+     otherwise UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rmhi:Rm);
+ 
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ boolean round = (op == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(idxdsize) operand2 = V[m];
+ bits(datasize) result;
+ integer round_const = if round then 1 << (esize - 1) else 0;
+ integer element1;
+ integer element2;
+ integer product;
+ boolean sat;
+ 
+ element2 = SInt(Elem[operand2, index, esize]);
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     product = (2 * element1 * element2) + round_const;
+     // The following only saturates if element1 and element2 equal -(2^(esize-1))
+     (Elem[result, e, esize], sat) = SignedSatQ(product >> esize, esize);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   x RESERVED 
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   x RESERVED 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in size:M:Rm
+  Is the name of the second SIMD&FP source register,
+
+  size <Vm>     
+  00   RESERVED 
+  01   0:Rm     
+  10   M:Rm     
+  11   RESERVED 
+
+   Restricted to V0-V15 when element size <Ts> is H.
+
+ <Ts>
+  Encoded in size
+  Is an element size specifier,
+
+  size <Ts>     
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <index>
+  Encoded in size:L:H:M
+  Is the element index,
+
+  size <index>  
+  00   RESERVED 
+  01   H:L:M    
+  10   H:L      
+  11   RESERVED 
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(idxdsize) operand2 = V[m];
+ bits(datasize) result;
+ integer round_const = if round then 1 << (esize - 1) else 0;
+ integer element1;
+ integer element2;
+ integer product;
+ boolean sat;
+ 
+ element2 = SInt(Elem[operand2, index, esize]);
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     product = (2 * element1 * element2) + round_const;
+     // The following only saturates if element1 and element2 equal -(2^(esize-1))
+     (Elem[result, e, esize], sat) = SignedSatQ(product >> esize, esize);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+

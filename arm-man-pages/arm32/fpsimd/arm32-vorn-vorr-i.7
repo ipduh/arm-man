@@ -1,0 +1,145 @@
+.nh
+.TH "VORN (immediate) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VORN (immediate)
+ VORN is an alias of VORR
+
+ Vector Bitwise OR NOT (immediate)
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|0 x x 1|0|.|0|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VORN{<c>}{<q>}.I16 {<Dd>,} <Dd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I16 <Dd>, #~<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VORN{<c>}{<q>}.I16 {<Qd>,} <Qd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I16 <Qd>, #~<imm>
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 0 x 1|0|.|0|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VORN{<c>}{<q>}.I32 {<Dd>,} <Dd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I32 <Dd>, #~<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VORN{<c>}{<q>}.I32 {<Qd>,} <Qd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I32 <Qd>, #~<imm>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|0 x x 1|0|.|0|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VORN{<c>}{<q>}.I16 {<Dd>,} <Dd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I16 <Dd>, #~<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VORN{<c>}{<q>}.I16 {<Qd>,} <Qd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I16 <Qd>, #~<imm>
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 0 x 1|0|.|0|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VORN{<c>}{<q>}.I32 {<Dd>,} <Dd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I32 <Dd>, #~<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VORN{<c>}{<q>}.I32 {<Qd>,} <Qd>, #<imm>
+ 
+ VORR{<c>}{<q>}.I32 <Qd>, #~<imm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1 and A2: see Standard assembler syntax fields. This encoding
+  must be unconditional.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <imm>
+  Is a constant of the specified type that is replicated to fill the destination
+  register. For details of the range of constants available and the encoding of
+  <imm>, see Modified immediate constants in T32 and A32 Advanced SIMD
+  instructions.
+
+
+
+.SS Operation
+
+ The manual of VORR gives pseudocode for VORN.

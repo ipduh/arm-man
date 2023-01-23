@@ -1,0 +1,85 @@
+.nh
+.TH "ISB -- AArch32" "7" " "  "instruction" "general"
+.SS ISB
+ Instruction Synchronization Barrier
+
+ Instruction Synchronization Barrier flushes the pipeline in the PE and is a
+ context synchronization event. For more information, see Instruction
+ Synchronization Barrier (ISB).
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+                         20 | | |16 | | |12 | | 9 8       4       0
+                          | | | | | | | | | | | | |       |       |
+   1 1 1 1 0 1 0 1 0 1 1 1|1|1|1|1|1|1|1|1|0|0|0|0|0 1 1 0|. . . .|
+                                                  |       |
+                                                  |       `-option
+                                                  `-opcode
+  
+  
+ 
+.SS A1
+ 
+ ISB{<c>}{<q>} {<option>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |10 9 8       4       0
+                          | | | | |   | | | | | | |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 1|1|1|1|1|1 0|0|0|1|1|1|1|0 1 1 0|. . . .|
+                                                  |       |
+                                                  `-opc   `-option
+  
+  
+ 
+.SS T1
+ 
+ ISB{<c>}{<q>} {<option>}
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     InstructionSynchronizationBarrier();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <option>
+  Encoded in option
+  Specifies an optional limitation on the barrier operation. Values are:
+  SYFull system barrier operation, encoded as option = 0b1111. Can be omitted.
+  All other encodings of option are reserved. The corresponding instructions
+  execute as full system barrier operations, but must not be relied upon by
+  software.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     InstructionSynchronizationBarrier();
+

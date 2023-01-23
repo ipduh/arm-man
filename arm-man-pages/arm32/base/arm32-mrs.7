@@ -1,0 +1,136 @@
+.nh
+.TH "MRS -- AArch32" "7" " "  "instruction" "general"
+.SS MRS
+ Move Special register to general-purpose register
+
+ Move Special register to general-purpose register moves the value of the APSR,
+ CPSR, or SPSR_<current_mode> into a general-purpose register.
+
+ Arm recommends the APSR form when only the N, Z, C, V, Q, and GE[3:0] bits are
+ being written. For more information, see APSR.
+
+ An MRS that accesses the SPSRs is unpredictable if executed in User mode or
+ System mode.
+
+ An MRS that is executed in User mode and accesses the CPSR returns an unknown
+ value for the CPSR.{E, A, I, F, M} fields.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                         20                                        
+                       21 |                  10                    
+                     22 | |                11 |                    
+         28        23 | | |      16      12 | | 9 8       4       0
+          |         | | | |       |       | | | | |       |       |
+  |. . . .|0 0 0 1 0|.|0|0|1 1 1 1|. . . .|0|0|0|0|0 0 0 0|0 0 0 0|
+  |                 |     |       |           | |         |
+  `-cond(!= 1111)   `-R   `-mask  `-Rd        | `-m       `-Rn
+                                              `-B
+  
+  
+ 
+.SS A1
+ 
+ MRS{<c>}{<q>} <Rd>, <spec_reg>
+ 
+ d = UInt(Rd);  read_spsr = (R == '1');
+ if d == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                             03                                    
+                           04 |          12                        
+                         05 | |  01    13 |                        
+                       06 | | |02 |  14 | |       8 7 6 5 4 3 2 1 0
+                        | | | | | |   | | |       | | | | | | | | |
+   1 1 1 1 0 0 1 1 1 1 1|.|1|1|1|1|1 0|0|0|. . . .|0|0|0|0|0|0|0|0|
+                        |                 |
+                        `-R               `-Rd
+  
+  
+ 
+.SS T1
+ 
+ MRS{<c>}{<q>} <Rd>, <spec_reg>
+ 
+ d = UInt(Rd);  read_spsr = (R == '1');
+ if d == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if read_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             R[d] = SPSR[];
+     else
+         // CPSR has same bit assignments as SPSR, but with the IT, J, SS, IL, and T bits masked out.
+         bits(32) mask = '11111000 00001111 00000011 11011111';
+         if HavePANExt() then
+             mask<22> = '1';
+ 
+         if HaveDITExt() then
+             mask<21> = '1';
+         psr_val = GetPSRFromPSTATE() AND mask;
+         if PSTATE.EL == EL0 then
+             // If accessed from User mode return UNKNOWN values for E, A, I, F bits, bits<9:6>,
+             // and for the M field, bits<4:0>
+             psr_val<22> = bits(1) UNKNOWN;
+             psr_val<9:6> = bits(4) UNKNOWN;
+             psr_val<4:0> = bits(5) UNKNOWN;
+         R[d] = psr_val;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <spec_reg>
+  Encoded in R
+  Is the special register to be accessed,
+
+  R <spec_reg> 
+  0 CPSR|APSR  
+  1 SPSR       
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if read_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             R[d] = SPSR[];
+     else
+         // CPSR has same bit assignments as SPSR, but with the IT, J, SS, IL, and T bits masked out.
+         bits(32) mask = '11111000 00001111 00000011 11011111';
+         if HavePANExt() then
+             mask<22> = '1';
+ 
+         if HaveDITExt() then
+             mask<21> = '1';
+         psr_val = GetPSRFromPSTATE() AND mask;
+         if PSTATE.EL == EL0 then
+             // If accessed from User mode return UNKNOWN values for E, A, I, F bits, bits<9:6>,
+             // and for the M field, bits<4:0>
+             psr_val<22> = bits(1) UNKNOWN;
+             psr_val<9:6> = bits(4) UNKNOWN;
+             psr_val<4:0> = bits(5) UNKNOWN;
+         R[d] = psr_val;
+

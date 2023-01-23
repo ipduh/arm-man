@@ -1,0 +1,202 @@
+.nh
+.TH "CASP, CASPA, CASPAL, CASPL -- A64" "7" " "  "instruction" "general"
+.SS CASP, CASPA, CASPAL, CASPL
+ Compare and Swap Pair of words or doublewords in memory
+
+ Compare and Swap Pair of words or doublewords in memory reads a pair of 32-bit
+ words or 64-bit doublewords from memory, and compares them against the values
+ held in the first pair of registers. If the comparison is equal, the values in
+ the second pair of registers are written to memory. If the writes are
+ performed, the reads and writes occur atomically such that no other
+ modification of the memory location can take place between the reads and
+ writes.
+
+ CASPA and CASPAL load from memory with acquire semantics.
+
+ CASPA and CASPAL load from memory with acquire semantics.
+
+ CASPL and CASPAL store to memory with release semantics.
+
+ CASPL and CASPAL store to memory with release semantics.
+
+ CAS has no memory ordering requirements.
+
+
+ For more information about memory ordering semantics see Load-Acquire, Store-
+ Release.
+
+ For information about memory accesses see Load/Store addressing modes.
+
+ The architecture permits that the data read clears any exclusive monitors
+ associated with that location, even if the compare subsequently fails.
+
+ If the instruction generates a synchronous Data Abort, the registers which are
+ compared and loaded, that is <Ws> and <W(s+1)>, or <Xs> and <X(s+1)>, are
+ restored to the values held in the registers before the instruction was
+ executed.
+
+
+
+.SS No offset - A64 - base_register
+ 
+                       21                                          
+                     22 |                                          
+     30            23 | |          15                              
+   31 |          24 | | |        16 |        10         5         0
+    | |           | | | |         | |         |         |         |
+   0|.|0 0 1 0 0 0|0|.|1|. . . . .|.|1 1 1 1 1|. . . . .|. . . . .|
+    |             | | | |         | |         |         |
+    `-sz          | | | `-Rs      | `-Rt2     `-Rn      `-Rt
+                  | | `-o1        `-o0
+                  | `-L
+                  `-o2
+  
+  
+ 
+.SS 32-bit CASP(sz == 0 && L == 0 && o0 == 0)
+ 
+ CASP  <Ws>, <W(s+1)>, <Wt>, <W(t+1)>, [<Xn|SP>{,#0}]
+.SS 32-bit CASPA(sz == 0 && L == 1 && o0 == 0)
+ 
+ CASPA  <Ws>, <W(s+1)>, <Wt>, <W(t+1)>, [<Xn|SP>{,#0}]
+.SS 32-bit CASPAL(sz == 0 && L == 1 && o0 == 1)
+ 
+ CASPAL  <Ws>, <W(s+1)>, <Wt>, <W(t+1)>, [<Xn|SP>{,#0}]
+.SS 32-bit CASPL(sz == 0 && L == 0 && o0 == 1)
+ 
+ CASPL  <Ws>, <W(s+1)>, <Wt>, <W(t+1)>, [<Xn|SP>{,#0}]
+.SS 64-bit CASP(sz == 1 && L == 0 && o0 == 0)
+ 
+ CASP  <Xs>, <X(s+1)>, <Xt>, <X(t+1)>, [<Xn|SP>{,#0}]
+.SS 64-bit CASPA(sz == 1 && L == 1 && o0 == 0)
+ 
+ CASPA  <Xs>, <X(s+1)>, <Xt>, <X(t+1)>, [<Xn|SP>{,#0}]
+.SS 64-bit CASPAL(sz == 1 && L == 1 && o0 == 1)
+ 
+ CASPAL  <Xs>, <X(s+1)>, <Xt>, <X(t+1)>, [<Xn|SP>{,#0}]
+.SS 64-bit CASPL(sz == 1 && L == 0 && o0 == 1)
+ 
+ CASPL  <Xs>, <X(s+1)>, <Xt>, <X(t+1)>, [<Xn|SP>{,#0}]
+ 
+ if !HaveAtomicExt() then UNDEFINED;
+ if Rs<0> == '1' then UNDEFINED;
+ if Rt<0> == '1' then UNDEFINED;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer s = UInt(Rs);
+ 
+ integer datasize = 32 << UInt(sz);
+ integer regsize = datasize;
+ AccType ldacctype = if L == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ AccType stacctype = if o0 == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(2*datasize) comparevalue;
+ bits(2*datasize) newvalue;
+ bits(2*datasize) data;
+ 
+ bits(datasize) s1 = X[s];
+ bits(datasize) s2 = X[s+1];
+ bits(datasize) t1 = X[t];
+ bits(datasize) t2 = X[t+1];
+ comparevalue = if BigEndian() then s1:s2 else s2:s1;
+ newvalue     = if BigEndian() then t1:t2 else t2:t1;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ if BigEndian() then
+     X[s]   = ZeroExtend(data<2*datasize-1:datasize>, regsize);
+     X[s+1] = ZeroExtend(data<datasize-1:0>, regsize);
+ else
+     X[s]   = ZeroExtend(data<datasize-1:0>, regsize);
+     X[s+1] = ZeroExtend(data<2*datasize-1:datasize>, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the first general-purpose register to be compared and
+  loaded, encoded in the "Rs" field. <Ws> must be an even-numbered register.
+
+ <W(s+1)>
+  Is the 32-bit name of the second general-purpose register to be compared and
+  loaded.
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the first general-purpose register to be conditionally
+  stored, encoded in the "Rt" field. <Wt> must be an even-numbered register.
+
+ <W(t+1)>
+  Is the 32-bit name of the second general-purpose register to be conditionally
+  stored.
+
+ <Xs>
+  Encoded in Rs
+  Is the 64-bit name of the first general-purpose register to be compared and
+  loaded, encoded in the "Rs" field. <Xs> must be an even-numbered register.
+
+ <X(s+1)>
+  Is the 64-bit name of the second general-purpose register to be compared and
+  loaded.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the first general-purpose register to be conditionally
+  stored, encoded in the "Rt" field. <Xt> must be an even-numbered register.
+
+ <X(t+1)>
+  Is the 64-bit name of the second general-purpose register to be conditionally
+  stored.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(2*datasize) comparevalue;
+ bits(2*datasize) newvalue;
+ bits(2*datasize) data;
+ 
+ bits(datasize) s1 = X[s];
+ bits(datasize) s2 = X[s+1];
+ bits(datasize) t1 = X[t];
+ bits(datasize) t2 = X[t+1];
+ comparevalue = if BigEndian() then s1:s2 else s2:s1;
+ newvalue     = if BigEndian() then t1:t2 else t2:t1;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ if BigEndian() then
+     X[s]   = ZeroExtend(data<2*datasize-1:datasize>, regsize);
+     X[s+1] = ZeroExtend(data<datasize-1:0>, regsize);
+ else
+     X[s]   = ZeroExtend(data<datasize-1:0>, regsize);
+     X[s+1] = ZeroExtend(data<2*datasize-1:datasize>, regsize);
+

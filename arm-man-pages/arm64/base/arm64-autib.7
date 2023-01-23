@@ -1,0 +1,164 @@
+.nh
+.TH "AUTIB, AUTIB1716, AUTIBSP, AUTIBZ, AUTIZB -- A64" "7" " "  "instruction" "system"
+.SS AUTIB, AUTIB1716, AUTIBSP, AUTIBZ, AUTIZB
+ Authenticate Instruction address, using key B
+
+ Authenticate Instruction address, using key B. This instruction authenticates
+ an instruction address, using a modifier and key B.
+
+ The address is:
+
+ In the general-purpose register that is specified by <Xd> for AUTIB and AUTIZB.
+
+ In the general-purpose register that is specified by <Xd> for AUTIB and AUTIZB.
+
+ In the general-purpose register that is specified by <Xd> for AUTIB and AUTIZB.
+
+ In X17, for AUTIB1716.
+
+ In X30, for AUTIBSP and AUTIBZ.
+
+ In X30, for AUTIBSP and AUTIBZ.
+
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTIB.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTIB.
+
+ The value zero, for AUTIZB and AUTIBZ.
+
+ The value zero, for AUTIZB and AUTIBZ.
+
+ In X16, for AUTIB1716.
+
+ In SP, for AUTIBSP.
+
+
+ If the authentication passes, the upper bits of the address are restored to
+ enable subsequent use of the address. If the authentication fails, the upper
+ bits are corrupted and any subsequent use of the address results in a
+ Translation fault.
+
+
+It has encodings from 2 classes: Integer and System
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|1 0 1|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS AUTIB(Z == 0)
+ 
+ AUTIB  <Xd>, <Xn|SP>
+.SS AUTIZB(Z == 1 && Rn == 11111)
+ 
+ AUTIZB  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // AUTIB
+     if n == 31 then source_is_sp = TRUE;
+ else // AUTIZB
+     if n != 31 then UNDEFINED;
+.SS System - A64
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 0|0 0 x 1|1 1 x|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS AUTIB1716(CRm == 0001 && op2 == 110)
+ 
+ AUTIB1716
+.SS AUTIBSP(CRm == 0011 && op2 == 111)
+ 
+ AUTIBSP
+.SS AUTIBZ(CRm == 0011 && op2 == 110)
+ 
+ AUTIBZ
+ 
+ integer d;
+ integer n;
+ boolean source_is_sp = FALSE;
+ 
+ case CRm:op2 of
+     when '0011 110' // AUTIBZ
+         d = 30;
+         n = 31;
+     when '0011 111' // AUTIBSP
+         d = 30;
+         source_is_sp = TRUE;
+     when '0001 110' // AUTIB1716
+         d = 17;
+         n = 16;
+     when '0001 000' SEE "PACIA";
+     when '0001 010' SEE "PACIB";
+     when '0001 100' SEE "AUTIA";
+     when '0011 00x' SEE "PACIA";
+     when '0011 01x' SEE "PACIB";
+     when '0011 10x' SEE "AUTIA";
+     when '0000 111' SEE "XPACLRI";
+     otherwise       SEE "HINT";
+ 
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthIB(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthIB(X[d], X[n], auth_then_branch);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthIB(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthIB(X[d], X[n], auth_then_branch);
+

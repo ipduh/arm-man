@@ -1,0 +1,160 @@
+.nh
+.TH "PACIB, PACIB1716, PACIBSP, PACIBZ, PACIZB -- A64" "7" " "  "instruction" "system"
+.SS PACIB, PACIB1716, PACIBSP, PACIBZ, PACIZB
+ Pointer Authentication Code for Instruction address, using key B
+
+ Pointer Authentication Code for Instruction address, using key B. This
+ instruction computes and inserts a pointer authentication code for an
+ instruction address, using a modifier and key B.
+
+ The address is:
+
+ In the general-purpose register that is specified by <Xd> for PACIB and PACIZB.
+
+ In the general-purpose register that is specified by <Xd> for PACIB and PACIZB.
+
+ In the general-purpose register that is specified by <Xd> for PACIB and PACIZB.
+
+ In X17, for PACIB1716.
+
+ In X30, for PACIBSP and PACIBZ.
+
+ In X30, for PACIBSP and PACIBZ.
+
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACIB.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACIB.
+
+ The value zero, for PACIZB and PACIBZ.
+
+ The value zero, for PACIZB and PACIBZ.
+
+ In X16, for PACIB1716.
+
+ In SP, for PACIBSP.
+
+
+
+It has encodings from 2 classes: Integer and System
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|0 0 1|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS PACIB(Z == 0)
+ 
+ PACIB  <Xd>, <Xn|SP>
+.SS PACIZB(Z == 1 && Rn == 11111)
+ 
+ PACIZB  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // PACIB
+     if n == 31 then source_is_sp = TRUE;
+ else // PACIZB
+     if n != 31 then UNDEFINED;
+.SS System - A64
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 0|0 0 x 1|0 1 x|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS PACIB1716(CRm == 0001 && op2 == 010)
+ 
+ PACIB1716
+.SS PACIBSP(CRm == 0011 && op2 == 011)
+ 
+ PACIBSP
+.SS PACIBZ(CRm == 0011 && op2 == 010)
+ 
+ PACIBZ
+ 
+ integer d;
+ integer n;
+ boolean source_is_sp = FALSE;
+ 
+ case CRm:op2 of
+     when '0011 010' // PACIBZ
+         d = 30;
+         n = 31;
+     when '0011 011' // PACIBSP
+         d = 30;
+         source_is_sp = TRUE;
+         if HaveBTIExt() then
+             // Check for branch target compatibility between PSTATE.BTYPE
+             // and implicit branch target of PACIBSP instruction.
+             SetBTypeCompatible(BTypeCompatible_PACIXSP());
+     when '0001 010' // PACIB1716
+         d = 17;
+         n = 16;
+     when '0001 000' SEE "PACIA";
+     when '0001 100' SEE "AUTIA";
+     when '0001 110' SEE "AUTIB";
+     when '0011 00x' SEE "PACIA";
+     when '0011 10x' SEE "AUTIA";
+     when '0011 11x' SEE "AUTIB";
+     when '0000 111' SEE "XPACLRI";
+     otherwise       SEE "HINT";
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AddPACIB(X[d], SP[]);
+     else
+         X[d] = AddPACIB(X[d], X[n]);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AddPACIB(X[d], SP[]);
+     else
+         X[d] = AddPACIB(X[d], X[n]);
+

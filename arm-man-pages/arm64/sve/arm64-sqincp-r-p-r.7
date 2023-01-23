@@ -1,0 +1,132 @@
+.nh
+.TH "SQINCP (scalar)" "7" " "  "instruction" "sve"
+.SS SQINCP (scalar)
+ Signed saturating increment scalar by count of true predicate elements
+
+ Counts the number of true elements in the source predicate and then uses the
+ result to increment the scalar destination. The result is saturated to the
+ source general-purpose register's signed integer range. A 32-bit saturated
+ result is then sign-extended to 64 bits.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: 32-bit and 64-bit
+
+.SS 32-bit - A64 - sqincp_r_p_r_sx
+ 
+                                                                   
+                                 16                                
+                               17 |          10                    
+                 24  22      18 | |        11 | 9       5         0
+                  |   |       | | |         | | |       |         |
+   0 0 1 0 0 1 0 1|. .|1 0 1 0|0|0|1 0 0 0 1|0|0|. . . .|. . . . .|
+                  |           | |           | | |       |
+                  `-size      | `-U         | | `-Pm    `-Rdn
+                              `-D           | `-op
+                                            `-sf
+  
+  
+ 
+.SS 32-bit
+ 
+ SQINCP  <Xdn>, <Pm>.<T>, <Wdn>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer m = UInt(Pm);
+ integer dn = UInt(Rdn);
+ boolean unsigned = FALSE;
+ integer ssize = 32;
+.SS 64-bit - A64 - sqincp_r_p_r_x
+ 
+                                                                   
+                                 16                                
+                               17 |          10                    
+                 24  22      18 | |        11 | 9       5         0
+                  |   |       | | |         | | |       |         |
+   0 0 1 0 0 1 0 1|. .|1 0 1 0|0|0|1 0 0 0 1|1|0|. . . .|. . . . .|
+                  |           | |           | | |       |
+                  `-size      | `-U         | | `-Pm    `-Rdn
+                              `-D           | `-op
+                                            `-sf
+  
+  
+ 
+.SS 64-bit
+ 
+ SQINCP  <Xdn>, <Pm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer m = UInt(Pm);
+ integer dn = UInt(Rdn);
+ boolean unsigned = FALSE;
+ integer ssize = 64;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(ssize) operand1 = X[dn];
+ bits(PL) operand2 = P[m];
+ bits(ssize) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ integer element = Int(operand1, unsigned);
+ (result, -) = SatQ(element + count, ssize, unsigned);
+ X[dn] = Extend(result, 64, unsigned);
+ 
+
+.SS Assembler Symbols
+
+ <Xdn>
+  Encoded in Rdn
+  Is the 64-bit name of the source and destination general-purpose register,
+  encoded in the "Rdn" field.
+
+ <Pm>
+  Encoded in Pm
+  Is the name of the source scalable predicate register, encoded in the "Pm"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Wdn>
+  Encoded in Rdn
+  Is the 32-bit name of the source and destination general-purpose register,
+  encoded in the "Rdn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(ssize) operand1 = X[dn];
+ bits(PL) operand2 = P[m];
+ bits(ssize) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ integer element = Int(operand1, unsigned);
+ (result, -) = SatQ(element + count, ssize, unsigned);
+ X[dn] = Extend(result, 64, unsigned);
+

@@ -1,0 +1,188 @@
+.nh
+.TH "STM, STMIA, STMEA -- AArch32" "7" " "  "instruction" "general"
+.SS STM, STMIA, STMEA
+ Store Multiple (Increment After, Empty Ascending)
+
+ Store Multiple (Increment After, Empty Ascending) stores multiple registers to
+ consecutive memory locations using an address from a base register. The
+ consecutive memory locations start at this address, and the address just above
+ the last of those locations can optionally be written back to the base
+ register.
+
+ The lowest-numbered register is loaded from the lowest memory address, through
+ to the highest-numbered register from the highest memory address. See also
+ Encoding of lists of general-purpose registers and the PC.
+
+ Armv8.2 permits the deprecation of some Store Multiple ordering behaviors in
+ AArch32 state, for more information see ARMv8.2-LSMAOC. For details of related
+ system instructions see STM (User registers).
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16                               0
+          |     | | | | | |       |                               |
+  |. . . .|1 0 0|0|1|0|.|0|. . . .|. . . . . . . . . . . . . . . .|
+  |             | | | | | |       |
+  |             | | | | | `-Rn    `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ STM{IA}{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ STMEA{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ n = UInt(Rn);  registers = register_list;  wback = (W == '1');
+ if n == 15 || BitCount(registers) < 1 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+           11                                                      
+         12 |     8               0                                
+          | |     |               |                                
+   1 1 0 0|0|. . .|. . . . . . . .|                                
+          | |     |
+          | `-Rn  `-register_list
+          `-L
+  
+  
+ 
+.SS T1
+ 
+ STM{IA}{<c>}{<q>} <Rn>!, <registers>
+ 
+ STMEA{<c>}{<q>} <Rn>!, <registers>
+ 
+ n = UInt(Rn);  registers = '00000000':register_list;  wback = TRUE;
+ if BitCount(registers) < 1 then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                           0
+                |   | | | |       | | |                           |
+   1 1 1 0 1 0 0|0 1|0|.|0|. . . .|0|.|. . . . . . . . . . . . . .|
+                |     | | |       | | |
+                `-opc | | `-Rn    | | `-register_list
+                      | `-L       | `-M
+                      `-W         `-P
+  
+  
+ 
+.SS T2
+ 
+ STM{IA}{<c>}.W <Rn>{!}, <registers>
+ 
+ STMEA{<c>}.W <Rn>{!}, <registers>
+ 
+ STM{IA}{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ STMEA{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ n = UInt(Rn);  registers = P:M:register_list;  wback = (W == '1');
+ if n == 15 || BitCount(registers) < 2 then UNPREDICTABLE;
+ if wback && registers<n> == '1' then UNPREDICTABLE;
+ if registers<13> == '1' then UNPREDICTABLE;
+ if registers<15> == '1' then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n];
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == n && wback && i != LowestSetBit(registers) then
+                 MemA[address,4] = bits(32) UNKNOWN;  // Only possible for encodings T1 and A1
+             else
+                 MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then  // Only possible for encoding A1
+         MemA[address,4] = PCStoreValue();
+     if wback then R[n] = R[n] + 4*BitCount(registers);
+ 
+
+.SS Assembler Symbols
+
+ IA
+  Is an optional suffix for the Increment After form.
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+ <registers>
+  For encoding A1: is a list of one or more registers to be stored, separated by
+  commas and surrounded by { and }.           The PC can be in the list.
+  However, Arm deprecates the use of instructions that include the PC in the
+  list.           If base register writeback is specified, and the base register
+  is not the lowest-numbered register in the list, such an instruction stores an
+  unknown value for the base register.
+
+ <registers>
+  Encoded in register_list
+  For encoding T1: is a list of one or more registers to be stored, separated by
+  commas and surrounded by { and }. The registers in the list must be in the
+  range R0-R7, encoded in the "register_list" field. If the base register is not
+  the lowest-numbered register in the list, such an instruction stores an
+  unknown value for the base register.
+
+ <registers>
+  Encoded in register_list
+  For encoding T2: is a list of one or more registers to be stored, separated by
+  commas and surrounded by { and }.           The registers in the list must be
+  in the range R0-R12, encoded in the "register_list" field, and can optionally
+  contain the LR. If the LR is in the list, the "M" field is set to 1, otherwise
+  it defaults to 0.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n];
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == n && wback && i != LowestSetBit(registers) then
+                 MemA[address,4] = bits(32) UNKNOWN;  // Only possible for encodings T1 and A1
+             else
+                 MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then  // Only possible for encoding A1
+         MemA[address,4] = PCStoreValue();
+     if wback then R[n] = R[n] + 4*BitCount(registers);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

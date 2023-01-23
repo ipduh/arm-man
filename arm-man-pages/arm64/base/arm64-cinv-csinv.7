@@ -1,0 +1,86 @@
+.nh
+.TH "CINV -- A64" "7" " "  "alias" "general"
+.SS CINV
+ CINV is an alias of CSINV
+
+ Conditional Invert
+
+ Conditional Invert returns, in the destination register, the bitwise inversion
+ of the value of the source register if the condition is TRUE, and otherwise
+ returns the value of the source register.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                    10                    
+     30 |                                  11 |                    
+   31 | |              21        16      12 | |         5         0
+    | | |               |         |       | | |         |         |
+  |.|1|0|1 1 0 1 0 1 0 0|. . . . .|. . . .|0|0|. . . . .|. . . . .|
+  | | |                 |         |         | |         |
+  | | `-S               |         |         | |         `-Rd
+  | `-op                |         |         | `-Rn(!= 11111)
+  `-sf                  |         |         `-o2
+                        |         `-cond(!= 111x)
+                        `-Rm(!= 11111)
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CINV  <Wd>, <Wn>, <cond>
+ 
+ CSINV <Wd>, <Wn>, <Wn>, invert(<cond>)
+.SS 64-bit(sf == 1)
+ 
+ CINV  <Xd>, <Xn>, <cond>
+ 
+ CSINV <Xd>, <Xn>, <Xn>, invert(<cond>)
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rm:Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rm:Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <cond>
+  Encoded in cond
+  Is one of the standard conditions, excluding AL and NV, encoded in the "cond"
+  field with its least significant bit inverted.
+
+
+
+.SS Operation
+
+ The manual of CSINV gives pseudocode for CINV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,164 @@
+.nh
+.TH "SMLALBB, SMLALBT, SMLALTB, SMLALTT -- AArch32" "7" " "  "instruction" "general"
+.SS SMLALBB, SMLALBT, SMLALTB, SMLALTT
+ Signed Multiply Accumulate Long (halfwords)
+
+ Signed Multiply Accumulate Long (halfwords) multiplies two signed 16-bit values
+ to produce a 32-bit value, and accumulates this with a 64-bit value. The
+ multiply acts on two signed 16-bit quantities, taken from either the bottom or
+ the top half of their respective source registers. The other halves of these
+ source registers are ignored. The 32-bit product is sign-extended and
+ accumulated with a 64-bit accumulate value.
+
+ Overflow is possible during this instruction, but only as a result of the
+ 64-bit addition. This overflow is not detected if it occurs. Instead, the
+ result wraps around modulo 264.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |      16      12       8 7 6 5 4       0
+          |         |   | |       |       |       | | | | |       |
+  |. . . .|0 0 0 1 0|1 0|0|. . . .|. . . .|. . . .|1|.|.|0|. . . .|
+  |                 |     |       |       |         | |   |
+  `-cond(!= 1111)   `-opc `-RdHi  `-RdLo  `-Rm      | `-N `-Rn
+                                                    `-M
+  
+  
+ 
+.SS SMLALBB(M == 0 && N == 0)
+ 
+ SMLALBB{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALBT(M == 1 && N == 0)
+ 
+ SMLALBT{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALTB(M == 0 && N == 1)
+ 
+ SMLALTB{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALTT(M == 1 && N == 1)
+ 
+ SMLALTT{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);
+ n_high = (N == '1');  m_high = (M == '1');
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ if dHi == dLo then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                   08    05      01      12       8   6 5 4       0
+                    |     |       |       |       |   | | |       |
+   1 1 1 1 1 0 1 1 1|1 0 0|. . . .|. . . .|. . . .|1 0|.|.|. . . .|
+                    |     |       |       |           | | |
+                    `-op1 `-Rn    `-RdLo  `-RdHi      | | `-Rm
+                                                      | `-M
+                                                      `-N
+  
+  
+ 
+.SS SMLALBB(N == 0 && M == 0)
+ 
+ SMLALBB{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALBT(N == 0 && M == 1)
+ 
+ SMLALBT{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALTB(N == 1 && M == 0)
+ 
+ SMLALTB{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLALTT(N == 1 && M == 1)
+ 
+ SMLALTT{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);
+ n_high = (N == '1');  m_high = (M == '1');
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+ if dHi == dLo then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand1 = if n_high then R[n]<31:16> else R[n]<15:0>;
+     operand2 = if m_high then R[m]<31:16> else R[m]<15:0>;
+     result = SInt(operand1) * SInt(operand2) + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <RdLo>
+  Encoded in RdLo
+  Is the general-purpose source register holding the lower 32 bits of the
+  addend, and the destination register for the lower 32 bits of the result,
+  encoded in the "RdLo" field.
+
+ <RdHi>
+  Encoded in RdHi
+  Is the general-purpose source register holding the upper 32 bits of the
+  addend, and the destination register for the upper 32 bits of the result,
+  encoded in the "RdHi" field.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the first general-purpose source register holding the
+  multiplicand in the bottom or top half (selected by <x>), encoded in the "Rn"
+  field.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the first general-purpose source register holding the
+  multiplicand in the bottom or top half (selected by <x>), encoded in the "Rn"
+  field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the second general-purpose source register holding the
+  multiplier in the bottom or top half (selected by <y>), encoded in the "Rm"
+  field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T1: is the second general-purpose source register holding the
+  multiplier in the bottom or top half (selected by <x>), encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand1 = if n_high then R[n]<31:16> else R[n]<15:0>;
+     operand2 = if m_high then R[m]<31:16> else R[m]<15:0>;
+     result = SInt(operand1) * SInt(operand2) + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

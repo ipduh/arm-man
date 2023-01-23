@@ -1,0 +1,81 @@
+.nh
+.TH "DCPS3 -- A64" "7" " "  "instruction" "system"
+.SS DCPS3
+ Debug Change PE State to EL3
+
+ Debug Change PE State to EL3, when executed in Debug state:
+
+
+ The target exception level of a DCPS3 instruction is EL3.
+
+ On executing a DCPS3 instruction:
+
+ ELR_EL3 becomes unknown.
+
+ ELR_EL3 becomes unknown.
+
+ SPSR_EL3 becomes unknown.
+
+ SPSR_EL3 becomes unknown.
+
+ ESR_EL3 becomes unknown.
+
+ ESR_EL3 becomes unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ The endianness is set according to SCTLR_EL3. EE.
+
+
+ This instruction is undefined at all exception levels if either:
+
+ EDSCR. SDD == 1.
+
+
+ This instruction is always undefined in Non-debug state.
+
+ For more information on the operation of the DCPSn instructions, see DCPS.
+
+
+
+.SS System - A64 - DCPS3_DC_exception
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24    21                               5     2   0
+                  |     |                               |     |   |
+   1 1 0 1 0 1 0 0|1 0 1|. . . . . . . . . . . . . . . .|0 0 0|1 1|
+                  |     |                               |     |
+                  `-opc `-imm16                         `-op2 `-LL
+  
+  
+ 
+.SS System
+ 
+ DCPS3  {#<imm>}
+ 
+ bits(2) target_level = LL;
+ if LL == '00' then UNDEFINED;
+ if !Halted() then UNDEFINED;
+ 
+ DCPSInstruction(target_level);
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in imm16
+  Is an optional 16-bit unsigned immediate, in the range 0 to 65535, defaulting
+  to 0 and encoded in the "imm16" field.
+
+
+
+.SS Operation
+
+ DCPSInstruction(target_level);
+

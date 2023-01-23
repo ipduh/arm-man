@@ -1,0 +1,125 @@
+.nh
+.TH "FRECPX -- A64" "7" " "  "instruction" "advsimd"
+.SS FRECPX
+ Floating-point Reciprocal exponent (scalar)
+
+ Floating-point Reciprocal exponent (scalar). This instruction finds an
+ approximate reciprocal exponent for each vector element in the source SIMD&FP
+ register, places the result in a vector, and writes the vector to the
+ destination SIMD&FP register.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR or a
+ synchronous exception being generated. For more information, see Floating-point
+ exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Half-precision and Single-precision and double-precision
+
+.SS Half-precision - A64 - FRECPX_asisdmiscfp16_R
+ 
+                                                                   
+                                                                   
+       29          23                                              
+     30 |        24 |          17        12  10         5         0
+      | |         | |           |         |   |         |         |
+   0 1|0|1 1 1 1 0|1|1 1 1 1 0 0|1 1 1 1 1|1 0|. . . . .|. . . . .|
+      |           |             |             |         |
+      `-U         `-a           `-opcode      `-Rn      `-Rd
+  
+  
+ 
+.SS Half-precision
+ 
+ FRECPX  <Hd>, <Hn>
+ 
+ if !HaveFP16Ext() then UNDEFINED;           
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer esize = 16;
+ integer datasize = esize;
+ integer elements = 1;
+.SS Single-precision and double-precision - A64 - FRECPX_asisdmisc_R
+ 
+                                                                   
+                     22                                            
+       29          23 |                                            
+     30 |        24 | |        17        12  10         5         0
+      | |         | | |         |         |   |         |         |
+   0 1|0|1 1 1 1 0|1|.|1 0 0 0 0|1 1 1 1 1|1 0|. . . . .|. . . . .|
+      |             |           |             |         |
+      `-U           `-sz        `-opcode      `-Rn      `-Rd
+  
+  
+ 
+.SS Single-precision and double-precision
+ 
+ FRECPX  <V><d>, <V><n>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer esize = 32 << UInt(sz);
+ integer datasize = esize;
+ integer elements = 1;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ bits(esize) element;
+ 
+ for e = 0 to elements-1
+     element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPRecpX(element, FPCR);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <V>
+  Encoded in sz
+  Is a width specifier,
+
+  sz <V> 
+  0  S   
+  1  D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ bits(esize) element;
+ 
+ for e = 0 to elements-1
+     element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPRecpX(element, FPCR);
+ 
+ V[d] = result;
+

@@ -1,0 +1,126 @@
+.nh
+.TH "STM (User registers) -- AArch32" "7" " "  "instruction" "general"
+.SS STM (User registers)
+ Store Multiple (User registers)
+
+ In an EL1 mode other than System mode, Store Multiple (User registers) stores
+ multiple User mode registers to consecutive memory locations using an address
+ from a base register. The PE reads the base register value normally, using the
+ current mode to determine the correct Banked version of the register. This
+ instruction cannot writeback to the base register.
+
+ Store Multiple (User registers) is undefined in Hyp mode, and constrained
+ unpredictable in User or System modes.
+
+ Armv8.2 permits the deprecation of some Store Multiple ordering behaviors in
+ AArch32 state, for more information see ARMv8.2-LSMAOC.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16                               0
+          |     | | | | | |       |                               |
+  |. . . .|1 0 0|.|.|1|0|0|. . . .|. . . . . . . . . . . . . . . .|
+  |             | | | | | |       |
+  |             | | | | | `-Rn    `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ STM{<amode>}{<c>}{<q>} <Rn>, <registers>^
+ 
+ n = UInt(Rn);  registers = register_list;  increment = (U == '1');  wordhigher = (P == U);
+ if n == 15 || BitCount(registers) < 1 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.M IN {M32_User,M32_System} then
+         UNPREDICTABLE;
+     else
+         length = 4*BitCount(registers);
+         address = if increment then R[n] else R[n]-length;
+         if wordhigher then address = address+4;
+         for i = 0 to 14
+             if registers<i> == '1' then  // Store User mode register
+                 MemA[address,4] = Rmode[i, M32_User];
+                 address = address + 4;
+         if registers<15> == '1' then
+             MemA[address,4] = PCStoreValue();
+ 
+
+.SS Assembler Symbols
+
+ <amode>
+  is one of:                                       DADecrement After. The
+  consecutive memory addresses end at the address in the base register. Encoded
+  as P = 0, U = 0.                                         EDEmpty Descending.
+  For this instruction, a synonym for DA.
+  DBDecrement Before. The consecutive memory addresses end one word below the
+  address in the base register. Encoded as P = 1, U = 0.
+  FDFull Descending. For this instruction, a synonym for DB.
+  IAIncrement After. The consecutive memory addresses start at the address in
+  the base register. This is the default. Encoded as P = 0, U = 1.
+  EAEmpty Ascending. For this instruction, a synonym for IA.
+  IBIncrement Before. The consecutive memory addresses start one word above the
+  address in the base register. Encoded as P = 1, U = 1.
+  FAFull Ascending. For this instruction, a synonym for IB.
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ <registers>
+  Is a list of one or more registers, separated by commas and surrounded by {
+  and }. It specifies the set of registers to be stored by the STM instruction.
+  The registers are stored with the lowest-numbered register to the lowest
+  memory address, through to the highest-numbered register to the highest memory
+  address. See also Encoding of lists of general-purpose registers and the PC.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.M IN {M32_User,M32_System} then
+         UNPREDICTABLE;
+     else
+         length = 4*BitCount(registers);
+         address = if increment then R[n] else R[n]-length;
+         if wordhigher then address = address+4;
+         for i = 0 to 14
+             if registers<i> == '1' then  // Store User mode register
+                 MemA[address,4] = Rmode[i, M32_User];
+                 address = address + 4;
+         if registers<15> == '1' then
+             MemA[address,4] = PCStoreValue();
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

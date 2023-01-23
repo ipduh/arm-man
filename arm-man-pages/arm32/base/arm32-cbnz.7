@@ -1,0 +1,65 @@
+.nh
+.TH "CBNZ, CBZ -- AArch32" "7" " "  "instruction" "general"
+.SS CBNZ, CBZ
+ Compare and Branch on Nonzero or Zero
+
+ Compare and Branch on Nonzero and Compare and Branch on Zero compare the value
+ in a register with zero, and conditionally branch forward a constant value.
+ They do not affect the condition flags.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS T1 - T32
+ 
+                9                                                  
+             10 |                                                  
+           11 | |                                                  
+         12 | | | 8         3     0                                
+          | | | | |         |     |                                
+   1 0 1 1|.|0|.|1|. . . . .|. . .|                                
+          |   |   |         |
+          |   `-i `-imm5    `-Rn
+          `-op
+  
+  
+ 
+.SS CBNZ(op == 1)
+ 
+ CBNZ{<q>} <Rn>, <label>
+.SS CBZ(op == 0)
+ 
+ CBZ{<q>} <Rn>, <label>
+ 
+ n = UInt(Rn);  imm32 = ZeroExtend(i:imm5:'0', 32);  nonzero = (op == '1');
+ if InITBlock() then UNPREDICTABLE;
+ 
+ EncodingSpecificOperations();
+ if nonzero != IsZero(R[n]) then
+     BranchWritePC(PC + imm32, BranchType_DIR);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose register to be tested, encoded in the "Rn" field.
+
+ <label>
+  Encoded in i:imm5
+  Is the program label to be conditionally branched to. Its offset from the PC,
+  a multiple of 2 and in the range 0 to 126, is encoded as "i:imm5" times 2.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ if nonzero != IsZero(R[n]) then
+     BranchWritePC(PC + imm32, BranchType_DIR);
+

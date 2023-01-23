@@ -1,0 +1,135 @@
+.nh
+.TH "VRINTX (floating-point) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VRINTX (floating-point)
+ Round floating-point to integer inexact
+
+ Round floating-point to integer inexact rounds a floating-point value to an
+ integral floating-point value of the same size, using the rounding mode
+ specified in the FPSCR, and raises an Inexact exception when the result value
+ is not numerically equal to the input value. A zero input gives a zero result
+ with the same sign, an infinite input gives an infinite result with the same
+ sign, and a NaN is propagated as for normal arithmetic.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|1 1 1|. . . .|1 0|. .|0|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VRINTX{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VRINTX{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VRINTX{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ exact = TRUE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|1 1 1|. . . .|1 0|. .|0|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VRINTX{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VRINTX{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VRINTX{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ exact = TRUE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+     rounding = FPRoundingMode(FPSCR);
+     case esize of
+         when 16
+             S[d] = Zeros(16) : FPRoundInt(S[m]<15:0>, FPSCR, rounding, exact);
+         when 32
+             S[d] = FPRoundInt(S[m], FPSCR, rounding, exact);
+         when 64
+             D[d] = FPRoundInt(D[m], FPSCR, rounding, exact);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+     rounding = FPRoundingMode(FPSCR);
+     case esize of
+         when 16
+             S[d] = Zeros(16) : FPRoundInt(S[m]<15:0>, FPSCR, rounding, exact);
+         when 32
+             S[d] = FPRoundInt(S[m], FPSCR, rounding, exact);
+         when 64
+             D[d] = FPRoundInt(D[m], FPSCR, rounding, exact);
+

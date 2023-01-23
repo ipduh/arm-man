@@ -1,0 +1,77 @@
+.nh
+.TH "SXTB -- A64" "7" " "  "alias" "general"
+.SS SXTB
+ SXTB is an alias of SBFM
+
+ Signed Extend Byte
+
+ Signed Extend Byte extracts an 8-bit value from a register, sign-extends it to
+ the size of the register, and writes the result to the destination register.
+
+
+
+.SS With sign replication to left and zeros to right - A64 - signed_fill
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |.|0 0|1 0 0 1 1 0|.|0 0 0 0 0 0|0 0 0 1 1 1|. . . . .|. . . . .|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      `-imms      `-Rn      `-Rd
+  `-sf              `-N
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0)
+ 
+ SXTB  <Wd>, <Wn>
+ 
+ SBFM <Wd>, <Wn>, #0, #7
+.SS 64-bit(sf == 1 && N == 1)
+ 
+ SXTB  <Xd>, <Wn>
+ 
+ SBFM <Xd>, <Xn>, #0, #7
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SBFM gives pseudocode for SXTB.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,174 @@
+.nh
+.TH "VMULL (integer and polynomial) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMULL (integer and polynomial)
+ Vector Multiply Long (integer and polynomial)
+
+ Vector Multiply Long multiplies corresponding elements in two vectors. The
+ destination vector elements are twice as long as the elements that are
+ multiplied.
+
+ For information about multiplying polynomials see Polynomial arithmetic over
+ {0, 1}.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+ Related encodings: See Advanced SIMD data-processing for the T32 instruction
+ set, or Advanced SIMD data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12  10 9 8 7 6 5 4       0
+                | | | |   |       |       |   | | | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. .|. . . .|. . . .|1 1|.|0|.|0|.|0|. . . .|
+                |   | |   |       |           |   |   |   |
+                `-U | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS A1
+ 
+ VMULL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ unsigned = (U == '1'); polynomial = (op == '1'); long_destination = TRUE;
+ esize = 8 << UInt(size); elements = 64 DIV esize;
+ if polynomial then
+     if U == '1' || size == '01' then UNDEFINED;
+     if size == '10' then    // .p64
+         if !HaveBit128PMULLExt() then UNDEFINED;
+         esize = 64; elements = 1;
+ if Vd<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm); regs = 1;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12  10 9 8 7 6 5 4       0
+        | |         | |   |       |       |   | | | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. .|. . . .|. . . .|1 1|.|0|.|0|.|0|. . . .|
+        |           | |   |       |           |   |   |   |
+        `-U         | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS T1
+ 
+ VMULL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ unsigned = (U == '1'); polynomial = (op == '1'); long_destination = TRUE;
+ esize = 8 << UInt(size); elements = 64 DIV esize;
+ if polynomial then
+     if U == '1' || size == '01' then UNDEFINED;
+     if size == '10' then    // .p64
+         if InITBlock() then UNPREDICTABLE;
+         if !HaveBit128PMULLExt() then UNDEFINED;
+         esize = 64; elements = 1;
+ if Vd<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm); regs = 1;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[Din[n+r],e,esize];  op1val = Int(op1, unsigned);
+             op2 = Elem[Din[m+r],e,esize];  op2val = Int(op2, unsigned);
+             if polynomial then
+                 product = PolynomialMult(op1,op2);
+             else
+                 product = (op1val*op2val)<2*esize-1:0>;
+             if long_destination then
+                 Elem[Q[d>>1],e,2*esize] = product;
+             else
+                 Elem[D[d+r],e,esize] = product<esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in op:U:size
+  Is the data type for the elements of the operands,
+
+  op U size <dt> 
+  0  0 00   S8   
+  0  0 01   S16  
+  0  0 10   S32  
+  0  1 00   U8   
+  0  1 01   U16  
+  0  1 10   U32  
+  1  0 00   P8   
+  1  0 10   P64  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[Din[n+r],e,esize];  op1val = Int(op1, unsigned);
+             op2 = Elem[Din[m+r],e,esize];  op2val = Int(op2, unsigned);
+             if polynomial then
+                 product = PolynomialMult(op1,op2);
+             else
+                 product = (op1val*op2val)<2*esize-1:0>;
+             if long_destination then
+                 Elem[Q[d>>1],e,2*esize] = product;
+             else
+                 Elem[D[d+r],e,esize] = product<esize-1:0>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

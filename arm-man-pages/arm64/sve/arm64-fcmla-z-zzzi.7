@@ -1,0 +1,198 @@
+.nh
+.TH "FCMLA (indexed)" "7" " "  "instruction" "sve"
+.SS FCMLA (indexed)
+ Floating-point complex multiply-add by indexed values with rotate
+
+ Multiply the duplicated real components for rotations 0 and 180, or imaginary
+ components for rotations 90 and 270, of the floating-point complex numbers in
+ each 128-bit segment of the first source vector by the specified complex number
+ in the corresponding the second source vector segment rotated by 0, 90, 180 or
+ 270 degrees in the direction from the positive real axis towards the positive
+ imaginary axis, when considered in polar representation.
+
+ Then destructively add the products to the corresponding components of the
+ complex numbers in the addend and destination vector, without intermediate
+ rounding.
+
+ These transformations permit the creation of a variety of multiply-add and
+ multiply-subtract operations on complex numbers by combining two of these
+ instructions with the same vector operands but with rotations that are 90
+ degrees apart.
+
+ Each complex number is represented in a vector register as an even/odd pair of
+ elements with the real part in the even-numbered element and the imaginary part
+ in the odd-numbered element.
+
+ The complex numbers within the second source vector are specified using an
+ immediate index which selects the same complex number position within each
+ 128-bit vector segment. The index range is from 0 to one less than the number
+ of complex numbers per 128-bit segment, encoded in 1 to 2 bits depending on the
+ size of the complex number. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Half-precision and Single-precision
+
+.SS Half-precision - A64 - fcmla_z_zzzi_h
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |  19    16      12  10         5         0
+                  | | | |   |     |       |   |         |         |
+   0 1 1 0 0 1 0 0|1|0|1|. .|. . .|0 0 0 1|. .|. . . . .|. . . . .|
+                  | |   |   |             |   |         |
+                  | |   |   `-Zm          |   `-Zn      `-Zda
+                  | |   `-i2              `-rot
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Half-precision
+ 
+ FCMLA   <Zda>.H, <Zn>.H, <Zm>.H[<imm>], <const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer index = UInt(i2);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ integer sel_a = UInt(rot<0>);
+ integer sel_b = UInt(NOT(rot<0>));
+ boolean neg_i = (rot<1> == '1');
+ boolean neg_r = (rot<0> != rot<1>);
+.SS Single-precision - A64 - fcmla_z_zzzi_s
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |20      16      12  10         5         0
+                  | | | | |       |       |   |         |         |
+   0 1 1 0 0 1 0 0|1|1|1|.|. . . .|0 0 0 1|. .|. . . . .|. . . . .|
+                  | |   | |               |   |         |
+                  | |   | `-Zm            |   `-Zn      `-Zda
+                  | |   `-i1              `-rot
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Single-precision
+ 
+ FCMLA   <Zda>.S, <Zn>.S, <Zm>.S[<imm>], <const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer index = UInt(i1);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ integer sel_a = UInt(rot<0>);
+ integer sel_b = UInt(NOT(rot<0>));
+ boolean neg_i = (rot<1> == '1');
+ boolean neg_r = (rot<0> != rot<1>);
+ 
+ CheckSVEEnabled();
+ integer pairs = VL DIV (2 * esize);
+ integer pairspersegment = 128 DIV (2 * esize);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for p = 0 to pairs-1
+     segmentbase = p - p MOD pairspersegment;
+     s = segmentbase + index;
+     addend_r = Elem[operand3, 2 * p + 0, esize];
+     addend_i = Elem[operand3, 2 * p + 1, esize];
+     elt1_a   = Elem[operand1, 2 * p + sel_a, esize];
+     elt2_a   = Elem[operand2, 2 * s + sel_a, esize];
+     elt2_b   = Elem[operand2, 2 * s + sel_b, esize];
+     if neg_r then elt2_a = FPNeg(elt2_a);
+     if neg_i then elt2_b = FPNeg(elt2_b);
+     addend_r = FPMulAdd(addend_r, elt1_a, elt2_a, FPCR);
+     addend_i = FPMulAdd(addend_i, elt1_a, elt2_b, FPCR);
+     Elem[result, 2 * p + 0, esize] = addend_r;
+     Elem[result, 2 * p + 1, esize] = addend_i;
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  For the half-precision variant: is the name of the second source scalable
+  vector register Z0-Z7, encoded in the "Zm" field.
+
+ <Zm>
+  Encoded in Zm
+  For the single-precision variant: is the name of the second source scalable
+  vector register Z0-Z15, encoded in the "Zm" field.
+
+ <imm>
+  Encoded in i2
+  For the half-precision variant: is the index of a Real and Imaginary pair, in
+  the range 0 to 3, encoded in the "i2" field.
+
+ <imm>
+  Encoded in i1
+  For the single-precision variant: is the index of a Real and Imaginary pair,
+  in the range 0 to 1, encoded in the "i1" field.
+
+ <const>
+  Encoded in rot
+  Is the const specifier,
+
+  rot <const> 
+  00  #0      
+  01  #90     
+  10  #180    
+  11  #270    
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer pairs = VL DIV (2 * esize);
+ integer pairspersegment = 128 DIV (2 * esize);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for p = 0 to pairs-1
+     segmentbase = p - p MOD pairspersegment;
+     s = segmentbase + index;
+     addend_r = Elem[operand3, 2 * p + 0, esize];
+     addend_i = Elem[operand3, 2 * p + 1, esize];
+     elt1_a   = Elem[operand1, 2 * p + sel_a, esize];
+     elt2_a   = Elem[operand2, 2 * s + sel_a, esize];
+     elt2_b   = Elem[operand2, 2 * s + sel_b, esize];
+     if neg_r then elt2_a = FPNeg(elt2_a);
+     if neg_i then elt2_b = FPNeg(elt2_b);
+     addend_r = FPMulAdd(addend_r, elt1_a, elt2_a, FPCR);
+     addend_i = FPMulAdd(addend_i, elt1_a, elt2_b, FPCR);
+     Elem[result, 2 * p + 0, esize] = addend_r;
+     Elem[result, 2 * p + 1, esize] = addend_i;
+ 
+ Z[da] = result;
+

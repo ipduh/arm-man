@@ -1,0 +1,197 @@
+.nh
+.TH "VSELEQ, VSELGE, VSELGT, VSELVS -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VSELEQ, VSELGE, VSELGT, VSELVS
+ Floating-point conditional select
+
+ Floating-point conditional select allows the destination register to take the
+ value in either one or the other source register according to the condition
+ codes in the APSR.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+                   23 |  20      16      12  10   8 7 6 5 4       0
+                    | |   |       |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 0|.|. .|. . . .|. . . .|1 0|. .|.|0|.|0|. . . .|
+                    | |   |       |           |   |   |   |
+                    | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-cc                    `-size(!= 00)
+                    `-D
+  
+  
+ 
+.SS VSELEQ,doubleprec(cc == 00 && size == 11)
+ 
+ VSELEQ.F64 <Dd>, <Dn>, <Dm>
+.SS VSELEQ,halfprec(cc == 00 && size == 01)
+ 
+ VSELEQ.F16 <Sd>, <Sn>, <Sm>
+.SS VSELEQ,singleprec(cc == 00 && size == 10)
+ 
+ VSELEQ.F32 <Sd>, <Sn>, <Sm>
+.SS VSELGE,doubleprec(cc == 10 && size == 11)
+ 
+ VSELGE.F64 <Dd>, <Dn>, <Dm>
+.SS VSELGE,halfprec(cc == 10 && size == 01)
+ 
+ VSELGE.F16 <Sd>, <Sn>, <Sm>
+.SS VSELGE,singleprec(cc == 10 && size == 10)
+ 
+ VSELGE.F32 <Sd>, <Sn>, <Sm>
+.SS VSELGT,doubleprec(cc == 11 && size == 11)
+ 
+ VSELGT.F64 <Dd>, <Dn>, <Dm>
+.SS VSELGT,halfprec(cc == 11 && size == 01)
+ 
+ VSELGT.F16 <Sd>, <Sn>, <Sm>
+.SS VSELGT,singleprec(cc == 11 && size == 10)
+ 
+ VSELGT.F32 <Sd>, <Sn>, <Sm>
+.SS VSELVS,doubleprec(cc == 01 && size == 11)
+ 
+ VSELVS.F64 <Dd>, <Dn>, <Dm>
+.SS VSELVS,halfprec(cc == 01 && size == 01)
+ 
+ VSELVS.F16 <Sd>, <Sn>, <Sm>
+.SS VSELVS,singleprec(cc == 01 && size == 10)
+ 
+ VSELVS.F32 <Sd>, <Sn>, <Sm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ cond = cc:(cc<1> EOR cc<0>):'0';
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                                            
+                   08 |  05      01      12  10   8 7 6 5 4       0
+                    | |   |       |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 0|.|. .|. . . .|. . . .|1 0|. .|.|0|.|0|. . . .|
+                    | |   |       |           |   |   |   |
+                    | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-cc                    `-size(!= 00)
+                    `-D
+  
+  
+ 
+.SS VSELEQ,doubleprec(cc == 00 && size == 11)
+ 
+ VSELEQ.F64 <Dd>, <Dn>, <Dm>
+.SS VSELEQ,halfprec(cc == 00 && size == 01)
+ 
+ VSELEQ.F16 <Sd>, <Sn>, <Sm>
+.SS VSELEQ,singleprec(cc == 00 && size == 10)
+ 
+ VSELEQ.F32 <Sd>, <Sn>, <Sm>
+.SS VSELGE,doubleprec(cc == 10 && size == 11)
+ 
+ VSELGE.F64 <Dd>, <Dn>, <Dm>
+.SS VSELGE,halfprec(cc == 10 && size == 01)
+ 
+ VSELGE.F16 <Sd>, <Sn>, <Sm>
+.SS VSELGE,singleprec(cc == 10 && size == 10)
+ 
+ VSELGE.F32 <Sd>, <Sn>, <Sm>
+.SS VSELGT,doubleprec(cc == 11 && size == 11)
+ 
+ VSELGT.F64 <Dd>, <Dn>, <Dm>
+.SS VSELGT,halfprec(cc == 11 && size == 01)
+ 
+ VSELGT.F16 <Sd>, <Sn>, <Sm>
+.SS VSELGT,singleprec(cc == 11 && size == 10)
+ 
+ VSELGT.F32 <Sd>, <Sn>, <Sm>
+.SS VSELVS,doubleprec(cc == 01 && size == 11)
+ 
+ VSELVS.F64 <Dd>, <Dn>, <Dm>
+.SS VSELVS,halfprec(cc == 01 && size == 01)
+ 
+ VSELVS.F16 <Sd>, <Sn>, <Sm>
+.SS VSELVS,singleprec(cc == 01 && size == 10)
+ 
+ VSELVS.F32 <Sd>, <Sn>, <Sm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ cond = cc:(cc<1> EOR cc<0>):'0';
+ 
+ EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+ case esize of
+     when 16
+         S[d] = Zeros(16) : (if ConditionHolds(cond) then S[n] else S[m])<15:0>;
+     when 32
+         S[d] = if ConditionHolds(cond) then S[n] else S[m];
+     when 64
+         D[d] = if ConditionHolds(cond) then D[n] else D[m];
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sn>
+  Encoded in Vn:N
+  Is the 32-bit name of the first SIMD&FP source register, encoded in the "Vn:N"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the
+  "Vm:M" field.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+ case esize of
+     when 16
+         S[d] = Zeros(16) : (if ConditionHolds(cond) then S[n] else S[m])<15:0>;
+     when 32
+         S[d] = if ConditionHolds(cond) then S[n] else S[m];
+     when 64
+         D[d] = if ConditionHolds(cond) then D[n] else D[m];
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

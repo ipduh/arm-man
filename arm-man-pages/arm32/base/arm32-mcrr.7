@@ -1,0 +1,123 @@
+.nh
+.TH "MCRR -- AArch32" "7" " "  "instruction" "general"
+.SS MCRR
+ Move to System register from two general-purpose registers
+
+ Move to System register from two general-purpose registers. This instruction
+ copies the values of two general-purpose registers to a System register.
+
+ The System register descriptions identify valid encodings for this instruction.
+ Other encodings are undefined. For more information see About the AArch32
+ System register interface and General behavior of System registers.
+
+ In an implementation that includes EL2, MCRR accesses to System registers can
+ be trapped to Hyp mode, meaning that an attempt to execute an MCRR instruction
+ in a Non-secure mode other than Hyp mode, that would be permitted in the
+ absence of the Hyp trap controls, generates a Hyp Trap exception.  For more
+ information, see EL2 configurable instruction enables, disables, and traps.
+
+ Because of the range of possible traps to Hyp mode, the MCRR pseudocode does
+ not show these possible traps.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+         28        23 | | |      16      12     9 8       4       0
+          |         | | | |       |       |     | |       |       |
+  |. . . .|1 1 0 0 0|1|0|0|. . . .|. . . .|1 1 1|.|. . . .|. . . .|
+  |                 |   | |       |       |     | |       |
+  `-cond(!= 1111)   `-D | `-Rt2   `-Rt    |     | `-opc1  `-CRm
+                        `-L               |     `-coproc<0>
+                                          `-coproc<3:1>
+  
+  
+ 
+.SS A1
+ 
+ MCRR{<c>}{<q>} <coproc>, {#}<opc1>, <Rt>, <Rt2>, <CRm>
+ 
+ t = UInt(Rt);  t2 = UInt(Rt2);  cp = if coproc<0> == '0' then 14 else 15;
+ if t == 15 || t2 == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12     9 8       4       0
+        | |         | | | |       |       |     | |       |       |
+   1 1 1|0|1 1 0 0 0|1|0|0|. . . .|. . . .|1 1 1|.|. . . .|. . . .|
+        |           |   | |       |       |     | |       |
+        `-o0        `-D | `-Rt2   `-Rt    |     | `-opc1  `-CRm
+                        `-L               |     `-coproc<0>
+                                          `-coproc<3:1>
+  
+  
+ 
+.SS T1
+ 
+ MCRR{<c>}{<q>} <coproc>, {#}<opc1>, <Rt>, <Rt2>, <CRm>
+ 
+ t = UInt(Rt);  t2 = UInt(Rt2);  cp = if coproc<0> == '0' then 14 else 15;
+ if t == 15 || t2 == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     value = R[t2]:R[t];
+     AArch32.SysRegWrite64(cp, ThisInstr(), value);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <coproc>
+  Encoded in coproc<0>
+  Is the System register encoding space,
+
+  coproc<0> <coproc> 
+  0         p14      
+  1         p15      
+
+ <opc1>
+  Encoded in opc1
+  Is the opc1 parameter within the System register encoding space, in the range
+  0 to 15, encoded in the "opc1" field.
+
+ <Rt>
+  Encoded in Rt
+  Is the first general-purpose register that is transferred into, encoded in the
+  "Rt" field.
+
+ <Rt2>
+  Encoded in Rt2
+  Is the second general-purpose register that is transferred into, encoded in
+  the "Rt2" field.
+
+ <CRm>
+  Encoded in CRm
+  Is the CRm parameter within the System register encoding space, in the range
+  c0 to c15, encoded in the "CRm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     value = R[t2]:R[t];
+     AArch32.SysRegWrite64(cp, ThisInstr(), value);
+

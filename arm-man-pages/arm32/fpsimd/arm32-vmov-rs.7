@@ -1,0 +1,126 @@
+.nh
+.TH "VMOV (general-purpose register to scalar) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOV (general-purpose register to scalar)
+ Copy a general-purpose register to a vector element
+
+ Copy a general-purpose register to a vector element copies a byte, halfword, or
+ word from a general-purpose register into an Advanced SIMD scalar.
+
+ On a Floating-point-only system, this instruction transfers one word to the
+ upper or lower half of a double-precision floating-point register from a
+ general-purpose register. This is an identical operation to the Advanced SIMD
+ single word transfer.
+
+ For more information about scalars see Advanced SIMD scalars.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                   23    20                                        
+         28      24 |  21 |      16      12       8 7   5 4 3 2 1 0
+          |       | |   | |       |       |       | |   | | | | | |
+  |. . . .|1 1 1 0|0|. .|0|. . . .|. . . .|1 0 1 1|.|. .|1|0|0|0|0|
+  |                 |   | |       |               | |
+  `-cond(!= 1111)   |   | `-Vd    `-Rt            | `-opc2
+                    |   `-L                       `-D
+                    `-opc1
+  
+  
+ 
+.SS A1
+ 
+ VMOV{<c>}{<q>}{.<size>} <Dd[x]>, <Rt>
+ 
+ case opc1:opc2 of
+     when '1xxx'  advsimd = TRUE;  esize = 8;  index = UInt(opc1<0>:opc2);
+     when '0xx1'  advsimd = TRUE;  esize = 16;  index = UInt(opc1<0>:opc2<1>);
+     when '0x00'  advsimd = FALSE;  esize = 32;  index = UInt(opc1<0>);
+     when '0x10'  UNDEFINED;
+ d = UInt(D:Vd);  t = UInt(Rt);
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                   08    05                                        
+                 09 |  06 |      01      12       8 7   5 4 3 2 1 0
+                  | |   | |       |       |       | |   | | | | | |
+   1 1 1 0 1 1 1 0|0|. .|0|. . . .|. . . .|1 0 1 1|.|. .|1|0|0|0|0|
+                    |   | |       |               | |
+                    |   | `-Vd    `-Rt            | `-opc2
+                    |   `-L                       `-D
+                    `-opc1
+  
+  
+ 
+.SS T1
+ 
+ VMOV{<c>}{<q>}{.<size>} <Dd[x]>, <Rt>
+ 
+ case opc1:opc2 of
+     when '1xxx'  advsimd = TRUE;  esize = 8;  index = UInt(opc1<0>:opc2);
+     when '0xx1'  advsimd = TRUE;  esize = 16;  index = UInt(opc1<0>:opc2<1>);
+     when '0x00'  advsimd = FALSE;  esize = 32;  index = UInt(opc1<0>);
+     when '0x10'  UNDEFINED;
+ d = UInt(D:Vd);  t = UInt(Rt);
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     Elem[D[d],index,esize] = R[t]<esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  The data size. It must be one of:
+  8Encoded as opc1<1> = 1. [x] is encoded in opc1<0>, opc2.
+  16Encoded as opc1<1> = 0, opc2<0> = 1. [x] is encoded in opc1<0>, opc2<1>.
+  32Encoded as opc1<1> = 0, opc2 = 0b00. [x] is encoded in opc1<0>.
+  omittedEquivalent to 32.
+
+ <Dd[x]>
+  The scalar. The register <Dd> is encoded in D:Vd. For details of how [x] is
+  encoded, see the description of <size>.
+
+ <Rt>
+  The source general-purpose register.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     Elem[D[d],index,esize] = R[t]<esize-1:0>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,144 @@
+.nh
+.TH "VFMAB, VFMAT (BFloat16, vector) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VFMAB, VFMAT (BFloat16, vector)
+ BFloat16 floating-point widening multiply-add long (vector)
+
+ The Bfloat16 floating-point widening multiply-add long instruction widens the
+ even-numbered (bottom) or odd-numbered (top) 16-bit elements in the first and
+ second source vectors from Bfloat16 to single-precision format. The instruction
+ then multiplies and adds these values to the overlapping single-precision
+ elements of the destination vector.
+
+ Unlike other BFloat16 multiplication instructions, this performs a fused
+ multiply-add, without intermediate rounding that uses the Round to Nearest
+ rounding mode and can generate a floating-point exception that causes
+ cumulative exception bits in the FPSCR to be set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                     22                    11 |                    
+               25  23 |  20      16      12 | | 9 8 7 6 5 4       0
+                |   | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 0|0 0|.|1 1|. . . .|. . . .|1|0|0|0|.|.|.|1|. . . .|
+                |   | |   |       |         |   | | | | | |
+                |   | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                |   | `-op2                 |   | | | | `-U
+                |   `-D                     |   | | | `-M
+                `-op1                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS A1
+ 
+ VFMA<bt>{<q>}.BF16 <Qd>, <Qn>, <Qm>
+ 
+ if !HaveAArch32BF16Ext() then UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer n = UInt(N:Vn);
+ integer m = UInt(M:Vm);
+ integer elements = 128 DIV 32;
+ integer sel = UInt(Q);
+.SS T1 - T32
+ 
+                                                                   
+                                             10                    
+                     07                    11 |                    
+               10  08 |  05      01      12 | | 9 8 7 6 5 4       0
+                |   | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 0|0 0|.|1 1|. . . .|. . . .|1|0|0|0|.|.|.|1|. . . .|
+                |   | |   |       |         |   | | | | | |
+                |   | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                |   | `-op2                 |   | | | | `-U
+                |   `-D                     |   | | | `-M
+                `-op1                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS T1
+ 
+ VFMA<bt>{<q>}.BF16 <Qd>, <Qn>, <Qm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveAArch32BF16Ext() then UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer n = UInt(N:Vn);
+ integer m = UInt(M:Vm);
+ integer elements = 128 DIV 32;
+ integer sel = UInt(Q);
+ 
+ CheckAdvSIMDEnabled();
+ bits(128) operand1 = Q[n>>1];
+ bits(128) operand2 = Q[m>>1];
+ bits(128) operand3 = Q[d>>1];
+ bits(128) result;
+ 
+ for e = 0 to elements-1
+     bits(32) element1 = Elem[operand1, 2 * e + sel, 16] : Zeros(16);
+     bits(32) element2 = Elem[operand2, 2 * e + sel, 16] : Zeros(16);
+     bits(32) addend = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(addend, element1, element2,
+                                    StandardFPSCRValue());
+ 
+ Q[d>>1] = result;
+ 
+
+.SS Assembler Symbols
+
+ <bt>
+  Encoded in T
+  Is the bottom or top element specifier,
+
+  T <bt> 
+  0 B    
+  1 T    
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+
+
+.SS Operation
+
+ CheckAdvSIMDEnabled();
+ bits(128) operand1 = Q[n>>1];
+ bits(128) operand2 = Q[m>>1];
+ bits(128) operand3 = Q[d>>1];
+ bits(128) result;
+ 
+ for e = 0 to elements-1
+     bits(32) element1 = Elem[operand1, 2 * e + sel, 16] : Zeros(16);
+     bits(32) element2 = Elem[operand2, 2 * e + sel, 16] : Zeros(16);
+     bits(32) addend = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(addend, element1, element2,
+                                    StandardFPSCRValue());
+ 
+ Q[d>>1] = result;
+

@@ -1,0 +1,181 @@
+.nh
+.TH "PLI (immediate, literal) -- AArch32" "7" " "  "instruction" "general"
+.SS PLI (immediate, literal)
+ Preload Instruction (immediate, literal)
+
+ Preload Instruction signals the memory system that instruction memory accesses
+ from a specified address are likely in the near future. The memory system can
+ respond by taking actions that are expected to speed up the memory accesses
+ when they do occur, such as pre-loading the cache line containing the specified
+ address into the instruction cache.
+
+ The effect of a PLI instruction is implementation defined. For more
+ information, see Preloading caches.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1, T2 and T3).
+
+.SS A1 - A32
+ 
+                     22                13                          
+                   23 |              14 |                          
+                 24 | |            15 | |                          
+               25 | | |  20      16 | | |12                       0
+                | | | |   |       | | | | |                       |
+   1 1 1 1 0 1 0|0|.|1|0 1|. . . .|1|1|1|1|. . . . . . . . . . . .|
+                | | |     |               |
+                | | `-R   `-Rn            `-imm12
+                | `-U
+                `-D
+  
+  
+ 
+.SS A1
+ 
+ PLI{<c>}{<q>} [<Rn> {, #{+/-}<imm>}]
+ 
+ PLI{<c>}{<q>} <label>
+ 
+ PLI{<c>}{<q>} [PC, #{+/-}<imm>]
+ 
+ n = UInt(Rn);  imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                   08  06 |      01      12                       0
+                    |   | |       |       |                       |
+   1 1 1 1 1 0 0 1 1|0 0|1|. . . .|1 1 1 1|. . . . . . . . . . . .|
+                    |     |       |       |
+                    |     |       `-Rt    `-imm12
+                    |     `-Rn(!= 1111)
+                    `-size
+  
+  
+ 
+.SS T1
+ 
+ PLI{<c>}{<q>} [<Rn> {, #{+}<imm>}]
+ 
+ if Rn == '1111' then SEE "encoding T3";
+ n = UInt(Rn);  imm32 = ZeroExtend(imm12, 32);  add = TRUE;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                   08  06 |      01      12       8               0
+                    |   | |       |       |       |               |
+   1 1 1 1 1 0 0 1 0|0 0|1|. . . .|1 1 1 1|1 1 0 0|. . . . . . . .|
+                    |     |       |               |
+                    |     |       `-Rt            `-imm8
+                    |     `-Rn(!= 1111)
+                    `-size
+  
+  
+ 
+.SS T2
+ 
+ PLI{<c>}{<q>} [<Rn> {, #-<imm>}]
+ 
+ if Rn == '1111' then SEE "encoding T3";
+ n = UInt(Rn);  imm32 = ZeroExtend(imm8, 32);  add = FALSE;
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+                   08                                              
+                 09 |  06        01      12                       0
+                  | |   |         |       |                       |
+   1 1 1 1 1 0 0 1|.|0 0|1 1 1 1 1|1 1 1 1|. . . . . . . . . . . .|
+                  | |             |       |
+                  | `-size        `-Rt    `-imm12
+                  `-U
+  
+  
+ 
+.SS T3
+ 
+ PLI{<c>}{<q>} <label>
+ 
+ PLI{<c>}{<q>} [PC, #{+/-}<imm>]
+ 
+ n = 15;  imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = if n == 15 then Align(PC,4) else R[n];
+     address = if add then (base + imm32) else (base - imm32);
+     Hint_PreloadInstr(address);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1, T2 and T3: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <label>
+  Encoded in imm12
+  The label of the instruction that is likely to be accessed in the near future.
+  The assembler calculates the required value of the offset from the Align(PC,
+  4) value of the instruction to this label. The offset must be in the range
+  –4095 to 4095.           If the offset is zero or positive, imm32 is equal to
+  the offset and add == TRUE.           If the offset is negative, imm32 is
+  equal to minus the offset and add == FALSE.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ +
+  Specifies the offset is added to the base register.
+
+ <imm>
+  Encoded in imm12
+  For encoding A1: is the optional 12-bit unsigned immediate byte offset, in the
+  range 0 to 4095, defaulting to 0 and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T1: is an optional 12-bit unsigned immediate byte offset, in the
+  range 0 to 4095, defaulting to 0 and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm8
+  For encoding T2: is an 8-bit unsigned immediate byte offset, in the range 0 to
+  255, defaulting to 0 if omitted, and encoded in the "imm8" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T3: is a 12-bit unsigned immediate byte offset, in the range 0 to
+  4095, encoded in the "imm12" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = if n == 15 then Align(PC,4) else R[n];
+     address = if add then (base + imm32) else (base - imm32);
+     Hint_PreloadInstr(address);
+

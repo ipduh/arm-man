@@ -1,0 +1,72 @@
+.nh
+.TH "BFMMLA -- A64" "7" " "  "instruction" "advsimd"
+.SS BFMMLA
+ BFloat16 floating-point matrix multiply-accumulate into 2x2 matrix
+
+ BFloat16 floating-point matrix multiply-accumulate into 2x2 matrix. This
+ instruction multiplies the 2x4 matrix of BF16 values held in the first 128-bit
+ source vector by the 4x2 BF16 matrix in the second 128-bit source vector. The
+ resulting 2x2 single-precision matrix product is then added destructively to
+ the 2x2 single-precision matrix in the 128-bit destination vector. This is
+ equivalent to performing a 4-way dot product per destination element. The
+ instruction ignores the FPCR and does not update the FPSR exception status.
+
+
+
+.SS Vector - A64 - BFMMLA_asimdsame2_E
+ 
+                                                                   
+       29                                                          
+     30 |              21          15        10                    
+   31 | |        24  22 |        16 |      11 |         5         0
+    | | |         |   | |         | |       | |         |         |
+   0|1|1|0 1 1 1 0|0 1|0|. . . . .|1|1 1 0 1|1|. . . . .|. . . . .|
+    | |           |     |           |         |         |
+    | `-U         |     `-Rm        `-opcode  `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ BFMMLA  <Vd>.4S, <Vn>.8H, <Vm>.8H
+ 
+ if !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Rd);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(128) op1 = V[n];
+ bits(128) op2 = V[m];
+ bits(128) acc = V[d];
+ 
+ V[d] = BFMatMulAdd(acc, op1, op2);
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP third source and destination register, encoded in
+  the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(128) op1 = V[n];
+ bits(128) op2 = V[m];
+ bits(128) acc = V[d];
+ 
+ V[d] = BFMatMulAdd(acc, op1, op2);
+

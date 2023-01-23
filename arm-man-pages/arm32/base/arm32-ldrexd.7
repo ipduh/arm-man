@@ -1,0 +1,122 @@
+.nh
+.TH "LDREXD -- AArch32" "7" " "  "instruction" "general"
+.SS LDREXD
+ Load Register Exclusive Doubleword
+
+ Load Register Exclusive Doubleword derives an address from a base register
+ value, loads a 64-bit doubleword from memory, writes it to two registers and:
+
+
+ For more information about support for shared memory see Synchronization and
+ semaphores. For information about memory accesses see Memory accesses.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                         20                11 |                    
+         28        23  21 |      16      12 | | 9 8       4       0
+          |         |   | |       |       | | | | |       |       |
+  |. . . .|0 0 0 1 1|0 1|1|. . . .|. . . .|1|1|1|1|1 0 0 1|1 1 1 1|
+  |                 |   | |       |           | |         |
+  `-cond(!= 1111)   |   | `-Rn    `-Rt        | `-ord     `-xRt
+                    |   `-L                   `-ex
+                    `-size
+  
+  
+ 
+.SS A1
+ 
+ LDREXD{<c>}{<q>} <Rt>, <Rt2>, [<Rn>]
+ 
+ t = UInt(Rt);  t2 = t + 1;  n = UInt(Rn);
+ if Rt<0> == '1' || t2 == 15 || n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                       06 |      01      12       8   6   4       0
+                        | |       |       |       |   |   |       |
+   1 1 1 0 1 0 0 0 1 1 0|1|. . . .|. . . .|. . . .|0 1|1 1|1 1 1 1|
+                        | |       |       |           |   |
+                        | `-Rn    `-Rt    `-Rt2       |   `-Rd
+                        `-L                           `-sz
+  
+  
+ 
+.SS T1
+ 
+ LDREXD{<c>}{<q>} <Rt>, <Rt2>, [<Rn>]
+ 
+ t = UInt(Rt);  t2 = UInt(Rt2);  n = UInt(Rn);
+ if t == 15 || t2 == 15 || t == t2 || n == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n];
+     AArch32.SetExclusiveMonitors(address,8);
+     value = MemA[address,8];
+     // Extract words from 64-bit loaded value such that R[t] is
+     // loaded from address and R[t2] from address+4.
+     R[t]  = if BigEndian() then value<63:32> else value<31:0>;
+     R[t2] = if BigEndian() then value<31:0> else value<63:32>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  For encoding A1: is the first general-purpose register to be transferred,
+  encoded in the "Rt" field. <Rt> must be even-numbered and not R14.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T1: is the first general-purpose register to be transferred,
+  encoded in the "Rt" field.
+
+ <Rt2>
+  For encoding A1: is the second general-purpose register to be transferred.
+  <Rt2> must be <R(t+1)>.
+
+ <Rt2>
+  Encoded in Rt2
+  For encoding T1: is the second general-purpose register to be transferred,
+  encoded in the "Rt2" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n];
+     AArch32.SetExclusiveMonitors(address,8);
+     value = MemA[address,8];
+     // Extract words from 64-bit loaded value such that R[t] is
+     // loaded from address and R[t2] from address+4.
+     R[t]  = if BigEndian() then value<63:32> else value<31:0>;
+     R[t2] = if BigEndian() then value<31:0> else value<63:32>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

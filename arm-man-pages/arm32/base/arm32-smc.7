@@ -1,0 +1,144 @@
+.nh
+.TH "SMC -- AArch32" "7" " "  "instruction" "general"
+.SS SMC
+ Secure Monitor Call
+
+ Secure Monitor Call causes a Secure Monitor Call exception.  For more
+ information see Secure Monitor Call (SMC) exception.
+
+ SMC is available only for software executing at EL1 or higher. It is undefined
+ in User mode.
+
+ If the values of HCR.TSC and SCR.SCD are both 0, execution of an SMC
+ instruction at EL1 or higher generates a Secure Monitor Call exception that is
+ taken to EL3. When EL3 is using AArch32 this exception is taken to Monitor
+ mode. When EL3 is using AArch64, it is the SCR_EL3.SMD bit, rather than the
+ SCR.SCD bit, that can change the effect of executing an SMC instruction.
+
+ If the value of HCR.TSC is 1, execution of an SMC instruction in a Non-secure
+ EL1 mode generates an exception that is taken to EL2, regardless of the value
+ of SCR.SCD. When EL2 is using AArch32, this is a Hyp Trap exception that is
+ taken to Hyp mode. For more information see Traps to Hyp mode of Non-secure EL1
+ execution of SMC instructions.
+
+ If the value of HCR.TSC is 0 and the value of SCR.SCD is 1, the SMC instruction
+ is:
+
+ undefined in Non-secure state.
+
+ constrained unpredictable if executed in Secure state at EL1 or higher.
+
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |                       8       4       0
+          |         |   | |                       |       |       |
+  |. . . .|0 0 0 1 0|1 1|0|0 0 0 0 0 0 0 0 0 0 0 0|0 1 1 1|. . . .|
+  |                 |     |                               |
+  `-cond(!= 1111)   `-opc `-imm12                         `-imm4
+  
+  
+ 
+.SS A1
+ 
+ SMC{<c>}{<q>} {#}<imm4>
+ 
+ // imm4 is for assembly/disassembly only and is ignored by hardware
+.SS T1 - T32
+ 
+                                                                   
+                                         12                        
+                         05            13 |                        
+                       06 |      01  14 | |                       0
+                        | |       |   | | |                       |
+   1 1 1 1 0 1 1 1 1 1 1|1|. . . .|1 0|0|0|0 0 0 0 0 0 0 0 0 0 0 0|
+                        | |           |   |
+                        | `-imm4      |   `-imm12
+                        `-o1          `-o2
+  
+  
+ 
+.SS T1
+ 
+ SMC{<c>}{<q>} {#}<imm4>
+ 
+ // imm4 is for assembly/disassembly only and is ignored by hardware
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     AArch32.CheckForSMCUndefOrTrap();
+ 
+     if !ELUsingAArch32(EL3) then
+         if SCR_EL3.SMD == '1' then
+             // SMC disabled.
+             UNDEFINED;
+     else
+         if SCR.SCD == '1' then
+             // SMC disabled
+             if IsSecure() then
+                 // Executes either as a NOP or UNALLOCATED.
+                 c = ConstrainUnpredictable(Unpredictable_SMD);
+                 assert c IN {Constraint_NOP, Constraint_UNDEF};
+                 if c == Constraint_NOP then EndOfInstruction();
+             UNDEFINED;
+ 
+     if !ELUsingAArch32(EL3) then
+         AArch64.CallSecureMonitor(Zeros(16));
+     else
+         AArch32.TakeSMCException();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <imm4>
+  Encoded in imm4
+  Is a 4-bit unsigned immediate value, in the range 0 to 15, encoded in the
+  "imm4" field. This is ignored by the PE. The Secure Monitor Call exception
+  handler (Secure Monitor code) can use this value to determine what service is
+  being requested, but Arm does not recommend this.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     AArch32.CheckForSMCUndefOrTrap();
+ 
+     if !ELUsingAArch32(EL3) then
+         if SCR_EL3.SMD == '1' then
+             // SMC disabled.
+             UNDEFINED;
+     else
+         if SCR.SCD == '1' then
+             // SMC disabled
+             if IsSecure() then
+                 // Executes either as a NOP or UNALLOCATED.
+                 c = ConstrainUnpredictable(Unpredictable_SMD);
+                 assert c IN {Constraint_NOP, Constraint_UNDEF};
+                 if c == Constraint_NOP then EndOfInstruction();
+             UNDEFINED;
+ 
+     if !ELUsingAArch32(EL3) then
+         AArch64.CallSecureMonitor(Zeros(16));
+     else
+         AArch32.TakeSMCException();
+

@@ -1,0 +1,120 @@
+.nh
+.TH "USDOT (indexed)" "7" " "  "instruction" "sve"
+.SS USDOT (indexed)
+ Unsigned by signed integer indexed dot product
+
+ The unsigned by signed integer indexed dot product instruction computes the dot
+ product of a group of four unsigned 8-bit integer values held in each 32-bit
+ element of the first source vector multiplied by a group of four signed 8-bit
+ integer values in an indexed 32-bit element of the second source vector, and
+ then destructively adds the widened dot product to the corresponding 32-bit
+ element of the destination vector.
+
+ The groups within the second source vector are specified using an immediate
+ index which selects the same group position within each 128-bit vector segment.
+ The index range is from 0 to 3. This instruction is unpredicated.
+
+ ID_AA64ZFR0_EL1.I8MM indicates whether this instruction is implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - usdot_z_zzzi_s
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                    10                    
+                 24 | | |  19    16        11 |         5         0
+                  | | | |   |     |         | |         |         |
+   0 1 0 0 0 1 0 0|1|0|1|. .|. . .|0 0 0 1 1|0|. . . . .|. . . . .|
+                  | |   |   |               | |         |
+                  | |   |   `-Zm            | `-Zn      `-Zda
+                  | |   `-i2                `-U
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS SVE
+ 
+ USDOT   <Zda>.S, <Zn>.B, <Zm>.B[<imm>]
+ 
+ if !HaveSVE() || !HaveInt8MatMulExt() then UNDEFINED;
+ integer esize = 32;
+ integer index = UInt(i2);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) res = Elem[operand3, e, esize];
+     for i = 0 to 3
+         integer element1 = UInt(Elem[operand1, 4 * e + i, esize DIV 4]);
+         integer element2 = SInt(Elem[operand2, 4 * s + i, esize DIV 4]);
+         res = res + element1 * element2;
+     Elem[result, e, esize] = res;
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register Z0-Z7, encoded in
+  the "Zm" field.
+
+ <imm>
+  Encoded in i2
+  Is the immediate index of a quadtuplet of four 8-bit elements within each
+  128-bit vector segment, in the range 0 to 3, encoded in the "i2" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) res = Elem[operand3, e, esize];
+     for i = 0 to 3
+         integer element1 = UInt(Elem[operand1, 4 * e + i, esize DIV 4]);
+         integer element2 = SInt(Elem[operand2, 4 * s + i, esize DIV 4]);
+         res = res + element1 * element2;
+     Elem[result, e, esize] = res;
+ 
+ Z[da] = result;
+

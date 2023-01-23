@@ -1,0 +1,93 @@
+.nh
+.TH "SHA1M -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA1M
+ SHA1 hash update (majority)
+
+ SHA1 hash update (majority).
+
+
+
+.SS Advanced SIMD - A64 - SHA1M_QSV_cryptosha3
+ 
+                                                                   
+                                                                   
+                       21          15                              
+                 24  22 |        16 |    12  10         5         0
+                  |   | |         | |     |   |         |         |
+   0 1 0 1 1 1 1 0|0 0|0|. . . . .|0|0 1 0|0 0|. . . . .|. . . . .|
+                  |     |           |         |         |
+                  |     `-Rm        `-opcode  `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA1M  <Qd>, <Sn>, <Vm>.4S
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if !HaveSHA1Ext() then UNDEFINED;
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) X = V[d];
+ bits(32)  Y = V[n];     // Note: 32 not 128 bits wide
+ bits(128) W = V[m];
+ bits(32)  t;
+ 
+ for e = 0 to 3
+     t = SHAmajority(X<63:32>, X<95:64>, X<127:96>);
+     Y = Y + ROL(X<31:0>, 5) + t + Elem[W, e, 32];
+     X<63:32> = ROL(X<63:32>, 30);
+     <Y, X> = ROL(Y : X, 32);
+ V[d] = X;
+ 
+
+.SS Assembler Symbols
+
+ <Qd>
+  Encoded in Rd
+  Is the 128-bit name of the SIMD&FP source and destination, encoded in the "Rd"
+  field.
+
+ <Sn>
+  Encoded in Rn
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the third SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) X = V[d];
+ bits(32)  Y = V[n];     // Note: 32 not 128 bits wide
+ bits(128) W = V[m];
+ bits(32)  t;
+ 
+ for e = 0 to 3
+     t = SHAmajority(X<63:32>, X<95:64>, X<127:96>);
+     Y = Y + ROL(X<31:0>, 5) + t + Elem[W, e, 32];
+     X<63:32> = ROL(X<63:32>, 30);
+     <Y, X> = ROL(Y : X, 32);
+ V[d] = X;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

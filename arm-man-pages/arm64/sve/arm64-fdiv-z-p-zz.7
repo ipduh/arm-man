@@ -1,0 +1,111 @@
+.nh
+.TH "FDIV" "7" " "  "instruction" "sve"
+.SS FDIV
+ Floating-point divide by vector (predicated)
+
+ Divide active floating-point elements of the first source vector by
+ corresponding floating-point elements of the second source vector and
+ destructively place the quotient in the corresponding elements of the first
+ source vector. Inactive elements in the destination vector register remain
+ unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - fdiv_z_p_zz_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22  20    17 |    13    10         5         0
+                  |   |   |     | |     |     |         |         |
+   0 1 1 0 0 1 0 1|. .|0 0|1 1 0|1|1 0 0|. . .|. . . . .|. . . . .|
+                  |       |     |       |     |         |
+                  `-size  |     |       `-Pg  `-Zm      `-Zdn
+                          |     `-opc<0>
+                          `-opc<3:1>
+  
+  
+ 
+.SS SVE
+ 
+ FDIV    <Zdn>.<T>, <Pg>/M, <Zdn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = FPDiv(element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = element1;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = FPDiv(element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = element1;
+ 
+ Z[dn] = result;
+

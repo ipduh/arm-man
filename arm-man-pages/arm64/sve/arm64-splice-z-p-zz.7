@@ -1,0 +1,122 @@
+.nh
+.TH "SPLICE" "7" " "  "instruction" "sve"
+.SS SPLICE
+ Splice two vectors under predicate control
+
+ Copy the first active to last active elements (inclusive) from the first source
+ vector to the lowest-numbered elements of the result. Then set any remaining
+ elements of the result to a copy of the lowest-numbered elements from the
+ second source vector. The result is placed destructively in the first source
+ vector.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - splice_z_p_zz_des
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                13    10         5         0
+                  |   |                 |     |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 1 1 0 0 1 0 0|. . .|. . . . .|. . . . .|
+                  |                     |     |         |
+                  `-size                `-Pg  `-Zm      `-Zdn
+  
+  
+ 
+.SS SVE
+ 
+ SPLICE  <Zdn>.<T>, <Pg>, <Zdn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ integer x = 0;
+ boolean active = FALSE;
+ integer lastnum = LastActiveElement(mask, esize);
+ 
+ if lastnum >= 0 then
+     for e = 0 to lastnum
+         active = active || ElemP[mask, e, esize] == '1';
+         if active then
+             Elem[result, x, esize] = Elem[operand1, e, esize];
+             x = x + 1;
+ 
+ elements = elements - x - 1;
+ for e = 0 to elements
+     Elem[result, x, esize] = Elem[operand2, e, esize];
+     x = x + 1;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ integer x = 0;
+ boolean active = FALSE;
+ integer lastnum = LastActiveElement(mask, esize);
+ 
+ if lastnum >= 0 then
+     for e = 0 to lastnum
+         active = active || ElemP[mask, e, esize] == '1';
+         if active then
+             Elem[result, x, esize] = Elem[operand1, e, esize];
+             x = x + 1;
+ 
+ elements = elements - x - 1;
+ for e = 0 to elements
+     Elem[result, x, esize] = Elem[operand2, e, esize];
+     x = x + 1;
+ 
+ Z[dn] = result;
+

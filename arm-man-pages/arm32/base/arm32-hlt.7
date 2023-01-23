@@ -1,0 +1,84 @@
+.nh
+.TH "HLT -- AArch32" "7" " "  "instruction" "general"
+.SS HLT
+ Halting Breakpoint
+
+ Halting breakpoint causes a software breakpoint to occur.
+
+ Halting breakpoint is always unconditional, even inside an IT block.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |                       8       4       0
+          |         |   | |                       |       |       |
+  |. . . .|0 0 0 1 0|0 0|0|. . . . . . . . . . . .|0 1 1 1|. . . .|
+  |                 |     |                               |
+  `-cond(!= 1111)   `-opc `-imm12                         `-imm4
+  
+  
+ 
+.SS A1
+ 
+ HLT{<q>} {#}<imm>
+ 
+ if EDSCR.HDE == '0' || !HaltingAllowed() then UNDEFINED;
+ if cond != '1110' then UNPREDICTABLE; // HLT must be encoded with AL condition
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                      6           0                                
+                      |           |                                
+   1 0 1 1 1 0 1 0 1 0|. . . . . .|                                
+                      |
+                      `-imm6
+  
+  
+ 
+.SS T1
+ 
+ HLT{<q>} {#}<imm>
+ 
+ if EDSCR.HDE == '0' || !HaltingAllowed() then UNDEFINED;
+ 
+ EncodingSpecificOperations();
+ Halt(DebugHalt_HaltInstruction);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields. An HLT instruction must be
+  unconditional.
+
+ <imm>
+  Encoded in imm12:imm4
+  For encoding A1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm12:imm4" field. This value is for assembly and disassembly
+  only. It is ignored by the PE, but can be used by a debugger to store more
+  information about the halting breakpoint.
+
+ <imm>
+  Encoded in imm6
+  For encoding T1: is a 6-bit unsigned immediate, in the range 0 to 63, encoded
+  in the "imm6" field. This value is for assembly and disassembly only. It is
+  ignored by the PE, but can be used by a debugger to store more information
+  about the halting breakpoint.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ Halt(DebugHalt_HaltInstruction);
+

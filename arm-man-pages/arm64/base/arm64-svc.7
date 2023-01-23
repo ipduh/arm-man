@@ -1,0 +1,50 @@
+.nh
+.TH "SVC -- A64" "7" " "  "instruction" "system"
+.SS SVC
+ Supervisor Call
+
+ Supervisor Call causes an exception to be taken to EL1.
+
+ On executing an SVC instruction, the PE records the exception as a Supervisor
+ Call exception in ESR_ELx, using the EC value 0x15, and the value of the
+ immediate argument.
+
+
+
+.SS System - A64 - SVC_EX_exception
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24    21                               5     2   0
+                  |     |                               |     |   |
+   1 1 0 1 0 1 0 0|0 0 0|. . . . . . . . . . . . . . . .|0 0 0|0 1|
+                  |     |                               |     |
+                  `-opc `-imm16                         `-op2 `-LL
+  
+  
+ 
+.SS System
+ 
+ SVC  #<imm>
+ 
+ bits(16) imm = imm16;
+ 
+ AArch64.CheckForSVCTrap(imm);
+ AArch64.CallSupervisor(imm);
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in imm16
+  Is a 16-bit unsigned immediate, in the range 0 to 65535, encoded in the
+  "imm16" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckForSVCTrap(imm);
+ AArch64.CallSupervisor(imm);
+

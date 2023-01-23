@@ -1,0 +1,174 @@
+.nh
+.TH "LDEOR, LDEORA, LDEORAL, LDEORL -- A64" "7" " "  "instruction" "general"
+.SS LDEOR, LDEORA, LDEORAL, LDEORL
+ Atomic exclusive OR on word or doubleword in memory
+
+ Atomic exclusive OR on word or doubleword in memory atomically loads a 32-bit
+ word or 64-bit doubleword from memory, performs an exclusive OR with the value
+ held in a register on it, and stores the result back to memory. The value
+ initially loaded from memory is returned in the destination register.
+
+ If the destination register is not one of WZR or XZR, LDEORA and LDEORAL load
+ from memory with acquire semantics.
+
+ If the destination register is not one of WZR or XZR, LDEORA and LDEORAL load
+ from memory with acquire semantics.
+
+ If the destination register is not one of WZR or XZR, LDEORA and LDEORAL load
+ from memory with acquire semantics.
+
+ If the destination register is not one of WZR or XZR, LDEORA and LDEORAL load
+ from memory with acquire semantics.
+
+ LDEORL and LDEORAL store to memory with release semantics.
+
+ LDEORL and LDEORAL store to memory with release semantics.
+
+ LDEOR has no memory ordering requirements.
+
+
+ For more information about memory ordering semantics see Load-Acquire, Store-
+ Release.
+
+ For information about memory accesses see Load/Store addressing modes.
+
+
+
+.SS Integer - A64 - general
+ 
+                       21                                          
+                     22 |                                          
+             26    23 | |          15                              
+     30    27 |  24 | | |        16 |    12  10         5         0
+      |     | |   | | | |         | |     |   |         |         |
+  |1 x|1 1 1|0|0 0|.|.|1|. . . . .|0|0 1 0|0 0|. . . . .|. . . . .|
+  |         |     | |   |         | |         |         |
+  `-size    `-V   | `-R `-Rs      | `-opc     `-Rn      `-Rt
+                  `-A             `-o3
+  
+  
+ 
+.SS 32-bit LDEOR(size == 10 && A == 0 && R == 0)
+ 
+ LDEOR  <Ws>, <Wt>, [<Xn|SP>]
+.SS 32-bit LDEORA(size == 10 && A == 1 && R == 0)
+ 
+ LDEORA  <Ws>, <Wt>, [<Xn|SP>]
+.SS 32-bit LDEORAL(size == 10 && A == 1 && R == 1)
+ 
+ LDEORAL  <Ws>, <Wt>, [<Xn|SP>]
+.SS 32-bit LDEORL(size == 10 && A == 0 && R == 1)
+ 
+ LDEORL  <Ws>, <Wt>, [<Xn|SP>]
+.SS 64-bit LDEOR(size == 11 && A == 0 && R == 0)
+ 
+ LDEOR  <Xs>, <Xt>, [<Xn|SP>]
+.SS 64-bit LDEORA(size == 11 && A == 1 && R == 0)
+ 
+ LDEORA  <Xs>, <Xt>, [<Xn|SP>]
+.SS 64-bit LDEORAL(size == 11 && A == 1 && R == 1)
+ 
+ LDEORAL  <Xs>, <Xt>, [<Xn|SP>]
+.SS 64-bit LDEORL(size == 11 && A == 0 && R == 1)
+ 
+ LDEORL  <Xs>, <Xt>, [<Xn|SP>]
+ 
+ if !HaveAtomicExt() then UNDEFINED;
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer s = UInt(Rs);
+ 
+ integer datasize = 8 << UInt(size);
+ integer regsize = if datasize == 64 then 64 else 32;
+ AccType ldacctype = if A == '1' && Rt != '11111' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ AccType stacctype = if R == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ MemAtomicOp op;
+ case opc of
+     when '000' op = MemAtomicOp_ADD;
+     when '001' op = MemAtomicOp_BIC;
+     when '010' op = MemAtomicOp_EOR;
+     when '011' op = MemAtomicOp_ORR;
+     when '100' op = MemAtomicOp_SMAX;
+     when '101' op = MemAtomicOp_SMIN;
+     when '110' op = MemAtomicOp_UMAX;
+     when '111' op = MemAtomicOp_UMIN;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) value;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ value = X[s];
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomic(address, op, value, ldacctype, stacctype);
+ 
+ if t != 31 then
+     X[t] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register holding the data value to
+  be operated on with the contents of the memory location, encoded in the "Rs"
+  field.
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <Xs>
+  Encoded in Rs
+  Is the 64-bit name of the general-purpose register holding the data value to
+  be operated on with the contents of the memory location, encoded in the "Rs"
+  field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) value;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ value = X[s];
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomic(address, op, value, ldacctype, stacctype);
+ 
+ if t != 31 then
+     X[t] = ZeroExtend(data, regsize);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

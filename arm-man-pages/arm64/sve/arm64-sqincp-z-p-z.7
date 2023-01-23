@@ -1,0 +1,107 @@
+.nh
+.TH "SQINCP (vector)" "7" " "  "instruction" "sve"
+.SS SQINCP (vector)
+ Signed saturating increment vector by count of true predicate elements
+
+ Counts the number of true elements in the source predicate and then uses the
+ result to increment all destination vector elements. The results are saturated
+ to the element signed integer range.
+
+ The predicate size specifier may be omitted in assembler source code, but this
+ is deprecated and will be prohibited in a future release of the architecture.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - sqincp_z_p_z_
+ 
+                                                                   
+                                 16                                
+                               17 |          10                    
+                 24  22      18 | |        11 | 9       5         0
+                  |   |       | | |         | | |       |         |
+   0 0 1 0 0 1 0 1|. .|1 0 1 0|0|0|1 0 0 0 0|0|0|. . . .|. . . . .|
+                  |           | |           | | |       |
+                  `-size      | `-U         | | `-Pm    `-Zdn
+                              `-D           | `-opc<0>
+                                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ SQINCP  <Zdn>.<T>, <Pm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer m = UInt(Pm);
+ integer dn = UInt(Zdn);
+ boolean unsigned = FALSE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) operand2 = P[m];
+ bits(VL) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ for e = 0 to elements-1
+     integer element = Int(Elem[operand1, e, esize], unsigned);
+     (Elem[result, e, esize], -) = SatQ(element + count, esize, unsigned);
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pm>
+  Encoded in Pm
+  Is the name of the source scalable predicate register, encoded in the "Pm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) operand2 = P[m];
+ bits(VL) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ for e = 0 to elements-1
+     integer element = Int(Elem[operand1, e, esize], unsigned);
+     (Elem[result, e, esize], -) = SatQ(element + count, esize, unsigned);
+ 
+ Z[dn] = result;
+

@@ -1,0 +1,148 @@
+.nh
+.TH "VMULL (by scalar) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMULL (by scalar)
+ Vector Multiply Long (by scalar)
+
+ Vector Multiply Long multiplies each element in a vector by a scalar, and
+ places the results in a second vector. The destination vector elements are
+ twice as long as the elements that are multiplied.
+
+ For more information about scalars see Advanced SIMD scalars.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD data-processing for the T32 instruction
+ set, or Advanced SIMD data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. .|. . . .|. . . .|1 0 1 0|.|1|.|0|. . . .|
+                |   | |   |       |       |       |   |   |
+                `-U | |   `-Vn    `-Vd    `-opc   `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS A1
+ 
+ VMULL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>[<index>]
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ unsigned = (U == '1');  long_destination = TRUE;  floating_point = FALSE;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  regs = 1;
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. .|. . . .|. . . .|1 0 1 0|.|1|.|0|. . . .|
+        |           | |   |       |       |       |   |   |
+        `-U         | |   `-Vn    `-Vd    `-opc   `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS T1
+ 
+ VMULL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>[<index>]
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ unsigned = (U == '1');  long_destination = TRUE;  floating_point = FALSE;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  regs = 1;
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     op2 = Elem[Din[m],index,esize];  op2val = Int(op2, unsigned);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[Din[n+r],e,esize];  op1val = Int(op1, unsigned);
+             if floating_point then
+                 Elem[D[d+r],e,esize] = FPMul(op1, op2, StandardFPSCRValue());
+             else
+                 if long_destination then
+                     Elem[Q[d>>1],e,2*esize] = (op1val*op2val)<2*esize-1:0>;
+                 else
+                     Elem[D[d+r],e,esize] = (op1val*op2val)<esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in U:size
+  Is the data type for the scalar and the elements of the operand vector,
+
+  U size <dt> 
+  0 01   S16  
+  0 10   S32  
+  1 01   U16  
+  1 10   U32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in Vm<2:0>
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "Vm<2:0>" field when <dt> is S16 or U16, otherwise the "Vm" field.
+
+ <index>
+  Encoded in M:Vm<3>
+  Is the element index in the range 0 to 3, encoded in the "M:Vm<3>" field when
+  <dt> is S16 or U16, otherwise in range 0 to 1, encoded in the "M" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     op2 = Elem[Din[m],index,esize];  op2val = Int(op2, unsigned);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[Din[n+r],e,esize];  op1val = Int(op1, unsigned);
+             if floating_point then
+                 Elem[D[d+r],e,esize] = FPMul(op1, op2, StandardFPSCRValue());
+             else
+                 if long_destination then
+                     Elem[Q[d>>1],e,2*esize] = (op1val*op2val)<2*esize-1:0>;
+                 else
+                     Elem[D[d+r],e,esize] = (op1val*op2val)<esize-1:0>;
+

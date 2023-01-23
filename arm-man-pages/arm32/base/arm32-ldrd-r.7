@@ -1,0 +1,128 @@
+.nh
+.TH "LDRD (register) -- AArch32" "7" " "  "instruction" "general"
+.SS LDRD (register)
+ Load Register Dual (register)
+
+ Load Register Dual (register) calculates an address from a base register value
+ and a register offset, loads two words from memory, and writes them to two
+ registers. It can use offset, post-indexed, or pre-indexed addressing. For
+ information about memory accesses see Memory accesses.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                      10                    
+                 24 | |  20                11 |                    
+         28    25 | | |21 |      16      12 | | 9 8 7   5 4       0
+          |     | | | | | |       |       | | | | | |   | |       |
+  |. . . .|0 0 0|.|.|0|.|0|. . . .|. . . .|0|0|0|0|1|1 0|1|. . . .|
+  |             | |   | | |       |                 |     |
+  |             | `-U | | `-Rn    `-Rt              `-op2 `-Rm
+  |             `-P   | `-o1
+  `-cond(!= 1111)     `-W
+  
+  
+ 
+.SS Offset(P == 1 && W == 0)
+ 
+ LDRD{<c>}{<q>} <Rt>, <Rt2>, [<Rn>, {+/-}<Rm>]
+.SS Post-indexed(P == 0 && W == 0)
+ 
+ LDRD{<c>}{<q>} <Rt>, <Rt2>, [<Rn>], {+/-}<Rm>
+.SS Pre-indexed(P == 1 && W == 1)
+ 
+ LDRD{<c>}{<q>} <Rt>, <Rt2>, [<Rn>, {+/-}<Rm>]!
+ 
+ if Rt<0> == '1' then UNPREDICTABLE;
+ t = UInt(Rt);  t2 = t+1;  n = UInt(Rn);  m = UInt(Rm);
+ index = (P == '1');  add = (U == '1');  wback = (P == '0') || (W == '1');
+ if P == '0' && W == '1' then UNPREDICTABLE;
+ if t2 == 15 || m == 15 || m == t || m == t2 then UNPREDICTABLE;
+ if wback && (n == 15 || n == t || n == t2) then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset_addr = if add then (R[n] + R[m]) else (R[n] - R[m]);
+     address = if index then offset_addr else R[n];
+     if address == Align(address, 8) then
+         data = MemA[address,8];
+         if BigEndian() then
+             R[t] = data<63:32>;
+             R[t2] = data<31:0>;
+         else
+             R[t] = data<31:0>;
+             R[t2] = data<63:32>;
+     else
+         R[t] = MemA[address,4];
+         R[t2] = MemA[address+4,4];
+ 
+     if wback then R[n] = offset_addr;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  Is the first general-purpose register to be transferred, encoded in the "Rt"
+  field. This register must be even-numbered and not R14.
+
+ <Rt2>
+  Is the second general-purpose register to be transferred. This register must
+  be <R(t+1)>.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field. The PC can be
+  used in the offset variant.
+
+ +/-
+  Encoded in U
+  Specifies the index register is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose index register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset_addr = if add then (R[n] + R[m]) else (R[n] - R[m]);
+     address = if index then offset_addr else R[n];
+     if address == Align(address, 8) then
+         data = MemA[address,8];
+         if BigEndian() then
+             R[t] = data<63:32>;
+             R[t2] = data<31:0>;
+         else
+             R[t] = data<31:0>;
+             R[t2] = data<63:32>;
+     else
+         R[t] = MemA[address,4];
+         R[t2] = MemA[address+4,4];
+ 
+     if wback then R[n] = offset_addr;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

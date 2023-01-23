@@ -1,0 +1,300 @@
+.nh
+.TH "ADD, ADDS (register) -- AArch32" "7" " "  "instruction" "general"
+.SS ADD, ADDS (register)
+ Add (register)
+
+ Add (register) adds a register value and an optionally-shifted register value,
+ and writes the result to the destination register.
+
+ If the destination register is not the PC, the ADDS variant of the instruction
+ updates the condition flags based on the result.
+
+ The field descriptions for <Rd> identify the encodings where the PC is
+ permitted as the destination register. If the destination register is the PC:
+
+ The ADD variant of the instruction is an interworking branch, see Pseudocode
+ description of operations on the AArch32 general-purpose registers and the PC.
+
+ The ADDS variant of the instruction performs an exception return without the
+ use of the stack. Arm deprecates use of this instruction. However, in this
+ case:
+ The PE branches to the address written to the PC, and restores PSTATE from
+ SPSR_<current_mode>.
+
+ The PE checks SPSR_<current_mode> for an illegal return event.  See Illegal
+ return events from AArch32 state.
+
+ The instruction is undefined in Hyp mode.
+
+ The instruction is constrained unpredictable in User mode and System mode.
+
+
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1, T2 and T3).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12         7   5 4       0
+          |       |     | |       |       |         |   | |       |
+  |. . . .|0 0 0 0|1 0 0|.|. . . .|. . . .|. . . . .|. .|0|. . . .|
+  |               |     | |       |       |         |     |
+  `-cond(!= 1111) `-opc | |       `-Rd    `-imm5    |     `-Rm
+                        | `-Rn(!= 1101)             `-stype
+                        `-S
+  
+  
+ 
+.SS ADD, rotate right with extend(S == 0 && imm5 == 00000 && stype == 11)
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, <Rm>, RRX
+.SS ADD, shift or rotate by value(S == 0 && !(imm5 == 00000 && stype == 11))
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, <shift> #<amount>}
+.SS ADDS, rotate right with extend(S == 1 && imm5 == 00000 && stype == 11)
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, <Rm>, RRX
+.SS ADDS, shift or rotate by value(S == 1 && !(imm5 == 00000 && stype == 11))
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, <shift> #<amount>}
+ 
+ if Rn == '1101' then SEE "ADD (SP plus register)";
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);  setflags = (S == '1');
+ (shift_t, shift_n) = DecodeImmShift(stype, imm5);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                9                                                  
+             10 |     6     3     0                                
+              | |     |     |     |                                
+   0 0 0 1 1 0|0|. . .|. . .|. . .|                                
+              | |     |     |
+              | `-Rm  `-Rn  `-Rd
+              `-S
+  
+  
+ 
+.SS T1
+ 
+ ADD<c>{<q>} <Rd>, <Rn>, <Rm>
+ 
+ ADDS{<q>} {<Rd>,} <Rn>, <Rm>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);  setflags = !InITBlock();
+ (shift_t, shift_n) = (SRType_LSL, 0);
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                    7                                              
+             10   8 |       3     0                                
+              |   | |       |     |                                
+   0 1 0 0 0 1|0 0|.|. . . .|. . .|                                
+              |   | |       |
+              |   | |       `-Rdn
+              |   | `-Rm(!= 1101)
+              |   `-DN
+              `-op
+  
+  
+ 
+.SS T2(!(DN == 1 && Rdn == 101))
+ 
+ ADD<c>{<q>} <Rdn>, <Rm>
+ 
+ ADD{<c>}{<q>} {<Rdn>,} <Rdn>, <Rm>
+ 
+ if (DN:Rdn) == '1101' || Rm == '1101' then SEE "ADD (SP plus register)";
+ d = UInt(DN:Rdn);  n = d;  m = UInt(Rm);  setflags = FALSE;  (shift_t, shift_n) = (SRType_LSL, 0);
+ if n == 15 && m == 15 then UNPREDICTABLE;
+ if d == 15 && InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+                         05        15                              
+               10      06 |      01 |    12       8   6   4       0
+                |       | |       | |     |       |   |   |       |
+   1 1 1 0 1 0 1|1 0 0 0|.|. . . .|0|. . .|. . . .|. .|. .|. . . .|
+                |       | |         |     |       |   |   |
+                `-op1   | |         |     `-Rd    |   |   `-Rm
+                        | |         `-imm3        |   `-stype
+                        | `-Rn(!= 1101)           `-imm2
+                        `-S
+  
+  
+ 
+.SS ADD, rotate right with extend(S == 0 && imm3 == 000 && imm2 == 00 && stype == 11)
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, <Rm>, RRX
+.SS ADD, shift or rotate by value(S == 0 && !(imm3 == 000 && imm2 == 00 && stype == 11))
+ 
+ ADD<c>.W {<Rd>,} <Rn>, <Rm>
+ 
+ ADD{<c>}.W {<Rd>,} <Rn>, <Rm>
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, <shift> #<amount>}
+.SS ADDS, rotate right with extend(S == 1 && imm3 == 000 && Rd != 1111 && imm2 == 00 && stype == 11)
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, <Rm>, RRX
+.SS ADDS, shift or rotate by value(S == 1 && !(imm3 == 000 && imm2 == 00 && stype == 11) && Rd != 1111)
+ 
+ ADDS.W {<Rd>,} <Rn>, <Rm>
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, <Rm> {, <shift> #<amount>}
+ 
+ if Rd == '1111' && S == '1' then SEE "CMN (register)";
+ if Rn == '1101' then SEE "ADD (SP plus register)";
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);  setflags = (S == '1');
+ (shift_t, shift_n) = DecodeImmShift(stype, imm3:imm2);
+ if (d == 15 && !setflags) || n == 15 || m == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     shifted = Shift(R[m], shift_t, shift_n, PSTATE.C);
+     (result, nzcv) = AddWithCarry(R[n], shifted, '0');
+     if d == 15 then
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rdn>
+  Encoded in DN:Rdn
+  Is the general-purpose source and destination register, encoded in the
+  "DN:Rdn" field. If the PC is used, the instruction is a branch to the address
+  calculated by the operation. This is a simple branch, see Pseudocode
+  description of operations on the AArch32 general-purpose registers and the PC.
+  The assembler language allows <Rdn> to be specified once or twice in the
+  assembler syntax. When used inside an IT block, and <Rdn> and <Rm> are in the
+  range R0 to R7, <Rdn> must be specified once so that encoding T2 is preferred
+  to encoding T1. In all other cases there is no difference in behavior when
+  <Rdn> is specified once or twice.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the same as <Rn>. If the PC is used:
+  For the ADD variant, the instruction is a branch to the address calculated by
+  the operation. This is an interworking branch, see Pseudocode description of
+  operations on the AArch32 general-purpose registers and the PC.
+  For the ADDS variant, the instruction performs an exception return, that
+  restores PSTATE from SPSR_<current_mode>. Arm deprecates use of this
+  instruction.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T1: is the general-purpose destination register, encoded in the
+  "Rd" field.           When used inside an IT block, <Rd> must be specified.
+  When used outside an IT block, <Rd> is optional, and:
+  If omitted, this register is the same as <Rn>.             If present,
+  encoding T1 is preferred to encoding T2.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T3: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the same as <Rn>.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the first general-purpose source register, encoded in the
+  "Rn" field. The PC can be used. If the SP is used, see ADD (SP plus register).
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the first general-purpose source register, encoded in the
+  "Rn" field.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T3: is the first general-purpose source register, encoded in the
+  "Rn" field. If the SP is used, see ADD (SP plus register).
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the second general-purpose source register, encoded in the
+  "Rm" field. The PC can be used, but this is deprecated.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T1 and T3: is the second general-purpose source register, encoded
+  in the "Rm" field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T2: is the second general-purpose source register, encoded in the
+  "Rm" field. The PC can be used.
+
+ <shift>
+  Encoded in stype
+  Is the type of shift to be applied to the second source register,
+
+  stype <shift> 
+  00    LSL     
+  01    LSR     
+  10    ASR     
+  11    ROR     
+
+ <amount>
+  Encoded in imm5
+  For encoding A1: is the shift amount, in the range 1 to 31 (when <shift> = LSL
+  or ROR) or 1 to 32 (when <shift> = LSR or ASR) encoded in the "imm5" field as
+  <amount> modulo 32.
+
+ <amount>
+  Encoded in imm3:imm2
+  For encoding T3: is the shift amount, in the range 1 to 31 (when <shift> = LSL
+  or ROR) or 1 to 32 (when <shift> = LSR or ASR), encoded in the "imm3:imm2"
+  field as <amount> modulo 32.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     shifted = Shift(R[m], shift_t, shift_n, PSTATE.C);
+     (result, nzcv) = AddWithCarry(R[n], shifted, '0');
+     if d == 15 then
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

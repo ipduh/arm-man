@@ -1,0 +1,249 @@
+.nh
+.TH "VCGT (register) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCGT (register)
+ Vector Compare Greater Than
+
+ Vector Compare Greater Than takes each element in a vector, and compares it
+ with the corresponding element of a second vector. If the first is greater than
+ the second, the corresponding element in the destination vector is set to all
+ ones. Otherwise, it is set to all zeros.
+
+ The operand vector elements are the same type, and are signed integers,
+ unsigned integers, or floating-point numbers. The result vector elements are
+ fields the same size as the operand vector elements.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|0|.|. .|. . . .|. . . .|0 0 1 1|.|.|.|0|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ vtype = if U == '1' then VCGTtype_unsigned else VCGTtype_signed;
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16      12       8 7 6 5 4       0
+                | | | | | |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|1|.|. . . .|. . . .|1 1 1 0|.|.|.|0|. . . .|
+                |   |   | |       |       |       | | | | |
+                `-U `-D | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                        `-sz                      | | | `-o1
+                                                  | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ vtype = VCGTtype_fp;
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 0|.|. .|. . . .|. . . .|0 0 1 1|.|.|.|0|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ vtype = if U == '1' then VCGTtype_unsigned else VCGTtype_signed;
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12       8 7 6 5 4       0
+        | |         | | | |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|1|.|. . . .|. . . .|1 1 1 0|.|.|.|0|. . . .|
+        |           |   | |       |       |       | | | | |
+        `-U         `-D | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                        `-sz                      | | | `-o1
+                                                  | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCGT{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ if sz == '1' && InITBlock() then UNPREDICTABLE;
+ vtype = VCGTtype_fp;
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ enumeration VCGTtype {VCGTtype_signed, VCGTtype_unsigned, VCGTtype_fp};
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[n+r],e,esize];  op2 = Elem[D[m+r],e,esize];
+             case vtype of
+                 when VCGTtype_signed    test_passed = (SInt(op1) > SInt(op2));
+                 when VCGTtype_unsigned  test_passed = (UInt(op1) > UInt(op2));
+                 when VCGTtype_fp        test_passed = FPCompareGT(op1, op2, StandardFPSCRValue());
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1 and A2: see Standard assembler syntax fields. This encoding
+  must be unconditional.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in U:size
+  For encoding A1 and T1: is the data type for the elements of the operands,
+
+  U size <dt> 
+  0 00   S8   
+  0 01   S16  
+  0 10   S32  
+  1 00   U8   
+  1 01   U16  
+  1 10   U32  
+
+ <dt>
+  Encoded in sz
+  For encoding A2 and T2: is the data type for the elements of the vectors,
+
+  sz <dt> 
+  0  F32  
+  1  F16  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ enumeration VCGTtype {VCGTtype_signed, VCGTtype_unsigned, VCGTtype_fp};
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[n+r],e,esize];  op2 = Elem[D[m+r],e,esize];
+             case vtype of
+                 when VCGTtype_signed    test_passed = (SInt(op1) > SInt(op2));
+                 when VCGTtype_unsigned  test_passed = (UInt(op1) > UInt(op2));
+                 when VCGTtype_fp        test_passed = FPCompareGT(op1, op2, StandardFPSCRValue());
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

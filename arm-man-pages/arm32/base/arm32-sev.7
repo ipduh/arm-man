@@ -1,0 +1,92 @@
+.nh
+.TH "SEV -- AArch32" "7" " "  "instruction" "general"
+.SS SEV
+ Send Event
+
+ Send Event is a hint instruction. It causes an event to be signaled to all PEs
+ in the multiprocessor system. For more information, see Wait For Event and Send
+ Event.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20  18  16 | | |12                       0
+          |         | |   |   |   | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0|0 0|1|1|1|1|0 0 0 0 0 0 0 0 0 1 0 0|
+  |                 |     |   |           |
+  `-cond(!= 1111)   `-R   |   `-imm4<1:0> `-imm12
+                          `-imm4<3:2>
+  
+  
+ 
+.SS A1
+ 
+ SEV{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                  8       4       0                                
+                  |       |       |                                
+   1 0 1 1 1 1 1 1|0 1 0 0|0 0 0 0|                                
+                  |
+                  `-hint
+  
+  
+ 
+.SS T1
+ 
+ SEV{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T2 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 0|0 1 0 0|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T2
+ 
+ SEV{<c>}.W
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SendEvent();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SendEvent();
+

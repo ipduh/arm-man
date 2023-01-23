@@ -1,0 +1,75 @@
+.nh
+.TH "CLREX -- AArch32" "7" " "  "instruction" "general"
+.SS CLREX
+ Clear-Exclusive
+
+ Clear-Exclusive clears the local monitor of the executing PE.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+                         20 | | |16 | | |12 | | 9 8       4       0
+                          | | | | | | | | | | | | |       |       |
+   1 1 1 1 0 1 0 1 0 1 1 1|1|1|1|1|1|1|1|1|0|0|0|0|0 0 0 1|1 1 1 1|
+                                                  |       |
+                                                  |       `-option
+                                                  `-opcode
+  
+  
+ 
+.SS A1
+ 
+ CLREX{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |10 9 8       4       0
+                          | | | | |   | | | | | | |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 1|1|1|1|1|1 0|0|0|1|1|1|1|0 0 1 0|1 1 1 1|
+                                                  |       |
+                                                  `-opc   `-option
+  
+  
+ 
+.SS T1
+ 
+ CLREX{<c>}{<q>}
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     ClearExclusiveLocal(ProcessorID());
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     ClearExclusiveLocal(ProcessorID());
+

@@ -1,0 +1,178 @@
+.nh
+.TH "FCMLA -- A64" "7" " "  "instruction" "advsimd"
+.SS FCMLA
+ Floating-point Complex Multiply Accumulate
+
+ Floating-point Complex Multiply Accumulate.
+
+ This instruction operates on complex numbers that are represented in SIMD&FP
+ registers as pairs of elements, with the more significant element holding the
+ imaginary part of the number and the less significant element holding the real
+ part of the number. Each element holds a floating-point value. It performs the
+ following computation on the corresponding complex number element pairs from
+ the two source registers and the destination register:
+
+ The two elements of the transformed complex number are multiplied by:
+
+
+ The multiplication and addition operations are performed as a fused multiply-
+ add, without any intermediate rounding.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR or a
+ synchronous exception being generated. For more information, see Floating-point
+ exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Vector - A64 - FCMLA_asimdsame2_C
+ 
+                                                                   
+       29                                                          
+     30 |              21          15        10                    
+   31 | |        24  22 |        16 |  13  11 |         5         0
+    | | |         |   | |         | |   |   | |         |         |
+   0|.|1|0 1 1 1 0|. .|0|. . . . .|1|1 0|. .|1|. . . . .|. . . . .|
+    | |           |     |               |     |         |
+    | `-U         |     `-Rm            `-rot `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ FCMLA  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<rotate>
+ 
+ if !HaveFCADDExt() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size == '00' then UNDEFINED;
+ if Q == '0' && size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ if !HaveFP16Ext() && esize == 16 then UNDEFINED;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) operand3 = V[d];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ bits(esize) element3;
+ bits(esize) element4;
+ 
+ for e = 0 to (elements DIV 2) -1 
+     case rot of 
+         when '00'
+             element1 = Elem[operand2, e*2, esize]; 
+             element2 = Elem[operand1, e*2, esize];
+             element3 = Elem[operand2, e*2+1, esize];
+             element4 = Elem[operand1, e*2, esize];
+         when '01'
+             element1 = FPNeg(Elem[operand2, e*2+1, esize]); 
+             element2 = Elem[operand1, e*2+1, esize];
+             element3 = Elem[operand2, e*2, esize];
+             element4 = Elem[operand1, e*2+1, esize];
+         when '10'
+             element1 = FPNeg(Elem[operand2, e*2, esize]); 
+             element2 = Elem[operand1, e*2, esize];
+             element3 = FPNeg(Elem[operand2, e*2+1, esize]);
+             element4 = Elem[operand1, e*2, esize];
+         when '11'
+             element1 = Elem[operand2, e*2+1, esize]; 
+             element2 = Elem[operand1, e*2+1, esize];
+             element3 = FPNeg(Elem[operand2, e*2, esize]);
+             element4 = Elem[operand1, e*2+1, esize];
+ 
+     Elem[result, e*2,   esize] = FPMulAdd(Elem[operand3, e*2,   esize], element2, element1, FPCR);
+     Elem[result, e*2+1, esize] = FPMulAdd(Elem[operand3, e*2+1, esize], element4, element3, FPCR);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   x RESERVED 
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+ <rotate>
+  Encoded in rot
+  Is the rotation,
+
+  rot <rotate> 
+  00  0        
+  01  90       
+  10  180      
+  11  270      
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) operand3 = V[d];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ bits(esize) element3;
+ bits(esize) element4;
+ 
+ for e = 0 to (elements DIV 2) -1 
+     case rot of 
+         when '00'
+             element1 = Elem[operand2, e*2, esize]; 
+             element2 = Elem[operand1, e*2, esize];
+             element3 = Elem[operand2, e*2+1, esize];
+             element4 = Elem[operand1, e*2, esize];
+         when '01'
+             element1 = FPNeg(Elem[operand2, e*2+1, esize]); 
+             element2 = Elem[operand1, e*2+1, esize];
+             element3 = Elem[operand2, e*2, esize];
+             element4 = Elem[operand1, e*2+1, esize];
+         when '10'
+             element1 = FPNeg(Elem[operand2, e*2, esize]); 
+             element2 = Elem[operand1, e*2, esize];
+             element3 = FPNeg(Elem[operand2, e*2+1, esize]);
+             element4 = Elem[operand1, e*2, esize];
+         when '11'
+             element1 = Elem[operand2, e*2+1, esize]; 
+             element2 = Elem[operand1, e*2+1, esize];
+             element3 = FPNeg(Elem[operand2, e*2, esize]);
+             element4 = Elem[operand1, e*2+1, esize];
+ 
+     Elem[result, e*2,   esize] = FPMulAdd(Elem[operand3, e*2,   esize], element2, element1, FPCR);
+     Elem[result, e*2+1, esize] = FPMulAdd(Elem[operand3, e*2+1, esize], element4, element3, FPCR);
+ 
+ V[d] = result;
+

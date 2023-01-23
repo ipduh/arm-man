@@ -1,0 +1,117 @@
+.nh
+.TH "TRN1 -- A64" "7" " "  "instruction" "advsimd"
+.SS TRN1
+ Transpose vectors (primary)
+
+ Transpose vectors (primary). This instruction reads corresponding even-numbered
+ vector elements from the two source SIMD&FP registers, starting at zero, places
+ each result into consecutive elements of a vector, and writes the vector to the
+ destination SIMD&FP register. Vector elements from the first source register
+ are placed into even-numbered elements of the destination vector, starting at
+ zero, while vector elements from the second source register are placed into
+ odd-numbered elements of the destination vector.
+
+
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - TRN1_asimdperm_only
+ 
+                                                                   
+                                     14                            
+     30                21          15 |                            
+   31 |          24  22 |        16 | |  12  10         5         0
+    | |           |   | |         | | |   |   |         |         |
+   0|.|0 0 1 1 1 0|. .|0|. . . . .|0|0|1 0|1 0|. . . . .|. . . . .|
+    |             |     |           |         |         |
+    `-Q           |     `-Rm        `-op      `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ TRN1  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if size:Q == '110' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ integer part = UInt(op);
+ integer pairs = elements DIV 2;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ 
+ for p = 0 to pairs-1
+     Elem[result, 2*p+0, esize] = Elem[operand1, 2*p+part, esize];
+     Elem[result, 2*p+1, esize] = Elem[operand2, 2*p+part, esize];
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ 
+ for p = 0 to pairs-1
+     Elem[result, 2*p+0, esize] = Elem[operand1, 2*p+part, esize];
+     Elem[result, 2*p+1, esize] = Elem[operand2, 2*p+part, esize];
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,131 @@
+.nh
+.TH "SMLAL, SMLALS -- AArch32" "7" " "  "instruction" "general"
+.SS SMLAL, SMLALS
+ Signed Multiply Accumulate Long
+
+ Signed Multiply Accumulate Long multiplies two signed 32-bit values to produce
+ a 64-bit value, and accumulates this with a 64-bit value.
+
+ In A32 instructions, the condition flags can optionally be updated based on the
+ result. Use of this option adversely affects performance on many
+ implementations.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12       8       4       0
+          |       |     | |       |       |       |       |       |
+  |. . . .|0 0 0 0|1 1 1|.|. . . .|. . . .|. . . .|1 0 0 1|. . . .|
+  |               |     | |       |       |               |
+  `-cond(!= 1111) `-opc | `-RdHi  `-RdLo  `-Rm            `-Rn
+                        `-S
+  
+  
+ 
+.SS Flag setting(S == 1)
+ 
+ SMLALS{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS Not flag setting(S == 0)
+ 
+ SMLAL{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);  setflags = (S == '1');
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ if dHi == dLo then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                   08    05      01      12       8       4       0
+                    |     |       |       |       |       |       |
+   1 1 1 1 1 0 1 1 1|1 0 0|. . . .|. . . .|. . . .|0 0 0 0|. . . .|
+                    |     |       |       |       |       |
+                    `-op1 `-Rn    `-RdLo  `-RdHi  `-op2   `-Rm
+  
+  
+ 
+.SS T1
+ 
+ SMLAL{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);  setflags = FALSE;
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ // Armv8-A removes UNPREDICTABLE for R13
+ if dHi == dLo then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     result = SInt(R[n]) * SInt(R[m]) + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+     if setflags then
+         PSTATE.N = result<63>;
+         PSTATE.Z = IsZeroBit(result<63:0>);
+         // PSTATE.C, PSTATE.V unchanged
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <RdLo>
+  Encoded in RdLo
+  Is the general-purpose source register holding the lower 32 bits of the
+  addend, and the destination register for the lower 32 bits of the result,
+  encoded in the "RdLo" field.
+
+ <RdHi>
+  Encoded in RdHi
+  Is the general-purpose source register holding the upper 32 bits of the
+  addend, and the destination register for the upper 32 bits of the result,
+  encoded in the "RdHi" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the first general-purpose source register holding the multiplicand, encoded
+  in the "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  Is the second general-purpose source register holding the multiplier, encoded
+  in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     result = SInt(R[n]) * SInt(R[m]) + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+     if setflags then
+         PSTATE.N = result<63>;
+         PSTATE.Z = IsZeroBit(result<63:0>);
+         // PSTATE.C, PSTATE.V unchanged
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,51 @@
+.nh
+.TH "DVP -- A64" "7" " "  "alias" "system"
+.SS DVP
+ DVP is an alias of SYS
+
+ Data Value Prediction Restriction by Context
+
+ Data Value Prediction Restriction by Context prevents data value predictions,
+ based on information gathered from earlier execution within an particular
+ execution context, from allowing later speculative execution within that
+ context to be observable through side-channels.
+
+ For more information, see DVP RCTX, Data Value Prediction Restriction by
+ Context.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|0 1 1|0 1 1 1|0 0 1 1|1 0 1|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ DVP  RCTX, <Xt>
+ 
+ SYS #3, C8, C3, #5, <Xt>
+ 
+
+.SS Assembler Symbols
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rt"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SYS gives pseudocode for DVP.

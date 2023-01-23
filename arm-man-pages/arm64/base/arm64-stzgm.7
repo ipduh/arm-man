@@ -1,0 +1,110 @@
+.nh
+.TH "STZGM -- A64" "7" " "  "instruction" "general"
+.SS STZGM
+ Store Tag and Zero Multiple
+
+ Store Tag and Zero Multiple writes a naturally aligned block of N Allocation
+ Tags and stores zero to the associated data locations, where the size of N is
+ identified in DCZID_EL0.BS, and the Allocation Tag written to address A is
+ taken from the source register bits<3:0>.
+
+ This instruction is undefined at EL0.
+
+ This instruction generates an Unchecked access.
+
+ If ID_AA64PFR1_EL1.MTE != 0b0010, this instruction is undefined.
+
+
+
+.SS Integer - A64 - STZGM_64bulk_ldsttags
+ 
+                       21      17      13                          
+                     22 |    18 |    14 |    10                    
+                   23 | |  19 | |  15 | |  11 |                    
+                 24 | | |20 | | |16 | | |12 | |         5         0
+                  | | | | | | | | | | | | | | |         |         |
+   1 1 0 1 1 0 0 1|0|0|1|0|0|0|0|0|0|0|0|0|0|0|. . . . .|. . . . .|
+                  | |   | | | | | | | | | | | |         |
+                  | |   | | | | | | | | | | | `-Xn      `-Xt
+                  | |   | | | | | | | | | | `-op2<0>
+                  | |   | | | | | | | | | `-op2<1>
+                  | |   | | | | | | | | `-imm9<0>
+                  | |   | | | | | | | `-imm9<1>
+                  | |   | | | | | | `-imm9<2>
+                  | |   | | | | | `-imm9<3>
+                  | |   | | | | `-imm9<4>
+                  | |   | | | `-imm9<5>
+                  | |   | | `-imm9<6>
+                  | |   | `-imm9<7>
+                  | |   `-imm9<8>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Integer
+ 
+ STZGM  <Xt>, [<Xn|SP>]
+ 
+ integer t = UInt(Xt);
+ integer n = UInt(Xn);
+ 
+ if PSTATE.EL == EL0 then
+     UNDEFINED;
+ 
+ bits(64) data = X[t];
+ bits(4) tag = data<3:0>;
+ bits(64) address;
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ integer size = 4*(2^(UInt(DCZID_EL0.BS)));
+ address = Align(address,size);
+ integer count = size >> LOG2_TAG_GRANULE;
+ 
+ for i = 0 to count-1
+     AArch64.MemTag[address, AccType_NORMAL] = tag;
+     Mem[address, TAG_GRANULE, AccType_NORMAL] = Zeros(8*TAG_GRANULE);
+     address = address + TAG_GRANULE;
+ 
+
+.SS Assembler Symbols
+
+ <Xt>
+  Encoded in Xt
+  Is the 64-bit name of the general-purpose register to be transferred, encoded
+  in the "Xt" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Xn" field.
+
+
+
+.SS Operation
+
+ if PSTATE.EL == EL0 then
+     UNDEFINED;
+ 
+ bits(64) data = X[t];
+ bits(4) tag = data<3:0>;
+ bits(64) address;
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ integer size = 4*(2^(UInt(DCZID_EL0.BS)));
+ address = Align(address,size);
+ integer count = size >> LOG2_TAG_GRANULE;
+ 
+ for i = 0 to count-1
+     AArch64.MemTag[address, AccType_NORMAL] = tag;
+     Mem[address, TAG_GRANULE, AccType_NORMAL] = Zeros(8*TAG_GRANULE);
+     address = address + TAG_GRANULE;
+

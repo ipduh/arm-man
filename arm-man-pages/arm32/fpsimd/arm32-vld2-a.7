@@ -1,0 +1,169 @@
+.nh
+.TH "VLD2 (single 2-element structure to all lanes) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VLD2 (single 2-element structure to all lanes)
+ Load single 2-element structure and replicate to all lanes of two registers
+
+ Load single 2-element structure and replicate to all lanes of two registers
+ loads one 2-element structure from memory into all lanes of two registers. For
+ details of the addressing mode see Advanced SIMD addressing mode.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly VLD2 (single 2-element structure to all lanes).
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+                   23 | | |      16      12  10   8   6 5 4       0
+                    | | | |       |       |   |   |   | | |       |
+   1 1 1 1 0 1 0 0 1|.|1|0|. . . .|. . . .|1 1|0 1|. .|.|.|. . . .|
+                    | |   |       |           |   |   | | |
+                    | `-L `-Rn    `-Vd        `-N |   | | `-Rm
+                    `-D                           |   | `-a
+                                                  |   `-T
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}],<Rm>
+ 
+ if size == '11' then UNDEFINED;
+ ebytes = 1 << UInt(size);
+ alignment = if a == '0' then 1 else 2*ebytes;
+ inc = if T == '0' then 1 else 2;
+ d = UInt(D:Vd);  d2 = d + inc;  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d2 > 31 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12  10   8   6 5 4       0
+                    | | | |       |       |   |   |   | | |       |
+   1 1 1 1 1 0 0 1 1|.|1|0|. . . .|. . . .|1 1|0 1|. .|.|.|. . . .|
+                    | |   |       |           |   |   | | |
+                    | `-L `-Rn    `-Vd        `-N |   | | `-Rm
+                    `-D                           |   | `-a
+                                                  |   `-T
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VLD2{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ if size == '11' then UNDEFINED;
+ ebytes = 1 << UInt(size);
+ alignment = if a == '0' then 1 else 2*ebytes;
+ inc = if T == '0' then 1 else 2;
+ d = UInt(D:Vd);  d2 = d + inc;  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d2 > 31 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     address = R[n];  iswrite = FALSE;
+     - = AArch32.CheckAlignment(address, alignment, AccType_VEC, iswrite);
+     D[d] = Replicate(MemU[address,ebytes]);
+     D[d2] = Replicate(MemU[address+ebytes,ebytes]);
+     if wback then
+         if register_index then
+             R[n] = R[n] + R[m];
+         else
+             R[n] = R[n] + 2*ebytes;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  Encoded in size
+  Is the data size,
+
+  size <size>   
+  00   8        
+  01   16       
+  10   32       
+  11   RESERVED 
+
+ <list>
+  Encoded in T
+  Is a list containing the 64-bit names of two SIMD&FP registers.           The
+  list must be one of:                                       { <Dd>[], <Dd+1>[]
+  }Single-spaced registers, encoded in the "T" field as 0.
+  { <Dd>[], <Dd+2>[] }Double-spaced registers, encoded in the "T" field as 1.
+  The register <Dd> is encoded in the "D:Vd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ <align>
+  Encoded in a
+  Is the optional alignment.           Whenever <align> is omitted, the standard
+  alignment is used, see Unaligned data access, and is encoded in the "a" field
+  as 0.           Whenever <align> is present, the permitted values and encoding
+  depend on <size>:                                       <size> == 8<align> is
+  16, meaning 16-bit alignment, encoded in the "a" field as 1.
+  <size> == 16<align> is 32, meaning 32-bit alignment, encoded in the "a" field
+  as 1.                                         <size> == 32<align> is 64,
+  meaning 64-bit alignment, encoded in the "a" field as 1.
+  : is the preferred separator before the <align> value, but the alignment can
+  be specified as @<align>, see Advanced SIMD addressing mode.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose index register containing an offset applied after the
+  access, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     address = R[n];  iswrite = FALSE;
+     - = AArch32.CheckAlignment(address, alignment, AccType_VEC, iswrite);
+     D[d] = Replicate(MemU[address,ebytes]);
+     D[d2] = Replicate(MemU[address+ebytes,ebytes]);
+     if wback then
+         if register_index then
+             R[n] = R[n] + R[m];
+         else
+             R[n] = R[n] + 2*ebytes;
+

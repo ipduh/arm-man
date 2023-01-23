@@ -1,0 +1,73 @@
+.nh
+.TH "TSB CSYNC -- AArch32" "7" " "  "instruction" "general"
+.SS TSB CSYNC
+ Trace Synchronization Barrier
+
+ Trace Synchronization Barrier. This instruction is a barrier that synchronizes
+ the trace operations of instructions.
+
+ If ARMv8.4-Trace is not implemented, this instruction executes as a NOP.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20      16 | | |12                       0
+          |         | |   |       | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0 0 0|1|1|1|1|0 0 0 0 0 0 0 1 0 0 1 0|
+  |                 |     |               |
+  `-cond(!= 1111)   `-R   `-imm4          `-imm12
+  
+  
+ 
+.SS A1
+ 
+ TSB{<c>}{<q>} CSYNC
+ 
+ if !HaveSelfHostedTrace() then EndOfInstruction(); // Instruction executes as NOP
+ if cond != '1110' then UNPREDICTABLE;              // ESB must be encoded with AL condition
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 1|0 0 1 0|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T1
+ 
+ TSB{<c>}{<q>} CSYNC
+ 
+ if !HaveSelfHostedTrace() then EndOfInstruction(); // Instruction executes as NOP
+ if InITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     TraceSynchronizationBarrier();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     TraceSynchronizationBarrier();
+

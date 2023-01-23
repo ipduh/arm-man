@@ -1,0 +1,224 @@
+.nh
+.TH "BTI -- A64" "7" " "  "instruction" "system"
+.SS BTI
+ Branch Target Identification
+
+ Branch Target Identification. A BTI instruction is used to guard against the
+ execution of instructions which are not the intended target of a branch.
+
+ Outside of a guarded memory region, a BTI instruction executes as a NOP. Within
+ a guarded memory region while PSTATE.BTYPE != 0b00, a BTI instruction
+ compatible with the current value of PSTATE.BTYPE will not generate a Branch
+ Target Exception and will allow execution of subsequent instructions within the
+ memory region.
+
+ The operand <targets> passed to a BTI instruction determines the values of
+ PSTATE.BTYPE which the BTI instruction is compatible with.
+
+
+
+.SS System - A64 - BTI_HB_hints
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 0|0 1 0 0|x x 0|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ BTI  {<targets>}
+ 
+ SystemHintOp op;
+ 
+ case CRm:op2 of
+     when '0000 000' op = SystemHintOp_NOP;
+     when '0000 001' op = SystemHintOp_YIELD;
+     when '0000 010' op = SystemHintOp_WFE;
+     when '0000 011' op = SystemHintOp_WFI;
+     when '0000 100' op = SystemHintOp_SEV;
+     when '0000 101' op = SystemHintOp_SEVL;
+     when '0000 110'
+         if !HaveDGHExt() then EndOfInstruction();                  // Instruction executes as NOP
+         op = SystemHintOp_DGH;
+     when '0000 111' SEE "XPACLRI";
+     when '0001 xxx'
+         case op2 of
+             when '000' SEE "PACIA1716";
+             when '010' SEE "PACIB1716";
+             when '100' SEE "AUTIA1716";
+             when '110' SEE "AUTIB1716";
+             otherwise EndOfInstruction();                          // Instruction executes as NOP
+     when '0010 000'
+         if !HaveRASExt() then EndOfInstruction();                  // Instruction executes as NOP
+         op = SystemHintOp_ESB;
+     when '0010 001'
+         if !HaveStatisticalProfiling() then EndOfInstruction();    // Instruction executes as NOP
+         op = SystemHintOp_PSB;
+     when '0010 010'
+         if !HaveSelfHostedTrace() then EndOfInstruction();         // Instruction executes as NOP
+         op = SystemHintOp_TSB;
+     when '0010 100'
+         op = SystemHintOp_CSDB;
+     when '0011 xxx'
+         case op2 of
+             when '000' SEE "PACIAZ";
+             when '001' SEE "PACIASP";
+             when '010' SEE "PACIBZ";
+             when '011' SEE "PACIBSP";
+             when '100' SEE "AUTIAZ";
+             when '101' SEE "AUTHASP";
+             when '110' SEE "AUTIBZ";
+             when '111' SEE "AUTIBSP";
+     when '0100 xx0'
+         op = SystemHintOp_BTI;
+         // Check branch target compatibility between BTI instruction and PSTATE.BTYPE
+         SetBTypeCompatible(BTypeCompatible_BTI(op2<2:1>));
+     otherwise EndOfInstruction();                                 // Instruction executes as NOP
+ 
+ case op of
+     when SystemHintOp_YIELD
+         Hint_Yield();
+ 
+     when SystemHintOp_DGH
+         Hint_DGH();
+ 
+     when SystemHintOp_WFE
+         if IsEventRegisterSet() then
+             ClearEventRegister();
+         else
+             if PSTATE.EL == EL0 then
+                 // Check for traps described by the OS which may be EL1 or EL2.
+                 AArch64.CheckForWFxTrap(EL1, TRUE);
+             if PSTATE.EL IN {EL0, EL1} && EL2Enabled() && !IsInHost() then
+                 // Check for traps described by the Hypervisor.
+                 AArch64.CheckForWFxTrap(EL2, TRUE);
+             if HaveEL(EL3) && PSTATE.EL != EL3 then
+                 // Check for traps described by the Secure Monitor.
+                 AArch64.CheckForWFxTrap(EL3, TRUE);
+             WaitForEvent();
+ 
+     when SystemHintOp_WFI
+         if !InterruptPending() then
+             if PSTATE.EL == EL0 then
+                 // Check for traps described by the OS which may be EL1 or EL2.
+                 AArch64.CheckForWFxTrap(EL1, FALSE);
+             if PSTATE.EL IN {EL0, EL1} && EL2Enabled() && !IsInHost() then
+                 // Check for traps described by the Hypervisor.
+                 AArch64.CheckForWFxTrap(EL2, FALSE);
+             if HaveEL(EL3) && PSTATE.EL != EL3 then
+                 // Check for traps described by the Secure Monitor.
+                 AArch64.CheckForWFxTrap(EL3, FALSE);
+             WaitForInterrupt();
+ 
+     when SystemHintOp_SEV
+         SendEvent();
+ 
+     when SystemHintOp_SEVL
+         SendEventLocal();
+ 
+     when SystemHintOp_ESB
+         SynchronizeErrors();
+         AArch64.ESBOperation();
+         if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then AArch64.vESBOperation();
+         TakeUnmaskedSErrorInterrupts();
+ 
+     when SystemHintOp_PSB
+         ProfilingSynchronizationBarrier();
+ 
+     when SystemHintOp_TSB
+         TraceSynchronizationBarrier();
+ 
+     when SystemHintOp_CSDB
+         ConsumptionOfSpeculativeDataBarrier();
+ 
+     when SystemHintOp_BTI
+         SetBTypeNext('00');
+ 
+     otherwise // do nothing
+ 
+
+.SS Assembler Symbols
+
+ <targets>
+  Encoded in op2<2:1>
+  Is the type of indirection,
+
+  op2<2:1> <targets> 
+  00       (omitted) 
+  01       c         
+  10       j         
+  11       jc        
+
+
+
+.SS Operation
+
+ case op of
+     when SystemHintOp_YIELD
+         Hint_Yield();
+ 
+     when SystemHintOp_DGH
+         Hint_DGH();
+ 
+     when SystemHintOp_WFE
+         if IsEventRegisterSet() then
+             ClearEventRegister();
+         else
+             if PSTATE.EL == EL0 then
+                 // Check for traps described by the OS which may be EL1 or EL2.
+                 AArch64.CheckForWFxTrap(EL1, TRUE);
+             if PSTATE.EL IN {EL0, EL1} && EL2Enabled() && !IsInHost() then
+                 // Check for traps described by the Hypervisor.
+                 AArch64.CheckForWFxTrap(EL2, TRUE);
+             if HaveEL(EL3) && PSTATE.EL != EL3 then
+                 // Check for traps described by the Secure Monitor.
+                 AArch64.CheckForWFxTrap(EL3, TRUE);
+             WaitForEvent();
+ 
+     when SystemHintOp_WFI
+         if !InterruptPending() then
+             if PSTATE.EL == EL0 then
+                 // Check for traps described by the OS which may be EL1 or EL2.
+                 AArch64.CheckForWFxTrap(EL1, FALSE);
+             if PSTATE.EL IN {EL0, EL1} && EL2Enabled() && !IsInHost() then
+                 // Check for traps described by the Hypervisor.
+                 AArch64.CheckForWFxTrap(EL2, FALSE);
+             if HaveEL(EL3) && PSTATE.EL != EL3 then
+                 // Check for traps described by the Secure Monitor.
+                 AArch64.CheckForWFxTrap(EL3, FALSE);
+             WaitForInterrupt();
+ 
+     when SystemHintOp_SEV
+         SendEvent();
+ 
+     when SystemHintOp_SEVL
+         SendEventLocal();
+ 
+     when SystemHintOp_ESB
+         SynchronizeErrors();
+         AArch64.ESBOperation();
+         if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then AArch64.vESBOperation();
+         TakeUnmaskedSErrorInterrupts();
+ 
+     when SystemHintOp_PSB
+         ProfilingSynchronizationBarrier();
+ 
+     when SystemHintOp_TSB
+         TraceSynchronizationBarrier();
+ 
+     when SystemHintOp_CSDB
+         ConsumptionOfSpeculativeDataBarrier();
+ 
+     when SystemHintOp_BTI
+         SetBTypeNext('00');
+ 
+     otherwise // do nothing
+

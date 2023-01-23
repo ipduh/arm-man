@@ -1,0 +1,132 @@
+.nh
+.TH "HVC -- AArch32" "7" " "  "instruction" "general"
+.SS HVC
+ Hypervisor Call
+
+ Hypervisor Call causes a Hypervisor Call exception. For more information see
+ Hypervisor Call (HVC) exception.  Non-secure software executing at EL1 can use
+ this instruction to call the hypervisor to request a service.
+
+ The HVC instruction is:
+
+ undefined in Secure state, and in User mode in Non-secure state.
+
+ When SCR. HCE is set to 0, undefined in Non-secure EL1 modes and constrained
+ unpredictable in Hyp mode.
+
+ When SCR. HCE is set to 0, undefined in Non-secure EL1 modes and constrained
+ unpredictable in Hyp mode.
+
+ When SCR. HCE is set to 0, undefined in Non-secure EL1 modes and constrained
+ unpredictable in Hyp mode.
+
+
+ On executing an HVC instruction, the HSR, Hyp Syndrome Register reports the
+ exception as a Hypervisor Call exception, using the EC value 0x12, and captures
+ the value of the immediate argument, see Use of the HSR.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |                       8       4       0
+          |         |   | |                       |       |       |
+  |. . . .|0 0 0 1 0|1 0|0|. . . . . . . . . . . .|0 1 1 1|. . . .|
+  |                 |     |                               |
+  `-cond(!= 1111)   `-opc `-imm12                         `-imm4
+  
+  
+ 
+.SS A1
+ 
+ HVC{<q>} {#}<imm16>
+ 
+ if cond != '1110' then UNPREDICTABLE;
+ imm16 = imm12:imm4;
+.SS T1 - T32
+ 
+                                                                   
+                                         12                        
+                         05            13 |                        
+                       06 |      01  14 | |                       0
+                        | |       |   | | |                       |
+   1 1 1 1 0 1 1 1 1 1 1|0|. . . .|1 0|0|0|. . . . . . . . . . . .|
+                        | |           |   |
+                        | `-imm4      |   `-imm12
+                        `-o1          `-o2
+  
+  
+ 
+.SS T1
+ 
+ HVC{<q>} {#}<imm16>
+ 
+ imm16 = imm4:imm12;
+ if InITBlock() then UNPREDICTABLE;
+ 
+ EncodingSpecificOperations();
+ if !HaveEL(EL2) || PSTATE.EL == EL0 || (IsSecure() && !IsSecureEL2Enabled()) then
+     UNDEFINED;
+ 
+ if HaveEL(EL3) then
+     if ELUsingAArch32(EL3) && SCR.HCE == '0' && PSTATE.EL == EL2 then
+         UNPREDICTABLE;
+     else
+         hvc_enable = SCR_GEN[].HCE;
+ else
+     hvc_enable = if ELUsingAArch32(EL2) then NOT(HCR.HCD) else NOT(HCR_EL2.HCD);
+ 
+ if hvc_enable == '0' then
+     UNDEFINED;
+ else
+     AArch32.CallHypervisor(imm16);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields. An HVC instruction must be
+  unconditional.
+
+ <imm16>
+  Encoded in imm12:imm4
+  For encoding A1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm12:imm4" field. This value is for assembly and disassembly
+  only. It is reported in the HSR but otherwise is ignored by hardware. An HVC
+  handler might interpret imm16, for example to determine the required service.
+
+ <imm16>
+  Encoded in imm4:imm12
+  For encoding T1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm4:imm12" field. This value is for assembly and disassembly
+  only. It is reported in the HSR but otherwise is ignored by hardware. An HVC
+  handler might interpret imm16, for example to determine the required service.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ if !HaveEL(EL2) || PSTATE.EL == EL0 || (IsSecure() && !IsSecureEL2Enabled()) then
+     UNDEFINED;
+ 
+ if HaveEL(EL3) then
+     if ELUsingAArch32(EL3) && SCR.HCE == '0' && PSTATE.EL == EL2 then
+         UNPREDICTABLE;
+     else
+         hvc_enable = SCR_GEN[].HCE;
+ else
+     hvc_enable = if ELUsingAArch32(EL2) then NOT(HCR.HCD) else NOT(HCR_EL2.HCD);
+ 
+ if hvc_enable == '0' then
+     UNDEFINED;
+ else
+     AArch32.CallHypervisor(imm16);
+

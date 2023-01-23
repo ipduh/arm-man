@@ -1,0 +1,79 @@
+.nh
+.TH "NGCS -- A64" "7" " "  "alias" "general"
+.SS NGCS
+ NGCS is an alias of SBCS
+
+ Negate with Carry, setting flags
+
+ Negate with Carry, setting flags, negates the sum of a register value and the
+ value of NOT (Carry flag), and writes the result to the destination register.
+ It updates the condition flags based on the result.
+
+
+
+.SS Setting the condition flags - A64 - s
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |              21        16          10         5         0
+    | | |               |         |           |         |         |
+  |.|1|1|1 1 0 1 0 0 0 0|. . . . .|0 0 0 0 0 0|1 1 1 1 1|. . . . .|
+  | | |                 |                     |         |
+  | | `-S               `-Rm                  `-Rn      `-Rd
+  | `-op
+  `-sf
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ NGCS  <Wd>, <Wm>
+ 
+ SBCS <Wd>, WZR, <Wm>
+.SS 64-bit(sf == 1)
+ 
+ NGCS  <Xd>, <Xm>
+ 
+ SBCS <Xd>, XZR, <Xm>
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rm"
+  field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xm>
+  Encoded in Rm
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SBCS gives pseudocode for NGCS.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

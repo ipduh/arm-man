@@ -1,0 +1,80 @@
+.nh
+.TH "AT -- A64" "7" " "  "alias" "system"
+.SS AT
+ AT is an alias of SYS
+
+ Address Translate
+
+ Address Translate. For more information, see op0==0b01, cache maintenance, TLB
+ maintenance, and address translation instructions.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|. . .|0 1 1 1|1 0 0 x|. . .|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ AT  <at_op>, <Xt>
+ 
+ SYS #<op1>, C7, <Cm>, #<op2>, <Xt>
+ 
+
+.SS Assembler Symbols
+
+ <at_op>
+  Encoded in op1:CRm<0>:op2
+  Is an AT instruction name, as listed for the AT system instruction group,
+
+  op1 CRm<0> op2 <at_op> Architectural Feature 
+  000 0      000 S1E1R                         
+  000 0      001 S1E1W                         
+  000 0      010 S1E0R                         
+  000 0      011 S1E0W                         
+  000 1      000 S1E1RP  ARMv8.2-ATS1E1        
+  000 1      001 S1E1WP  ARMv8.2-ATS1E1        
+  100 0      000 S1E2R                         
+  100 0      001 S1E2W                         
+  100 0      100 S12E1R                        
+  100 0      101 S12E1W                        
+  100 0      110 S12E0R                        
+  100 0      111 S12E0W                        
+  110 0      000 S1E3R                         
+  110 0      001 S1E3W                         
+
+ <op1>
+  Encoded in op1
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op1"
+  field.
+
+ <Cm>
+  Encoded in CRm
+  Is a name 'Cm', with 'm' in the range 0 to 15, encoded in the "CRm" field.
+
+ <op2>
+  Encoded in op2
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op2"
+  field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rt"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SYS gives pseudocode for AT.

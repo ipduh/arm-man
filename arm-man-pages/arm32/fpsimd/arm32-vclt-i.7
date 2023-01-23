@@ -1,0 +1,161 @@
+.nh
+.TH "VCLT (immediate #0) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCLT (immediate #0)
+ Vector Compare Less Than Zero
+
+ Vector Compare Less Than Zero takes each element in a vector, and compares it
+ with zero.  If it is less than zero, the corresponding element in the
+ destination vector is set to all ones. Otherwise, it is set to all zeros.
+
+ The operand vector elements are the same type, and are signed integers or
+ floating-point numbers. The result vector elements are fields the same size as
+ the operand vector elements.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                     22                    11 |                    
+                   23 |  20  18  16      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|0 1|. . . .|0|.|1 0 0|.|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-F     | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCLT{<c>}{<q>}.<dt> {<Dd>,} <Dm>, #0
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCLT{<c>}{<q>}.<dt> {<Qd>,} <Qm>, #0
+ 
+ if size == '11' then UNDEFINED;
+ if F == '1' && ((size == '01' && !HaveFP16Ext()) || size == '00') then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ floating_point = (F == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                             10                    
+                     07                    11 |                    
+                   08 |  05  03  01      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|0 1|. . . .|0|.|1 0 0|.|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-F     | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCLT{<c>}{<q>}.<dt> {<Dd>,} <Dm>, #0
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCLT{<c>}{<q>}.<dt> {<Qd>,} <Qm>, #0
+ 
+ if size == '11' then UNDEFINED;
+ if F == '1' && ((size == '01' && !HaveFP16Ext()) || size == '00') then UNDEFINED;
+ if F == '1' && size == '01' && InITBlock() then UNPREDICTABLE;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ floating_point = (F == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if floating_point then
+                 bits(esize) zero = FPZero('0');
+                 test_passed = FPCompareGT(zero, Elem[D[m+r],e,esize], StandardFPSCRValue());
+             else
+                 test_passed = (SInt(Elem[D[m+r],e,esize]) < 0);
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in F:size
+  Is the data type for the elements of the operands,
+
+  F size <dt> 
+  0 00   S8   
+  0 01   S16  
+  0 10   S32  
+  1 01   F16  
+  1 10   F32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if floating_point then
+                 bits(esize) zero = FPZero('0');
+                 test_passed = FPCompareGT(zero, Elem[D[m+r],e,esize], StandardFPSCRValue());
+             else
+                 test_passed = (SInt(Elem[D[m+r],e,esize]) < 0);
+             Elem[D[d+r],e,esize] = if test_passed then Ones(esize) else Zeros(esize);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

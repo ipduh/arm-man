@@ -1,0 +1,103 @@
+.nh
+.TH "TBL" "7" " "  "instruction" "sve"
+.SS TBL
+ Programmable table lookup in single vector table
+
+ Reads each element of the second source (index) vector and uses its value to
+ select an indexed element from the first source (table) vector, and places the
+ indexed table element in the destination vector element corresponding to the
+ index vector element. If an index value is greater than or equal to the number
+ of vector elements then it places zero in the corresponding destination vector
+ element.
+
+ Since the index values can select any element in a vector this operation is not
+ naturally vector length agnostic.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - tbl_z_zz_1
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|0 0 1 1 0 0|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-Zm                  `-Zn      `-Zd
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ TBL     <Zd>.<T>, { <Zn>.<T> }, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer idx = UInt(Elem[operand2, e, esize]);
+     Elem[result, e, esize] = if idx < elements then Elem[operand1, idx, esize] else Zeros();
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer idx = UInt(Elem[operand2, e, esize]);
+     Elem[result, e, esize] = if idx < elements then Elem[operand1, idx, esize] else Zeros();
+ 
+ Z[d] = result;
+

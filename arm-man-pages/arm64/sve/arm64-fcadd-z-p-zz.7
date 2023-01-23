@@ -1,0 +1,138 @@
+.nh
+.TH "FCADD" "7" " "  "instruction" "sve"
+.SS FCADD
+ Floating-point complex add with rotate (predicated)
+
+ Add the real and imaginary components of the active floating-point complex
+ numbers from the first source vector to the complex numbers from the second
+ source vector which have first been rotated by 90 or 270 degrees in the
+ direction from the positive real axis towards the positive imaginary axis, when
+ considered in polar representation, equivalent to multiplying the complex
+ numbers in the second source vector by ±j beforehand. Destructively place the
+ results in the corresponding elements of the first source vector. Inactive
+ elements in the destination vector register remain unmodified.
+
+ Each complex number is represented in a vector register as an even/odd pair of
+ elements with the real part in the even-numbered element and the imaginary part
+ in the odd-numbered element.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - fcadd_z_p_zz_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22        17 |    13    10         5         0
+                  |   |         | |     |     |         |         |
+   0 1 1 0 0 1 0 0|. .|0 0 0 0 0|.|1 0 0|. . .|. . . . .|. . . . .|
+                  |             |       |     |         |
+                  `-size        `-rot   `-Pg  `-Zm      `-Zdn
+  
+  
+ 
+.SS SVE
+ 
+ FCADD   <Zdn>.<T>, <Pg>/M, <Zdn>.<T>, <Zm>.<T>, <const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ boolean sub_i = (rot == '0');
+ boolean sub_r = (rot == '1');
+ 
+ CheckSVEEnabled();
+ integer pairs = VL DIV (2 * esize);
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for p = 0 to pairs-1
+     acc_r  = Elem[operand1, 2 * p + 0, esize];
+     acc_i  = Elem[operand1, 2 * p + 1, esize];
+     elt2_r = Elem[operand2, 2 * p + 0, esize];
+     elt2_i = Elem[operand2, 2 * p + 1, esize];
+     if ElemP[mask, 2 * p + 0, esize] == '1' then
+         if sub_i then elt2_i = FPNeg(elt2_i);
+         acc_r = FPAdd(acc_r, elt2_i, FPCR);
+     if ElemP[mask, 2 * p + 1, esize] == '1' then
+         if sub_r then elt2_r = FPNeg(elt2_r);
+         acc_i = FPAdd(acc_i, elt2_r, FPCR);
+     Elem[result, 2 * p + 0, esize] = acc_r;
+     Elem[result, 2 * p + 1, esize] = acc_i;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+ <const>
+  Encoded in rot
+  Is the const specifier,
+
+  rot <const> 
+  0   #90     
+  1   #270    
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer pairs = VL DIV (2 * esize);
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for p = 0 to pairs-1
+     acc_r  = Elem[operand1, 2 * p + 0, esize];
+     acc_i  = Elem[operand1, 2 * p + 1, esize];
+     elt2_r = Elem[operand2, 2 * p + 0, esize];
+     elt2_i = Elem[operand2, 2 * p + 1, esize];
+     if ElemP[mask, 2 * p + 0, esize] == '1' then
+         if sub_i then elt2_i = FPNeg(elt2_i);
+         acc_r = FPAdd(acc_r, elt2_i, FPCR);
+     if ElemP[mask, 2 * p + 1, esize] == '1' then
+         if sub_r then elt2_r = FPNeg(elt2_r);
+         acc_i = FPAdd(acc_i, elt2_r, FPCR);
+     Elem[result, 2 * p + 0, esize] = acc_r;
+     Elem[result, 2 * p + 1, esize] = acc_i;
+ 
+ Z[dn] = result;
+

@@ -1,0 +1,117 @@
+.nh
+.TH "BFMLALB (indexed)" "7" " "  "instruction" "sve"
+.SS BFMLALB (indexed)
+ BFloat16 floating-point multiply-add long to single-precision (bottom, indexed)
+
+ This BFloat16 floating-point multiply-add long instruction widens the even-
+ numbered 16-bit BFloat16 elements in the first source vector and the indexed
+ element from the corresponding 128-bit segment in the second source vector to
+ single-precision format and then destructively multiplies and adds these values
+ without intermediate rounding to the overlapping 32-bit single-precision
+ elements of the addend and destination vector. This instruction is
+ unpredicated.
+
+ Unlike the BFloat16 matrix multiplication and dot product instructions, this
+ instruction performs a fused multiply-add that honors all of the FPCR bits that
+ apply to single-precision arithmetic. It can also generate a floating-point
+ exception that causes cumulative exception bits in the FPSR to be set, or a
+ synchronous exception to be taken, depending on the enable bits in the FPCR.
+
+ ID_AA64ZFR0_EL1.BF16 indicates whether this instruction is implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - bfmlalb_z_zzzi_
+ 
+                                           11                      
+                       21                12 |                      
+                     22 |              13 | |                      
+                   23 | |  19    16  14 | | |10         5         0
+                    | | |   |     |   | | | | |         |         |
+   0 1 1 0 0 1 0 0 1|1|1|. .|. . .|0 1|0|0|.|0|. . . . .|. . . . .|
+                    |   |   |         |   | | |         |
+                    |   |   `-Zm      |   | | `-Zn      `-Zda
+                    |   `-i3h         |   | `-T
+                    `-o2              |   `-i3l
+                                      `-op
+  
+  
+ 
+.SS SVE
+ 
+ BFMLALB <Zda>.S, <Zn>.H, <Zm>.H[<imm>]
+ 
+ if !HaveSVE() || !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ integer index = UInt(i3h:i3l);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV 32;
+ integer eltspersegment = 128 DIV 32;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = 2 * segmentbase + index;
+     bits(32) element1 = Elem[operand1, 2 * e + 0, 16] : Zeros(16);
+     bits(32) element2 = Elem[operand2, s, 16] : Zeros(16);
+     bits(32) element3 = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(element3, element1, element2, FPCR);
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register Z0-Z7, encoded in
+  the "Zm" field.
+
+ <imm>
+  Encoded in i3h:i3l
+  Is the immediate index, in the range 0 to 7, encoded in the "i3h:i3l" fields.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV 32;
+ integer eltspersegment = 128 DIV 32;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = 2 * segmentbase + index;
+     bits(32) element1 = Elem[operand1, 2 * e + 0, 16] : Zeros(16);
+     bits(32) element2 = Elem[operand2, s, 16] : Zeros(16);
+     bits(32) element3 = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(element3, element1, element2, FPCR);
+ 
+ Z[da] = result;
+

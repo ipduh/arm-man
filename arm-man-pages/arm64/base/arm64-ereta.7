@@ -1,0 +1,87 @@
+.nh
+.TH "ERETAA, ERETAB -- A64" "7" " "  "instruction" "general"
+.SS ERETAA, ERETAB
+ Exception Return, with pointer authentication
+
+ Exception Return, with pointer authentication. This instruction authenticates
+ the address in ELR, using SP as the modifier and the specified key, the PE
+ restores PSTATE from the SPSR for the current Exception level, and branches to
+ the authenticated address.
+
+ Key A is used for ERETAA, and key B is used for ERETAB.
+
+ If the authentication passes, the PE continues execution at the target of the
+ branch. If the authentication fails, a Translation fault is generated.
+
+ The authenticated address is not written back to ELR.
+
+ The PE checks the SPSR for the current Exception level for an illegal return
+ event. See Illegal return events from AArch64 state.
+
+ ERETAA and ERETAB are undefined at EL0.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+                                             10                    
+                 24                        11 |                    
+               25 |    21        16      12 | |         5         0
+                | |     |         |       | | |         |         |
+   1 1 0 1 0 1 1|0|1 0 0|1 1 1 1 1|0 0 0 0|1|.|1 1 1 1 1|1 1 1 1 1|
+                | |     |         |       | | |         |
+                | |     `-op2     |       | | `-Rn      `-op4
+                | `-opc[2:0]      |       | `-M
+                `-opc[3]          |       `-A
+                                  `-op3[5:2]
+  
+  
+ 
+.SS ERETAA(M == 0)
+ 
+ ERETAA
+.SS ERETAB(M == 1)
+ 
+ ERETAB
+ 
+ if PSTATE.EL == EL0 then UNDEFINED;
+ boolean pac = (A == '1');
+ boolean use_key_a = (M == '0');
+ 
+ if !pac && op4 != '00000' then
+     UNDEFINED;
+ elsif pac && (!HavePACExt() || op4 != '11111') then
+     UNDEFINED;
+ 
+ if Rn != '11111' then 
+     UNDEFINED;
+ 
+ AArch64.CheckForERetTrap(pac, use_key_a);
+ bits(64) target = ELR[];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     if use_key_a then
+         target = AuthIA(ELR[], SP[], auth_then_branch);
+     else
+         target = AuthIB(ELR[], SP[], auth_then_branch);
+ 
+ AArch64.ExceptionReturn(target, SPSR[]);
+ 
+
+
+.SS Operation
+
+ AArch64.CheckForERetTrap(pac, use_key_a);
+ bits(64) target = ELR[];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     if use_key_a then
+         target = AuthIA(ELR[], SP[], auth_then_branch);
+     else
+         target = AuthIB(ELR[], SP[], auth_then_branch);
+ 
+ AArch64.ExceptionReturn(target, SPSR[]);
+

@@ -1,0 +1,112 @@
+.nh
+.TH "BFMLALB, BFMLALT (by element) -- A64" "7" " "  "instruction" "advsimd"
+.SS BFMLALB, BFMLALT (by element)
+ BFloat16 floating-point widening multiply-add long (by element)
+
+ BFloat16 floating-point widening multiply-add long (by element) widens the
+ even-numbered (bottom) or odd-numbered (top) 16-bit elements in the first
+ source vector, and the indexed element in the second source vector from
+ Bfloat16 to single-precision format. The instruction then multiplies and adds
+ these values to the overlapping single-precision elements of the destination
+ vector.
+
+ This performs a fused multiply-add without intermediate rounding that honors
+ all of the control bits in the FPCR that apply to single-precision arithmetic,
+ including the rounding mode. It can also generate a floating-point exception
+ that causes cumulative exception bits in the FPSR to be set, or a synchronous
+ exception to be taken, depending on the enable bits in the FPCR.
+ ID_AA64ISAR1_EL1.BF16 indicates whether this instruction is supported.
+
+
+
+.SS Vector - A64 - BFMLAL_asimdelem_F
+ 
+                                                                   
+       29                20          14      10                    
+     30 |              21 |        15 |    11 |                    
+   31 | |        24  22 | |      16 | |  12 | |         5         0
+    | | |         |   | | |       | | |   | | |         |         |
+   0|.|0|0 1 1 1 1|1 1|.|.|. . . .|1|1|1 1|.|0|. . . . .|. . . . .|
+    | |           |   | | |       | | |   |   |         |
+    | `-U         |   | | `-Rm    | | |   `-H `-Rn      `-Rd
+    `-Q           |   | `-M       | | `-opcode<1:0>
+                  |   `-L         | `-opcode<2>
+                  `-size          `-opcode<3>
+  
+  
+ 
+.SS Vector
+ 
+ BFMLAL<bt>  <Vd>.4S, <Vn>.8H, <Vm>.H[<index>]
+ 
+ if !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Rn);
+ integer m = UInt('0':Rm);
+ integer d = UInt(Rd);
+ integer index = UInt(H:L:M);
+ 
+ integer elements = 128 DIV 32;
+ integer sel = UInt(Q);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(128) operand3 = V[d];
+ bits(128) result;
+ 
+ bits(32) element2 = Elem[operand2, index, 16] : Zeros(16);
+ 
+ for e = 0 to elements-1
+     bits(32) element1 = Elem[operand1, 2 * e + sel, 16] : Zeros(16);
+     bits(32) addend = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(addend, element1, element2, FPCR);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <bt>
+  Encoded in Q
+  Is the bottom or top element specifier,
+
+  Q <bt> 
+  0 B    
+  1 T    
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, in the range V0 to V15,
+  encoded in the "Rm" field.
+
+ <index>
+  Encoded in H:L:M
+  Is the element index, in the range 0 to 7, encoded in the "H:L:M" fields.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(128) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(128) operand3 = V[d];
+ bits(128) result;
+ 
+ bits(32) element2 = Elem[operand2, index, 16] : Zeros(16);
+ 
+ for e = 0 to elements-1
+     bits(32) element1 = Elem[operand1, 2 * e + sel, 16] : Zeros(16);
+     bits(32) addend = Elem[operand3, e, 32];
+     Elem[result, e, 32] = FPMulAdd(addend, element1, element2, FPCR);
+ 
+ V[d] = result;
+

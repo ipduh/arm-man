@@ -1,0 +1,133 @@
+.nh
+.TH "VMOV (register) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOV (register)
+ Copy between FP registers
+
+ Copy between FP registers copies the contents of one FP register to another.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A2) and  T32 (T2).
+
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|0 0 0|. . . .|1 0|1 x|0|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Single-precision scalar(size == 10)
+ 
+ VMOV{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMOV{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ single_register = (size == '10');  advsimd = FALSE;
+ if single_register then
+     d = UInt(Vd:D);  m = UInt(Vm:M);
+ else
+     d = UInt(D:Vd);  m = UInt(M:Vm);  regs = 1;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|0 0 0|. . . .|1 0|1 x|0|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Single-precision scalar(size == 10)
+ 
+ VMOV{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMOV{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ single_register = (size == '10');  advsimd = FALSE;
+ if single_register then
+     d = UInt(Vd:D);  m = UInt(Vm:M);
+ else
+     d = UInt(D:Vd);  m = UInt(M:Vm);  regs = 1;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if single_register then
+         S[d] = S[m];
+     else
+         for r = 0 to regs-1
+             D[d+r] = D[m+r];
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if single_register then
+         S[d] = S[m];
+     else
+         for r = 0 to regs-1
+             D[d+r] = D[m+r];
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

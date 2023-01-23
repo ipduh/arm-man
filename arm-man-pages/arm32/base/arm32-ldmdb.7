@@ -1,0 +1,150 @@
+.nh
+.TH "LDMDB, LDMEA -- AArch32" "7" " "  "instruction" "general"
+.SS LDMDB, LDMEA
+ Load Multiple Decrement Before (Empty Ascending)
+
+ Load Multiple Decrement Before (Empty Ascending) loads multiple registers from
+ consecutive memory locations using an address from a base register. The
+ consecutive memory locations end just below this address, and the address of
+ the lowest of those locations can optionally be written back to the base
+ register.
+
+ The lowest-numbered register is loaded from the lowest memory address, through
+ to the highest-numbered register from the highest memory address. See also
+ Encoding of lists of general-purpose registers and the PC.
+
+ Armv8.2 permits the deprecation of some Load Multiple ordering behaviors in
+ AArch32 state, for more information see ARMv8.2-LSMAOC. The registers loaded
+ can include the PC, causing a branch to a loaded address. This is an
+ interworking branch, see Pseudocode description of operations on the AArch32
+ general-purpose registers and the PC. Related system instructions are LDM (User
+ registers) and LDM (exception return).
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16                               0
+          |     | | | | | |       |                               |
+  |. . . .|1 0 0|1|0|0|.|1|. . . .|. . . . . . . . . . . . . . . .|
+  |             | | | | | |       |
+  |             | | | | | `-Rn    `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ LDMDB{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ LDMEA{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ n = UInt(Rn);  registers = register_list;  wback = (W == '1');
+ if n == 15 || BitCount(registers) < 1 then UNPREDICTABLE;
+ if wback && registers<n> == '1' then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                           0
+                |   | | | |       | | |                           |
+   1 1 1 0 1 0 0|1 0|0|.|1|. . . .|.|.|. . . . . . . . . . . . . .|
+                |     | | |       | | |
+                `-opc | | `-Rn    | | `-register_list
+                      | `-L       | `-M
+                      `-W         `-P
+  
+  
+ 
+.SS T1
+ 
+ LDMDB{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ LDMEA{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ n = UInt(Rn);  registers = P:M:register_list;  wback = (W == '1');
+ if n == 15 || BitCount(registers) < 2 || (P == '1' && M == '1') then UNPREDICTABLE;
+ if wback && registers<n> == '1' then UNPREDICTABLE;
+ if registers<13> == '1' then UNPREDICTABLE;
+ if registers<15> == '1' && InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] - 4*BitCount(registers);
+     for i = 0 to 14
+         if registers<i> == '1' then
+             R[i] = MemA[address,4];  address = address + 4;
+     if registers<15> == '1' then
+         LoadWritePC(MemA[address,4]);
+     if wback && registers<n> == '0' then R[n] = R[n] - 4*BitCount(registers);
+     if wback && registers<n> == '1' then R[n] = bits(32) UNKNOWN;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+ <registers>
+  For encoding A1: is a list of one or more registers to be loaded, separated by
+  commas and surrounded by { and }.           The PC can be in the list.
+  Arm deprecates using these instructions with both the LR and the PC in the
+  list.
+
+ <registers>
+  Encoded in register_list
+  For encoding T1: is a list of one or more registers to be loaded, separated by
+  commas and surrounded by { and }. The registers in the list must be in the
+  range R0-R12, encoded in the "register_list" field, and can optionally contain
+  one of  the LR or the PC. If the LR is in the list, the "M" field is set to 1,
+  otherwise it defaults to 0. If the PC is in the list, the "P" field is set to
+  1, otherwise it defaults to 0.           If the PC is in the list:
+  The LR must not be in the list.             The instruction must be either
+  outside any IT block, or the last instruction in an IT block.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] - 4*BitCount(registers);
+     for i = 0 to 14
+         if registers<i> == '1' then
+             R[i] = MemA[address,4];  address = address + 4;
+     if registers<15> == '1' then
+         LoadWritePC(MemA[address,4]);
+     if wback && registers<n> == '0' then R[n] = R[n] - 4*BitCount(registers);
+     if wback && registers<n> == '1' then R[n] = bits(32) UNKNOWN;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

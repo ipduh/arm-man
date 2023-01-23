@@ -1,0 +1,109 @@
+.nh
+.TH "ADD (vectors, predicated)" "7" " "  "instruction" "sve"
+.SS ADD (vectors, predicated)
+ Add vectors (predicated)
+
+ Add active elements of the second source vector to corresponding elements of
+ the first source vector and destructively place the results in the
+ corresponding elements of the first source vector. Inactive elements in the
+ destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - add_z_p_zz_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |    13    10         5         0
+                  |   |     |   | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 0 0|0 0|0|0 0 0|. . .|. . . . .|. . . . .|
+                  |         |   |       |     |         |
+                  `-size    |   |       `-Pg  `-Zm      `-Zdn
+                            |   `-opc<0>
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ ADD     <Zdn>.<T>, <Pg>/M, <Zdn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = element1 + element2;
+     else
+         Elem[result, e, esize] = Elem[operand1, e, esize];
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = element1 + element2;
+     else
+         Elem[result, e, esize] = Elem[operand1, e, esize];
+ 
+ Z[dn] = result;
+

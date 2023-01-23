@@ -1,0 +1,152 @@
+.nh
+.TH "RSHRN, RSHRN2 -- A64" "7" " "  "instruction" "advsimd"
+.SS RSHRN, RSHRN2
+ Rounding Shift Right Narrow (immediate)
+
+ Rounding Shift Right Narrow (immediate). This instruction reads each unsigned
+ integer value from the vector in the source SIMD&FP register, right shifts each
+ result by an immediate value, writes the final result to a vector, and writes
+ the vector to the lower or upper half of the destination SIMD&FP register. The
+ destination vector elements are half as long as the source vector elements. The
+ results are rounded. For truncated results, see SHRN.
+
+ The RSHRN instruction writes the vector to the lower half of the destination
+ register and clears the upper half, while the RSHRN2 instruction writes the
+ vector to the upper half of the destination register without affecting the
+ other bits of the register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Vector - A64 - RSHRN_asimdshf_N
+ 
+                                                                   
+       29                                    10                    
+     30 |                                  11 |                    
+   31 | |          23      19    16      12 | |         5         0
+    | | |           |       |     |       | | |         |         |
+   0|.|0|0 1 1 1 1 0|. . . .|. . .|1 0 0 0|1|1|. . . . .|. . . . .|
+    | |             |       |             |   |         |
+    | `-U           |       `-immb        |   `-Rn      `-Rd
+    `-Q             `-immh(!= 0000)       `-op
+  
+  
+ 
+.SS Vector
+ 
+ RSHRN{2}  <Vd>.<Tb>, <Vn>.<Ta>, #<shift>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if immh == '0000' then SEE(asimdimm);
+ if immh<3> == '1' then UNDEFINED;
+ integer esize = 8 << HighestSetBit(immh);
+ integer datasize = 64;
+ integer part = UInt(Q);
+ integer elements = datasize DIV esize;
+ 
+ integer shift = (2 * esize) - UInt(immh:immb);
+ boolean round = (op == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize*2) operand = V[n];
+ bits(datasize) result;
+ integer round_const = if round then (1 << (shift - 1)) else 0;
+ integer element;
+ 
+ for e = 0 to elements-1
+     element = (UInt(Elem[operand, e, 2*esize]) + round_const) >> shift;
+     Elem[result, e, esize] = element<esize-1:0>;
+ 
+ Vpart[d, part] = result;
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Tb>
+  Encoded in immh:Q
+  Is an arrangement specifier,
+
+  immh Q <Tb>                                 
+  0000 x SEE Advanced SIMD modified immediate 
+  0001 0 8B                                   
+  0001 1 16B                                  
+  001x 0 4H                                   
+  001x 1 8H                                   
+  01xx 0 2S                                   
+  01xx 1 4S                                   
+  1xxx x RESERVED                             
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Ta>
+  Encoded in immh
+  Is an arrangement specifier,
+
+  immh <Ta>                                 
+  0000 SEE Advanced SIMD modified immediate 
+  0001 8H                                   
+  001x 4S                                   
+  01xx 2D                                   
+  1xxx RESERVED                             
+
+ <shift>
+  Encoded in immh:immb
+  Is the right shift amount, in the range 1 to the destination element width in
+  bits,
+
+  immh <shift>                              
+  0000 SEE Advanced SIMD modified immediate 
+  0001 (16-UInt(immh:immb))                 
+  001x (32-UInt(immh:immb))                 
+  01xx (64-UInt(immh:immb))                 
+  1xxx RESERVED                             
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize*2) operand = V[n];
+ bits(datasize) result;
+ integer round_const = if round then (1 << (shift - 1)) else 0;
+ integer element;
+ 
+ for e = 0 to elements-1
+     element = (UInt(Elem[operand, e, 2*esize]) + round_const) >> shift;
+     Elem[result, e, esize] = element<esize-1:0>;
+ 
+ Vpart[d, part] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

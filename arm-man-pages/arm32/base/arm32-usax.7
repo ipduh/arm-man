@@ -1,0 +1,114 @@
+.nh
+.TH "USAX -- AArch32" "7" " "  "instruction" "general"
+.SS USAX
+ Unsigned Subtract and Add with Exchange
+
+ Unsigned Subtract and Add with Exchange exchanges the two halfwords of the
+ second operand, performs one unsigned 16-bit integer subtraction and one
+ unsigned 16-bit addition, and writes the results to the destination register.
+ It sets PSTATE.GE according to the results.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                                           11 |                    
+         28        23    20      16      12 | | 9 8 7   5 4       0
+          |         |     |       |       | | | | | |   | |       |
+  |. . . .|0 1 1 0 0|1 0 1|. . . .|. . . .|1|1|1|1|0|1 0|1|. . . .|
+  |                 |     |       |               | |     |
+  `-cond(!= 1111)   `-op1 `-Rn    `-Rd            | `-op2 `-Rm
+                                                  `-B
+  
+  
+ 
+.SS A1
+ 
+ USAX{<c>}{<q>} {<Rd>,} <Rn>, <Rm>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);
+ if d == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                   08    05      01      12       8 7 6 5 4       0
+                    |     |       |       |       | | | | |       |
+   1 1 1 1 1 0 1 0 1|1 1 0|. . . .|1 1 1 1|. . . .|0|1|0|0|. . . .|
+                    |     |               |         | | | |
+                    `-op1 `-Rn            `-Rd      | | | `-Rm
+                                                    | | `-S
+                                                    | `-H
+                                                    `-U
+  
+  
+ 
+.SS T1
+ 
+ USAX{<c>}{<q>} {<Rd>,} <Rn>, <Rm>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);
+ if d == 15 || n == 15 || m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     sum  = UInt(R[n]<15:0>) + UInt(R[m]<31:16>);
+     diff = UInt(R[n]<31:16>) - UInt(R[m]<15:0>);
+     R[d]<15:0>  = sum<15:0>;
+     R[d]<31:16> = diff<15:0>;
+     PSTATE.GE<1:0> = if sum  >= 0x10000 then '11' else '00';
+     PSTATE.GE<3:2> = if diff >= 0 then '11' else '00';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the first general-purpose source register, encoded in the "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  Is the second general-purpose source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     sum  = UInt(R[n]<15:0>) + UInt(R[m]<31:16>);
+     diff = UInt(R[n]<31:16>) - UInt(R[m]<15:0>);
+     R[d]<15:0>  = sum<15:0>;
+     R[d]<31:16> = diff<15:0>;
+     PSTATE.GE<1:0> = if sum  >= 0x10000 then '11' else '00';
+     PSTATE.GE<3:2> = if diff >= 0 then '11' else '00';
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,132 @@
+.nh
+.TH "FMINV -- A64" "7" " "  "instruction" "advsimd"
+.SS FMINV
+ Floating-point Minimum across Vector
+
+ Floating-point Minimum across Vector. This instruction compares all the vector
+ elements in the source SIMD&FP register, and writes the smallest of the values
+ as a scalar to the destination SIMD&FP register. All the values in this
+ instruction are floating-point values.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR or a
+ synchronous exception being generated. For more information, see Floating-point
+ exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Half-precision and Single-precision and double-precision
+
+.SS Half-precision - A64 - FMINV_asimdall_only_H
+ 
+                                                                   
+       29            22                                            
+     30 |          23 |                                            
+   31 | |        24 | |        17        12  10         5         0
+    | | |         | | |         |         |   |         |         |
+   0|.|0|0 1 1 1 0|1|0|1 1 0 0 0|0 1 1 1 1|1 0|. . . . .|. . . . .|
+    | |           |             |             |         |
+    | `-U         `-o1          `-opcode      `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Half-precision
+ 
+ FMINV  <V><d>, <Vn>.<T>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer esize = 16;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ ReduceOp op = if o1 == '1' then ReduceOp_FMIN else ReduceOp_FMAX;
+.SS Single-precision and double-precision - A64 - FMINV_asimdall_only_SD
+ 
+                                                                   
+       29            22                                            
+     30 |          23 |                                            
+   31 | |        24 | |        17        12  10         5         0
+    | | |         | | |         |         |   |         |         |
+   0|.|1|0 1 1 1 0|1|.|1 1 0 0 0|0 1 1 1 1|1 0|. . . . .|. . . . .|
+    | |           | |           |             |         |
+    | `-U         | `-sz        `-opcode      `-Rn      `-Rd
+    `-Q           `-o1
+  
+  
+ 
+.SS Single-precision and double-precision
+ 
+ FMINV  <V><d>, <Vn>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if sz:Q != '01' then UNDEFINED;
+ 
+ integer esize = 32 << UInt(sz);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ ReduceOp op = if o1 == '1' then ReduceOp_FMIN else ReduceOp_FMAX;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ V[d] = Reduce(op, operand, esize);
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  For the half-precision variant: is the destination width specifier, H.
+
+ <V>
+  Encoded in sz
+  For the single-precision and double-precision variant: is the destination
+  width specifier,
+
+  sz <V>      
+  0  S        
+  1  RESERVED 
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <T>
+  Encoded in Q
+  For the half-precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in Q:sz
+  For the single-precision and double-precision variant: is an arrangement
+  specifier,
+
+  Q sz <T>      
+  0 x  RESERVED 
+  1 0  4S       
+  1 1  RESERVED 
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ V[d] = Reduce(op, operand, esize);
+

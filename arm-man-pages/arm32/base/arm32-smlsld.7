@@ -1,0 +1,123 @@
+.nh
+.TH "SMLSLD, SMLSLDX -- AArch32" "7" " "  "instruction" "general"
+.SS SMLSLD, SMLSLDX
+ Signed Multiply Subtract Long Dual
+
+ Signed Multiply Subtract Long Dual performs two signed 16 x 16-bit
+ multiplications. It adds the difference of the products to a 64-bit accumulate
+ operand.
+
+ Optionally, the instruction can exchange the halfwords of the second operand
+ before performing the arithmetic. This produces top x bottom and bottom x top
+ multiplication.
+
+ Overflow is possible during this instruction, but only as a result of the
+ 64-bit addition. This overflow is not detected if it occurs. Instead, the
+ result wraps around modulo 264.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                                                                   
+         28        23    20      16      12       8   6 5 4       0
+          |         |     |       |       |       |   | | |       |
+  |. . . .|0 1 1 1 0|1 0 0|. . . .|. . . .|. . . .|0 1|.|1|. . . .|
+  |                 |     |       |       |           |   |
+  `-cond(!= 1111)   `-op1 `-RdHi  `-RdLo  `-Rm        `-M `-Rn
+  
+  
+ 
+.SS SMLSLD(M == 0)
+ 
+ SMLSLD{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLSLDX(M == 1)
+ 
+ SMLSLDX{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);  m_swap = (M == '1');
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ if dHi == dLo then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                   08    05      01      12       8     5 4       0
+                    |     |       |       |       |     | |       |
+   1 1 1 1 1 0 1 1 1|1 0 1|. . . .|. . . .|. . . .|1 1 0|.|. . . .|
+                    |     |       |       |             | |
+                    `-op1 `-Rn    `-RdLo  `-RdHi        | `-Rm
+                                                        `-M
+  
+  
+ 
+.SS SMLSLD(M == 0)
+ 
+ SMLSLD{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+.SS SMLSLDX(M == 1)
+ 
+ SMLSLDX{<c>}{<q>} <RdLo>, <RdHi>, <Rn>, <Rm>
+ 
+ dLo = UInt(RdLo);  dHi = UInt(RdHi);  n = UInt(Rn);  m = UInt(Rm);  m_swap = (M == '1');
+ if dLo == 15 || dHi == 15 || n == 15 || m == 15 then UNPREDICTABLE;
+ // Armv8-A removes UPREDICTABLE for R13
+ if dHi == dLo then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand2 = if m_swap then ROR(R[m],16) else R[m];
+     product1 = SInt(R[n]<15:0>) * SInt(operand2<15:0>);
+     product2 = SInt(R[n]<31:16>) * SInt(operand2<31:16>);
+     result = product1 - product2 + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <RdLo>
+  Encoded in RdLo
+  Is the general-purpose source register holding the lower 32 bits of the
+  addend, and the destination register for the lower 32 bits of the result,
+  encoded in the "RdLo" field.
+
+ <RdHi>
+  Encoded in RdHi
+  Is the general-purpose source register holding the upper 32 bits of the
+  addend, and the destination register for the upper 32 bits of the result,
+  encoded in the "RdHi" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the first general-purpose source register, encoded in the "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  Is the second general-purpose source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand2 = if m_swap then ROR(R[m],16) else R[m];
+     product1 = SInt(R[n]<15:0>) * SInt(operand2<15:0>);
+     product2 = SInt(R[n]<31:16>) * SInt(operand2<31:16>);
+     result = product1 - product2 + SInt(R[dHi]:R[dLo]);
+     R[dHi] = result<63:32>;
+     R[dLo] = result<31:0>;
+

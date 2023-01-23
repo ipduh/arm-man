@@ -1,0 +1,75 @@
+.nh
+.TH "SETPAN -- AArch32" "7" " "  "instruction" "general"
+.SS SETPAN
+ Set Privileged Access Never
+
+ Set Privileged Access Never writes a new value to PSTATE.PAN.
+
+ This instruction is available only in privileged mode and it is a NOP when
+ executed in User mode.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+                         20 | | |16 | | |12 | | 9 8       4 3 2 1 0
+                          | | | | | | | | | | | | |       | | | | |
+   1 1 1 1 0 0 0 1 0 0 0 1|0|0|0|0|0|0|0|0|0|0|.|0|0 0 0 0|0|0|0|0|
+                                              |
+                                              `-imm1
+  
+  
+ 
+.SS A1
+ 
+ SETPAN{<q>} #<imm>
+ 
+ if !HavePANExt() then UNDEFINED;
+ value = imm1;
+.SS T1 - T32
+ 
+                              2                                    
+                            3 |                                    
+                          4 | |   0                                
+                        5 | | | 1 |                                
+                        | | | | | |                                
+   1 0 1 1 0 1 1 0 0 0 0|1|.|0|0|0|                                
+                          |
+                          `-imm1
+  
+  
+ 
+.SS T1
+ 
+ SETPAN{<q>} #<imm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HavePANExt() then UNDEFINED;
+ value = imm1;
+ 
+ EncodingSpecificOperations();
+ if PSTATE.EL != EL0 then
+     PSTATE.PAN = value;
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <imm>
+  Encoded in imm1
+  Is the unsigned immediate 0 or 1, encoded in the "imm1" field.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ if PSTATE.EL != EL0 then
+     PSTATE.PAN = value;
+

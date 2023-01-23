@@ -1,0 +1,137 @@
+.nh
+.TH "CMN (extended register) -- A64" "7" " "  "alias" "general"
+.SS CMN (extended register)
+ CMN is an alias of ADDS
+
+ Compare Negative (extended register)
+
+ Compare Negative (extended register) adds a register value and a sign or zero-
+ extended register value, followed by an optional left shift amount. The
+ argument that is extended from the <Rm> register can be a byte, halfword, word,
+ or doubleword. It updates the condition flags based on the result, and discards
+ the result.
+
+
+
+.SS Setting the condition flags - A64 - s
+ 
+                                                                   
+       29                                                          
+     30 |              21                                          
+   31 | |        24  22 |        16    13    10         5         0
+    | | |         |   | |         |     |     |         |         |
+  |.|0|1|0 1 0 1 1|0 0|1|. . . . .|. . .|. . .|. . . . .|1 1 1 1 1|
+  | | |           |     |         |     |     |         |
+  | | `-S         `-opt `-Rm      |     |     `-Rn      `-Rd
+  | `-op                          |     `-imm3
+  `-sf                            `-option
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CMN  <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
+ 
+ ADDS WZR, <Wn|WSP>, <Wm>{, <extend> {#<amount>}}
+.SS 64-bit(sf == 1)
+ 
+ CMN  <Xn|SP>, <R><m>{, <extend> {#<amount>}}
+ 
+ ADDS XZR, <Xn|SP>, <R><m>{, <extend> {#<amount>}}
+ 
+
+.SS Assembler Symbols
+
+ <Wn|WSP>
+  Encoded in Rn
+  Is the 32-bit name of the first source general-purpose register or stack
+  pointer, encoded in the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the second general-purpose source register, encoded in
+  the "Rm" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the first source general-purpose register or stack
+  pointer, encoded in the "Rn" field.
+
+ <R>
+  Encoded in option
+  Is a width specifier,
+
+  option <R> 
+  00x    W   
+  010    W   
+  x11    X   
+  10x    W   
+  110    W   
+
+ <m>
+  Encoded in Rm
+  Is the number [0-30] of the second general-purpose source register or the name
+  ZR (31), encoded in the "Rm" field.
+
+ <extend>
+  Encoded in option
+  For the 32-bit variant: is the extension to be applied to the second source
+  operand,
+
+  option <extend> 
+  000    UXTB     
+  001    UXTH     
+  010    LSL|UXTW 
+  011    UXTX     
+  100    SXTB     
+  101    SXTH     
+  110    SXTW     
+  111    SXTX     
+
+  If "Rn" is '11111' (WSP) and "option" is '010' then LSL is preferred, but may
+  be omitted when "imm3" is '000'. In all other cases <extend> is required and
+  must be UXTW when "option" is '010'.
+
+ <extend>
+  Encoded in option
+  For the 64-bit variant: is the extension to be applied to the second source
+  operand,
+
+  option <extend> 
+  000    UXTB     
+  001    UXTH     
+  010    UXTW     
+  011    LSL|UXTX 
+  100    SXTB     
+  101    SXTH     
+  110    SXTW     
+  111    SXTX     
+
+  If "Rn" is '11111' (SP) and "option" is '011' then LSL is preferred, but may
+  be omitted when "imm3" is '000'. In all other cases <extend> is required and
+  must be UXTX when "option" is '011'.
+
+ <amount>
+  Encoded in imm3
+  Is the left shift amount to be applied after extension in the range 0 to 4,
+  defaulting to 0, encoded in the "imm3" field. It must be absent when <extend>
+  is absent, is required when <extend> is LSL, and is optional when <extend> is
+  present but not LSL.
+
+
+
+.SS Operation
+
+ The manual of ADDS gives pseudocode for CMN.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

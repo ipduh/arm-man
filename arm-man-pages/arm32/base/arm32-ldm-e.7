@@ -1,0 +1,147 @@
+.nh
+.TH "LDM (exception return) -- AArch32" "7" " "  "instruction" "general"
+.SS LDM (exception return)
+ Load Multiple (exception return)
+
+ Load Multiple (exception return) loads multiple registers from consecutive
+ memory locations using an address from a base register. The SPSR of the current
+ mode is copied to the CPSR. An address adjusted by the size of the data loaded
+ can optionally be written back to the base register.
+
+ The registers loaded include the PC. The word loaded for the PC is treated as
+ an address and a branch occurs to that address.
+
+ Load Multiple (exception return) is:
+
+ undefined in Hyp mode.
+
+ unpredictable in debug state, and in User mode and System mode.
+
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20        15                              
+         28    25 | | |21 |      16 |                             0
+          |     | | | | | |       | |                             |
+  |. . . .|1 0 0|.|.|1|.|1|. . . .|1|. . . . . . . . . . . . . . .|
+  |             | | | | | |         |
+  |             | | | | | `-Rn      `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ LDM{<amode>}{<c>}{<q>} <Rn>{!}, <registers_with_pc>^
+ 
+ n = UInt(Rn);  registers = register_list;
+ wback = (W == '1');  increment = (U == '1');  wordhigher = (P == U);
+ if n == 15 then UNPREDICTABLE;
+ if wback && registers<n> == '1' then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.M IN {M32_User,M32_System} then
+         UNPREDICTABLE;                        // UNDEFINED or NOP
+     else
+         length = 4*BitCount(registers) + 4;
+         address = if increment then R[n] else R[n]-length;
+         if wordhigher then address = address+4;
+ 
+         for i = 0 to 14
+             if registers<i> == '1' then
+                 R[i] = MemA[address,4];  address = address + 4;
+         new_pc_value = MemA[address,4];
+ 
+         if wback && registers<n> == '0' then R[n] = if increment then R[n]+length else R[n]-length;
+         if wback && registers<n> == '1' then R[n] = bits(32) UNKNOWN;
+ 
+         AArch32.ExceptionReturn(new_pc_value, SPSR[]);
+ 
+
+.SS Assembler Symbols
+
+ <amode>
+  is one of:                                       DADecrement After. The
+  consecutive memory addresses end at the address in the base register. Encoded
+  as P = 0, U = 0.                                         FAFull Ascending. For
+  this instruction, a synonym for DA.
+  DBDecrement Before. The consecutive memory addresses end one word below the
+  address in the base register. Encoded as P = 1, U = 0.
+  EAEmpty Ascending. For this instruction, a synonym for DB.
+  IAIncrement After. The consecutive memory addresses start at the address in
+  the base register. This is the default. Encoded as P = 0, U = 1.
+  FDFull Descending. For this instruction, a synonym for IA.
+  IBIncrement Before. The consecutive memory addresses start one word above the
+  address in the base register. Encoded as P = 1, U = 1.
+  EDEmpty Descending. For this instruction, a synonym for IB.
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+ <registers_with_pc>
+  Is a list of one or more registers, separated by commas and surrounded by {
+  and }. It specifies the set of registers to be loaded. The registers are
+  loaded with the lowest-numbered register from the lowest memory address,
+  through to the highest-numbered register from the highest memory address. The
+  PC must be specified in the register list, and the instruction causes a branch
+  to the address (data) loaded into the PC. See also Encoding of lists of
+  general-purpose registers and the PC.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.M IN {M32_User,M32_System} then
+         UNPREDICTABLE;                        // UNDEFINED or NOP
+     else
+         length = 4*BitCount(registers) + 4;
+         address = if increment then R[n] else R[n]-length;
+         if wordhigher then address = address+4;
+ 
+         for i = 0 to 14
+             if registers<i> == '1' then
+                 R[i] = MemA[address,4];  address = address + 4;
+         new_pc_value = MemA[address,4];
+ 
+         if wback && registers<n> == '0' then R[n] = if increment then R[n]+length else R[n]-length;
+         if wback && registers<n> == '1' then R[n] = bits(32) UNKNOWN;
+ 
+         AArch32.ExceptionReturn(new_pc_value, SPSR[]);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

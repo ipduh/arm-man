@@ -1,0 +1,103 @@
+.nh
+.TH "NOP -- AArch32" "7" " "  "instruction" "general"
+.SS NOP
+ No Operation
+
+ No Operation does nothing. This instruction can be used for instruction
+ alignment purposes.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20  18  16 | | |12                       0
+          |         | |   |   |   | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0|0 0|1|1|1|1|0 0 0 0 0 0 0 0 0 0 0 0|
+  |                 |     |   |           |
+  `-cond(!= 1111)   `-R   |   `-imm4<1:0> `-imm12
+                          `-imm4<3:2>
+  
+  
+ 
+.SS A1
+ 
+ NOP{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                  8       4       0                                
+                  |       |       |                                
+   1 0 1 1 1 1 1 1|0 0 0 0|0 0 0 0|                                
+                  |
+                  `-hint
+  
+  
+ 
+.SS T1
+ 
+ NOP{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T2 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 0|0 0 0 0|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T2
+ 
+ NOP{<c>}.W
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     // Do nothing
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     // Do nothing
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

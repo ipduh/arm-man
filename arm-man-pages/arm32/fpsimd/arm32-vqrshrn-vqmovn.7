@@ -1,0 +1,93 @@
+.nh
+.TH "VQRSHRN (zero) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VQRSHRN (zero)
+ VQRSHRN is an alias of VQMOVN
+
+ Vector Saturating Rounding Shift Right, Narrow
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |     8   6 5 4       0
+                    | |   |   |   |       | |     |   | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0|1 x|.|0|. . . .|
+                    |     |   |   |               |   |   |
+                    `-D   |   |   `-Vd            |   `-M `-Vm
+                          |   `-opc1              `-op
+                          `-size
+  
+  
+ 
+.SS Signed result
+ 
+ VQRSHRN{<c>}{<q>}.<dt> <Dd>, <Qm>, #0
+ 
+ VQMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |     8   6 5 4       0
+                    | |   |   |   |       | |     |   | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0|1 x|.|0|. . . .|
+                    |     |   |   |               |   |   |
+                    `-D   |   |   `-Vd            |   `-M `-Vm
+                          |   `-opc1              `-op
+                          `-size
+  
+  
+ 
+.SS Signed result
+ 
+ VQRSHRN{<c>}{<q>}.<dt> <Dd>, <Qm>, #0
+ 
+ VQMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in op<0>:size
+  Is the data type for the elements of the operand,
+
+  op<0> size <dt>     
+  0     00   S16      
+  0     01   S32      
+  0     10   S64      
+  0     11   RESERVED 
+  1     00   U16      
+  1     01   U32      
+  1     10   U64      
+  1     11   RESERVED 
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ The manual of VQMOVN gives pseudocode for VQRSHRN.

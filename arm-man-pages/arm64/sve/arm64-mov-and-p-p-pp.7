@@ -1,0 +1,62 @@
+.nh
+.TH "MOV (predicate, predicated, zeroing)" "7" " "  "alias" "sve"
+.SS MOV (predicate, predicated, zeroing)
+ MOV is an alias of AND
+
+ Move predicates (zeroing)
+
+ Read active elements from the source predicate and place in the corresponding
+ elements of the destination predicate. Inactive elements in the destination
+ predicate register are set to zero. Does not set the condition flags.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS Not setting the condition flags - A64 - and_p_p_pp_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|0|0 0|. . . .|0 1|. . . .|0|. . . .|0|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS Not setting the condition flags
+ 
+ MOV     <Pd>.B, <Pg>/Z, <Pn>.B
+ 
+ AND <Pd>.B, <Pg>/Z, <Pn>.B, <Pn>.B
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+
+
+.SS Operation
+
+ The manual of AND gives pseudocode for MOV.

@@ -1,0 +1,82 @@
+.nh
+.TH "SHA1SU1 -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA1SU1
+ SHA1 schedule update 1
+
+ SHA1 schedule update 1.
+
+
+
+.SS Advanced SIMD - A64 - SHA1SU1_VV_cryptosha2
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22        17        12  10         5         0
+                  |   |         |         |   |         |         |
+   0 1 0 1 1 1 1 0|0 0|1 0 1 0 0|0 0 0 0 1|1 0|. . . . .|. . . . .|
+                  |             |             |         |
+                  `-size        `-opcode      `-Rn      `-Rd
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA1SU1  <Vd>.4S, <Vn>.4S
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ if !HaveSHA1Ext() then UNDEFINED;
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) operand1 = V[d];
+ bits(128) operand2 = V[n];
+ bits(128) result;
+ bits(128) T = operand1 EOR LSR(operand2, 32);
+ result<31:0>   = ROL(T<31:0>,   1);
+ result<63:32>  = ROL(T<63:32>,  1);
+ result<95:64>  = ROL(T<95:64>,  1);
+ result<127:96> = ROL(T<127:96>, 1) EOR ROL(T<31:0>, 2);
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP source and destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the second SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) operand1 = V[d];
+ bits(128) operand2 = V[n];
+ bits(128) result;
+ bits(128) T = operand1 EOR LSR(operand2, 32);
+ result<31:0>   = ROL(T<31:0>,   1);
+ result<63:32>  = ROL(T<63:32>,  1);
+ result<95:64>  = ROL(T<95:64>,  1);
+ result<127:96> = ROL(T<127:96>, 1) EOR ROL(T<31:0>, 2);
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

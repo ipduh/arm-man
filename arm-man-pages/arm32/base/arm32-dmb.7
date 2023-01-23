@@ -1,0 +1,168 @@
+.nh
+.TH "DMB -- AArch32" "7" " "  "instruction" "general"
+.SS DMB
+ Data Memory Barrier
+
+ Data Memory Barrier is a memory barrier that ensures the ordering of
+ observations of memory accesses, see Data Memory Barrier (DMB).
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+                         20 | | |16 | | |12 | | 9 8       4       0
+                          | | | | | | | | | | | | |       |       |
+   1 1 1 1 0 1 0 1 0 1 1 1|1|1|1|1|1|1|1|1|0|0|0|0|0 1 0 1|. . . .|
+                                                  |       |
+                                                  |       `-option
+                                                  `-opcode
+  
+  
+ 
+.SS A1
+ 
+ DMB{<c>}{<q>} {<option>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |10 9 8       4       0
+                          | | | | |   | | | | | | |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 1|1|1|1|1|1 0|0|0|1|1|1|1|0 1 0 1|. . . .|
+                                                  |       |
+                                                  `-opc   `-option
+  
+  
+ 
+.SS T1
+ 
+ DMB{<c>}{<q>} {<option>}
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     case option of
+         when '0001'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_Reads;
+         when '0010'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_Writes;
+         when '0011'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_All;
+         when '0101'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_Reads;
+         when '0110'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_Writes;
+         when '0111'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_All;
+         when '1001'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_Reads;
+         when '1010'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_Writes;
+         when '1011'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_All;
+         when '1101'  domain = MBReqDomain_FullSystem;      types = MBReqTypes_Reads;
+         when '1110'  domain = MBReqDomain_FullSystem;      types = MBReqTypes_Writes;
+         otherwise    domain = MBReqDomain_FullSystem;      types = MBReqTypes_All;
+ 
+     if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then
+         if HCR.BSU == '11' then
+             domain = MBReqDomain_FullSystem;
+         if HCR.BSU == '10' && domain != MBReqDomain_FullSystem then
+             domain = MBReqDomain_OuterShareable;
+         if HCR.BSU == '01' && domain == MBReqDomain_Nonshareable then
+             domain = MBReqDomain_InnerShareable;
+ 
+     DataMemoryBarrier(domain, types);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <option>
+  Encoded in option
+  Specifies an optional limitation on the barrier operation. Values are:
+  SYFull system is the required shareability domain, reads and writes are the
+  required access types, both before and after the barrier instruction. Can be
+  omitted. This option is referred to as the full system barrier. Encoded as
+  option = 0b1111.                                         STFull system is the
+  required shareability domain, writes are the required access type, both before
+  and after the barrier instruction. SYST is a synonym for ST. Encoded as option
+  = 0b1110.                                         LDFull system is the
+  required shareability domain, reads are the required access type before the
+  barrier instruction, and reads and writes are the required access types after
+  the barrier instruction. Encoded as option = 0b1101.
+  ISHInner Shareable is the required shareability domain, reads and writes are
+  the required access types, both before and after the barrier instruction.
+  Encoded as option = 0b1011.                                         ISHSTInner
+  Shareable is the required shareability domain, writes are the required access
+  type, both before and after the barrier instruction. Encoded as option =
+  0b1010.                                         ISHLDInner Shareable is the
+  required shareability domain, reads are the required access type before the
+  barrier instruction, and reads and writes are the required access types after
+  the barrier instruction. Encoded as option = 0b1001.
+  NSHNon-shareable is the required shareability domain, reads and writes are the
+  required access, both before and after the barrier instruction. Encoded as
+  option = 0b0111.                                         NSHSTNon-shareable is
+  the required shareability domain, writes are the required access type both
+  before and after the barrier instruction. Encoded as option = 0b0110.
+  NSHLDNon-shareable is the required shareability domain, reads are the required
+  access type before the barrier instruction, and reads and writes are the
+  required access types after the barrier instruction. Encoded as option =
+  0b0101.                                         OSHOuter Shareable is the
+  required shareability domain, reads and writes are the required access types,
+  both before and after the barrier instruction. Encoded as option = 0b0011.
+  OSHSTOuter Shareable is the required shareability domain, writes are the
+  required access type, both before and after the barrier instruction. Encoded
+  as option = 0b0010.                                         OSHLDOuter
+  Shareable is the required shareability domain, reads are the required access
+  type before the barrier instruction, and reads and writes are the required
+  access types after the barrier instruction. Encoded as option = 0b0001.
+  For more information on whether an access is before or after a barrier
+  instruction, see Data Memory Barrier (DMB). All other encodings of option are
+  reserved. All unsupported and reserved options must execute as a full system
+  DMB operation, but software must not rely on this behavior.
+  The instruction supports the following alternative <option> values, but Arm
+  recommends that software does not use these alternative values:
+  SH as an alias for ISH.               SHST as an alias for ISHST.
+  UN as an alias for NSH.               UNST as an alias for NSHST.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     case option of
+         when '0001'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_Reads;
+         when '0010'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_Writes;
+         when '0011'  domain = MBReqDomain_OuterShareable;  types = MBReqTypes_All;
+         when '0101'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_Reads;
+         when '0110'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_Writes;
+         when '0111'  domain = MBReqDomain_Nonshareable;    types = MBReqTypes_All;
+         when '1001'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_Reads;
+         when '1010'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_Writes;
+         when '1011'  domain = MBReqDomain_InnerShareable;  types = MBReqTypes_All;
+         when '1101'  domain = MBReqDomain_FullSystem;      types = MBReqTypes_Reads;
+         when '1110'  domain = MBReqDomain_FullSystem;      types = MBReqTypes_Writes;
+         otherwise    domain = MBReqDomain_FullSystem;      types = MBReqTypes_All;
+ 
+     if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then
+         if HCR.BSU == '11' then
+             domain = MBReqDomain_FullSystem;
+         if HCR.BSU == '10' && domain != MBReqDomain_FullSystem then
+             domain = MBReqDomain_OuterShareable;
+         if HCR.BSU == '01' && domain == MBReqDomain_Nonshareable then
+             domain = MBReqDomain_InnerShareable;
+ 
+     DataMemoryBarrier(domain, types);
+

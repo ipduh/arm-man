@@ -1,0 +1,83 @@
+.nh
+.TH "SYS -- A64" "7" " "  "instruction" "system"
+.SS SYS
+ System instruction
+
+ System instruction. For more information, see Op0 equals 0b01, cache
+ maintenance, TLB maintenance, and address translation instructions for the
+ encodings of System instructions.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|. . .|. . . .|. . . .|. . .|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ SYS  #<op1>, <Cn>, <Cm>, #<op2>{, <Xt>}
+ 
+ AArch64.CheckSystemAccess('01', op1, CRn, CRm, op2, Rt, L);
+ 
+ integer t = UInt(Rt);
+ 
+ integer sys_op0 = 1;
+ integer sys_op1 = UInt(op1);
+ integer sys_op2 = UInt(op2);
+ integer sys_crn = UInt(CRn);
+ integer sys_crm = UInt(CRm);
+ boolean has_result = (L == '1');
+ 
+ if has_result then
+     // No architecturally defined instructions here.
+     X[t] = AArch64.SysInstrWithResult(sys_op0, sys_op1, sys_crn, sys_crm, sys_op2);
+ else
+     AArch64.SysInstr(sys_op0, sys_op1, sys_crn, sys_crm, sys_op2, X[t]);
+ 
+
+.SS Assembler Symbols
+
+ <op1>
+  Encoded in op1
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op1"
+  field.
+
+ <Cn>
+  Encoded in CRn
+  Is a name 'Cn', with 'n' in the range 0 to 15, encoded in the "CRn" field.
+
+ <Cm>
+  Encoded in CRm
+  Is a name 'Cm', with 'm' in the range 0 to 15, encoded in the "CRm" field.
+
+ <op2>
+  Encoded in op2
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op2"
+  field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the optional general-purpose source register, defaulting
+  to '11111', encoded in the "Rt" field.
+
+
+
+.SS Operation
+
+ if has_result then
+     // No architecturally defined instructions here.
+     X[t] = AArch64.SysInstrWithResult(sys_op0, sys_op1, sys_crn, sys_crm, sys_op2);
+ else
+     AArch64.SysInstr(sys_op0, sys_op1, sys_crn, sys_crm, sys_op2, X[t]);
+

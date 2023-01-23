@@ -1,0 +1,98 @@
+.nh
+.TH "SHA1H -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS SHA1H
+ SHA1 fixed rotate
+
+ SHA1 fixed rotate.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|0 1|. . . .|0|0 1 0 1|1|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS A1
+ 
+ SHA1H.32 <Qd>, <Qm>
+ 
+ if !HaveSHA1Ext() then UNDEFINED;
+ if size != '10' then UNDEFINED;
+ if Vd<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|0 1|. . . .|0|0 1 0 1|1|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS T1
+ 
+ SHA1H.32 <Qd>, <Qm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveSHA1Ext() then UNDEFINED;
+ if size != '10' then UNDEFINED;
+ if Vd<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckCryptoEnabled32();
+     Q[d>>1] = ZeroExtend(ROL(Q[m>>1]<31:0>, 30), 128);
+ 
+
+.SS Assembler Symbols
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckCryptoEnabled32();
+     Q[d>>1] = ZeroExtend(ROL(Q[m>>1]<31:0>, 30), 128);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

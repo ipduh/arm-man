@@ -1,0 +1,194 @@
+.nh
+.TH "VCVT (between floating-point and fixed-point, Advanced SIMD) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVT (between floating-point and fixed-point, Advanced SIMD)
+ Vector Convert between floating-point and fixed-point
+
+ Vector Convert between floating-point and fixed-point converts each element in
+ a vector from floating-point to fixed-point, or from fixed-point to floating-
+ point, and places the results in a second vector.
+
+ The vector elements are the same type, and are floating-point numbers or
+ integers. Signed and unsigned integers are distinct.
+
+ The floating-point to fixed-point operation uses the Round towards Zero
+ rounding mode. The fixed-point to floating-point operation uses the Round to
+ Nearest rounding mode.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD one register and modified immediate for
+ the T32 instruction set, or Advanced SIMD one register and modified immediate
+ for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |          16      12  10   8 7 6 5 4       0
+                | | | |           |       |   |   | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. . . . . .|. . . .|1 1|. .|0|.|.|1|. . . .|
+                |   | |           |           |   | | |   |
+                `-U | `-imm6      `-Vd        |   | | `-M `-Vm
+                    `-D                       |   | `-Q
+                                              |   `-L
+                                              `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(imm6 != 000xxx && Q == 0)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Dd>, <Dm>, #<fbits>
+.SS 128-bit SIMD vector(imm6 != 000xxx && Q == 1)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Qd>, <Qm>, #<fbits>
+ 
+ if imm6 == '000xxx' then SEE "Related encodings";
+ if op<1> == '0' && !HaveFP16Ext() then UNDEFINED;
+ if op<1> == '0' && imm6 == '10xxxx' then UNDEFINED;
+ if imm6 == '0xxxxx' then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ to_fixed = (op<0> == '1');  frac_bits = 64 - UInt(imm6);
+ unsigned = (U == '1');
+ case op<1> of
+      when '0' esize = 16; elements = 4;
+      when '1' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |          01      12  10   8 7 6 5 4       0
+        | |         | |           |       |   |   | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. . . . . .|. . . .|1 1|. .|0|.|.|1|. . . .|
+        |           | |           |           |   | | |   |
+        `-U         | `-imm6      `-Vd        |   | | `-M `-Vm
+                    `-D                       |   | `-Q
+                                              |   `-L
+                                              `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(imm6 != 000xxx && Q == 0)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Dd>, <Dm>, #<fbits>
+.SS 128-bit SIMD vector(imm6 != 000xxx && Q == 1)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Qd>, <Qm>, #<fbits>
+ 
+ if imm6 == '000xxx' then SEE "Related encodings";
+ if op<1> == '0' && !HaveFP16Ext() then UNDEFINED;
+ if op<1> == '0' && imm6 == '10xxxx' then UNDEFINED;
+ if imm6 == '0xxxxx' then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ to_fixed = (op<0> == '1');  frac_bits = 64 - UInt(imm6);
+ unsigned = (U == '1');
+ case op<1> of
+      when '0' esize = 16; elements = 4;
+      when '1' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     bits(esize) result;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[m+r],e,esize];
+             if to_fixed then
+                 result = FPToFixed(op1, frac_bits, unsigned, StandardFPSCRValue(),
+                                    FPRounding_ZERO);
+             else
+                 result = FixedToFP(op1, frac_bits, unsigned, StandardFPSCRValue(),
+                                    FPRounding_TIEEVEN);
+             Elem[D[d+r],e,esize] = result;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt1>
+  Encoded in op:U
+  Is the data type for the elements of the destination vector,
+
+  op U <dt1> 
+  00 x F16   
+  01 0 S16   
+  01 1 U16   
+  10 x F32   
+  11 0 S32   
+  11 1 U32   
+
+ <dt2>
+  Encoded in op:U
+  Is the data type for the elements of the source vector,
+
+  op U <dt2> 
+  00 0 S16   
+  00 1 U16   
+  01 x F16   
+  10 0 S32   
+  10 1 U32   
+  11 x F32   
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+ <fbits>
+  The number of fraction bits in the fixed point number, in the range 1 to 32
+  for 32-bit elements, or in the range 1 to 16 for 16-bit elements:
+  (64 - <fbits>) is encoded in imm6.                      An assembler can
+  permit an <fbits> value of 0. This is encoded as floating-point to integer or
+  integer to floating-point instruction, see VCVT (between floating-point and
+  integer, Advanced SIMD).
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     bits(esize) result;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[m+r],e,esize];
+             if to_fixed then
+                 result = FPToFixed(op1, frac_bits, unsigned, StandardFPSCRValue(),
+                                    FPRounding_ZERO);
+             else
+                 result = FixedToFP(op1, frac_bits, unsigned, StandardFPSCRValue(),
+                                    FPRounding_TIEEVEN);
+             Elem[D[d+r],e,esize] = result;
+

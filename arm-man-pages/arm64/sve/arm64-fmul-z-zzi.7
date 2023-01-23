@@ -1,0 +1,177 @@
+.nh
+.TH "FMUL (indexed)" "7" " "  "instruction" "sve"
+.SS FMUL (indexed)
+ Floating-point multiply by indexed elements
+
+ Multiply all floating-point elements within each 128-bit segment of the first
+ source vector by the specified element in the corresponding second source
+ vector segment. The results are placed in the corresponding elements of the
+ destination vector.
+
+ The elements within the second source vector are specified using an immediate
+ index which selects the same element position within each 128-bit vector
+ segment. The index range is from 0 to one less than the number of elements per
+ 128-bit segment, encoded in 1 to 3 bits depending on the size of the element.
+ This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 3 classes: Half-precision, Single-precision and Double-precision
+
+.SS Half-precision - A64 - fmul_z_zzi_h
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |  19    16          10         5         0
+                  | | | |   |     |           |         |         |
+   0 1 1 0 0 1 0 0|0|.|1|. .|. . .|0 0 1 0 0 0|. . . . .|. . . . .|
+                    |   |   |                 |         |
+                    |   |   `-Zm              `-Zn      `-Zd
+                    |   `-i3l
+                    `-i3h
+  
+  
+ 
+.SS Half-precision
+ 
+ FMUL    <Zd>.H, <Zn>.H, <Zm>.H[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer index = UInt(i3h:i3l);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+.SS Single-precision - A64 - fmul_z_zzi_s
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |  19    16          10         5         0
+                  | | | |   |     |           |         |         |
+   0 1 1 0 0 1 0 0|1|0|1|. .|. . .|0 0 1 0 0 0|. . . . .|. . . . .|
+                  | |   |   |                 |         |
+                  | |   |   `-Zm              `-Zn      `-Zd
+                  | |   `-i2
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Single-precision
+ 
+ FMUL    <Zd>.S, <Zn>.S, <Zm>.S[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer index = UInt(i2);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+.SS Double-precision - A64 - fmul_z_zzi_d
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |20      16          10         5         0
+                  | | | | |       |           |         |         |
+   0 1 1 0 0 1 0 0|1|1|1|.|. . . .|0 0 1 0 0 0|. . . . .|. . . . .|
+                  | |   | |                   |         |
+                  | |   | `-Zm                `-Zn      `-Zd
+                  | |   `-i1
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Double-precision
+ 
+ FMUL    <Zd>.D, <Zn>.D, <Zm>.D[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer index = UInt(i1);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, s, esize];
+     Elem[result, e, esize] = FPMul(element1, element2, FPCR);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  For the half-precision and single-precision variant: is the name of the second
+  source scalable vector register Z0-Z7, encoded in the "Zm" field.
+
+ <Zm>
+  Encoded in Zm
+  For the double-precision variant: is the name of the second source scalable
+  vector register Z0-Z15, encoded in the "Zm" field.
+
+ <imm>
+  Encoded in i3h:i3l
+  For the half-precision variant: is the immediate index, in the range 0 to 7,
+  encoded in the "i3h:i3l" fields.
+
+ <imm>
+  Encoded in i2
+  For the single-precision variant: is the immediate index, in the range 0 to 3,
+  encoded in the "i2" field.
+
+ <imm>
+  Encoded in i1
+  For the double-precision variant: is the immediate index, in the range 0 to 1,
+  encoded in the "i1" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, s, esize];
+     Elem[result, e, esize] = FPMul(element1, element2, FPCR);
+ 
+ Z[d] = result;
+

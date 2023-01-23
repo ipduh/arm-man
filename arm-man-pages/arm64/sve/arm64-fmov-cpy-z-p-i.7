@@ -1,0 +1,67 @@
+.nh
+.TH "FMOV (zero, predicated)" "7" " "  "alias" "sve"
+.SS FMOV (zero, predicated)
+ FMOV is an alias of CPY
+
+ Move floating-point +0.0 to vector elements (predicated)
+
+ Move floating-point constant +0.0 to to each active element in the destination
+ vector. Inactive elements in the destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - cpy_z_p_i_
+ 
+                                       13                          
+                                     14 |                          
+                                   15 | |                          
+                 24  22  20      16 | | |               5         0
+                  |   |   |       | | | |               |         |
+   0 0 0 0 0 1 0 1|. .|0 1|. . . .|0|1|0|0 0 0 0 0 0 0 0|. . . . .|
+                  |       |         | | |               |
+                  `-size  `-Pg      | | `-imm8          `-Zd
+                                    | `-sh
+                                    `-M
+  
+  
+ 
+.SS SVE
+ 
+ FMOV    <Zd>.<T>, <Pg>/M, #0.0
+ 
+ CPY <Zd>.<T>, <Pg>/M, #0
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+
+
+.SS Operation
+
+ The manual of CPY gives pseudocode for FMOV.

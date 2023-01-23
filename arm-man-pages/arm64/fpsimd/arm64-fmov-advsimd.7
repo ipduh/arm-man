@@ -1,0 +1,145 @@
+.nh
+.TH "FMOV (vector, immediate) -- A64" "7" " "  "instruction" "advsimd"
+.SS FMOV (vector, immediate)
+ Floating-point move immediate (vector)
+
+ Floating-point move immediate (vector). This instruction copies an immediate
+ floating-point constant into every element of the SIMD&FP destination register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Half-precision and Single-precision and double-precision
+
+.SS Half-precision - A64 - FMOV_asimdimm_H_h
+ 
+                                 16                                
+       29                      17 |          10                    
+     30 |                    18 | |        11 |                    
+   31 | |                  19 | | |      12 | | 9 8 7 6 5         0
+    | | |                   | | | |       | | | | | | | |         |
+   0|.|0|0 1 1 1 1 0 0 0 0 0|.|.|.|1 1 1 1|1|1|.|.|.|.|.|. . . . .|
+    | |                     | | | |       |   | | | | | |
+    | `-op                  | | | `-cmode |   | | | | | `-Rd
+    `-Q                     | | `-c       |   | | | | `-h
+                            | `-b         |   | | | `-g
+                            `-a           |   | | `-f
+                                          |   | `-e
+                                          |   `-d
+                                          `-o2
+  
+  
+ 
+.SS Half-precision
+ 
+ FMOV  <Vd>.<T>, #<imm>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer rd = UInt(Rd);
+ 
+ integer datasize = if Q == '1' then 128 else 64;
+ bits(datasize) imm;
+ 
+ imm8 = a:b:c:d:e:f:g:h;
+ imm16 = imm8<7>:NOT(imm8<6>):Replicate(imm8<6>,2):imm8<5:0>:Zeros(6);
+ 
+ imm = Replicate(imm16, datasize DIV 16);
+.SS Single-precision and double-precision - A64 - single_and_double
+ 
+                                 16                                
+       29                      17 |          10                    
+     30 |                    18 | |        11 |                    
+   31 | |                  19 | | |      12 | | 9 8 7 6 5         0
+    | | |                   | | | |       | | | | | | | |         |
+   0|.|.|0 1 1 1 1 0 0 0 0 0|.|.|.|1 1 1 1|0|1|.|.|.|.|.|. . . . .|
+    | |                     | | | |       |   | | | | | |
+    | `-op                  | | | `-cmode |   | | | | | `-Rd
+    `-Q                     | | `-c       |   | | | | `-h
+                            | `-b         |   | | | `-g
+                            `-a           |   | | `-f
+                                          |   | `-e
+                                          |   `-d
+                                          `-o2
+  
+  
+ 
+.SS Single-precision(op == 0)
+ 
+ FMOV  <Vd>.<T>, #<imm>
+.SS Double-precision(Q == 1 && op == 1)
+ 
+ FMOV  <Vd>.2D, #<imm>
+ 
+ integer rd = UInt(Rd);
+ 
+ integer datasize = if Q == '1' then 128 else 64;
+ bits(datasize) imm;
+ bits(64) imm64;
+ 
+ ImmediateOp operation;
+ case cmode:op of
+     when '0xx00' operation = ImmediateOp_MOVI;
+     when '0xx01' operation = ImmediateOp_MVNI;
+     when '0xx10' operation = ImmediateOp_ORR;
+     when '0xx11' operation = ImmediateOp_BIC;
+     when '10x00' operation = ImmediateOp_MOVI;
+     when '10x01' operation = ImmediateOp_MVNI;
+     when '10x10' operation = ImmediateOp_ORR;
+     when '10x11' operation = ImmediateOp_BIC;
+     when '110x0' operation = ImmediateOp_MOVI;
+     when '110x1' operation = ImmediateOp_MVNI;
+     when '1110x' operation = ImmediateOp_MOVI;
+     when '11110' operation = ImmediateOp_MOVI;
+     when '11111' 
+         // FMOV Dn,#imm is in main FP instruction set
+         if Q == '0' then UNDEFINED;
+         operation = ImmediateOp_MOVI;
+ 
+ imm64 = AdvSIMDExpandImm(op, cmode, a:b:c:d:e:f:g:h);
+ imm = Replicate(imm64, datasize DIV 64);
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ V[rd] = imm;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in Q
+  For the half-precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in Q
+  For the single-precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 2S  
+  1 4S  
+
+ <imm>
+  Encoded in a:b:c:d:e:f:g:h
+  Is a signed floating-point constant with 3-bit exponent and normalized 4 bits
+  of precision, encoded in "a:b:c:d:e:f:g:h". For details of the range of
+  constants available and the encoding of <imm>, see Modified immediate
+  constants in A64 floating-point instructions.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ 
+ V[rd] = imm;
+

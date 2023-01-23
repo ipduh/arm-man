@@ -1,0 +1,81 @@
+.nh
+.TH "SETEND -- AArch32" "7" " "  "instruction" "general"
+.SS SETEND
+ Set Endianness
+
+ Set Endianness writes a new value to PSTATE.E.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                   15      11                      
+                                 16 |    12 |                      
+                               17 | |  13 | |                      
+                         20  18 | | |14 | | |10 9 8 7 6 5         0
+                          |   | | | | | | | | | | | | | |         |
+   1 1 1 1 0 0 0 1 0 0 0 0|0 0|0|1|0|0|0|0|0|0|.|0|0|0|0|0 0 0 0 0|
+                          |   | |             | | | |   |
+                          |   | `-op          | | | `-F `-mode
+                          |   `-M             | | `-I
+                          `-imod              | `-A
+                                              `-E
+  
+  
+ 
+.SS A1
+ 
+ SETEND{<q>} <endian_specifier>
+ 
+ set_bigend = (E == '1');
+.SS T1 - T32
+ 
+                            3                                      
+                          4 |                                      
+                        5 | |                                      
+                      6 | | |     0                                
+                      | | | |     |                                
+   1 0 1 1 0 1 1 0 0 1|0|1|.|0 0 0|                                
+                      |   |
+                      |   `-E
+                      `-op
+  
+  
+ 
+.SS T1
+ 
+ SETEND{<q>} <endian_specifier>
+ 
+ set_bigend = (E == '1');
+ if InITBlock() then UNPREDICTABLE;
+ 
+ EncodingSpecificOperations();
+ AArch32.CheckSETENDEnabled();
+ PSTATE.E = if set_bigend then '1' else '0';
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <endian_specifier>
+  Encoded in E
+  Is the endianness to be selected, and the value to be set in PSTATE.E,
+
+  E <endian_specifier> 
+  0 LE                 
+  1 BE                 
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ AArch32.CheckSETENDEnabled();
+ PSTATE.E = if set_bigend then '1' else '0';
+

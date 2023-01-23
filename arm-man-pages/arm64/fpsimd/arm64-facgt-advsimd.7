@@ -1,0 +1,287 @@
+.nh
+.TH "FACGT -- A64" "7" " "  "instruction" "advsimd"
+.SS FACGT
+ Floating-point Absolute Compare Greater than (vector)
+
+ Floating-point Absolute Compare Greater than (vector). This instruction
+ compares the absolute value of each vector element in the first source SIMD&FP
+ register with the absolute value of the corresponding vector element in the
+ second source SIMD&FP register and if the first value is greater than the
+ second value sets every bit of the corresponding vector element in the
+ destination SIMD&FP register to one, otherwise sets every bit of the
+ corresponding vector element in the destination SIMD&FP register to zero.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR, or
+ a synchronous exception being generated. For more information, see Floating-
+ point exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 4 classes: Scalar half precision, Scalar single-precision and double-precision, Vector half precision and Vector single-precision and double-precision
+
+.SS Scalar half precision - A64 - FACGT_asisdsamefp16_only
+ 
+                                                                   
+                                             10                    
+       29          23                      11 |                    
+     30 |        24 |  21        16  14  12 | |         5         0
+      | |         | |   |         |   |   | | |         |         |
+   0 1|1|1 1 1 1 0|1|1 0|. . . . .|0 0|1 0|1|1|. . . . .|. . . . .|
+      |           |     |                 |   |         |
+      `-U         `-E   `-Rm              |   `-Rn      `-Rd
+                                          `-ac
+  
+  
+ 
+.SS Scalar half precision
+ 
+ FACGT  <Hd>, <Hn>, <Hm>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 16;
+ integer datasize = esize;
+ integer elements = 1;
+ CompareOp cmp;
+ boolean abs;
+ 
+ case E:U:ac of
+     when '000' cmp = CompareOp_EQ; abs = FALSE;
+     when '010' cmp = CompareOp_GE; abs = FALSE;
+     when '011' cmp = CompareOp_GE; abs = TRUE;
+     when '110' cmp = CompareOp_GT; abs = FALSE;
+     when '111' cmp = CompareOp_GT; abs = TRUE;
+     otherwise  UNDEFINED;
+.SS Scalar single-precision and double-precision - A64 - FACGT_asisdsame_only
+ 
+                       21                                          
+                     22 |                    10                    
+       29          23 | |                  11 |                    
+     30 |        24 | | |        16      12 | |         5         0
+      | |         | | | |         |       | | |         |         |
+   0 1|1|1 1 1 1 0|1|.|1|. . . . .|1 1 1 0|1|1|. . . . .|. . . . .|
+      |           | |   |                 |   |         |
+      `-U         | |   `-Rm              |   `-Rn      `-Rd
+                  | `-sz                  `-ac
+                  `-E
+  
+  
+ 
+.SS Scalar single-precision and double-precision
+ 
+ FACGT  <V><d>, <V><n>, <V><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 32 << UInt(sz);
+ integer datasize = esize;
+ integer elements = 1;
+ CompareOp cmp;
+ boolean abs;
+ 
+ case E:U:ac of
+     when '000' cmp = CompareOp_EQ; abs = FALSE;
+     when '010' cmp = CompareOp_GE; abs = FALSE;
+     when '011' cmp = CompareOp_GE; abs = TRUE;
+     when '110' cmp = CompareOp_GT; abs = FALSE;
+     when '111' cmp = CompareOp_GT; abs = TRUE;
+     otherwise  UNDEFINED;
+.SS Vector half precision - A64 - FACGT_asimdsamefp16_only
+ 
+                                                                   
+       29                                    10                    
+     30 |          23                      11 |                    
+   31 | |        24 |  21        16  14  12 | |         5         0
+    | | |         | |   |         |   |   | | |         |         |
+   0|.|1|0 1 1 1 0|1|1 0|. . . . .|0 0|1 0|1|1|. . . . .|. . . . .|
+    | |           |     |                 |   |         |
+    | `-U         `-E   `-Rm              |   `-Rn      `-Rd
+    `-Q                                   `-ac
+  
+  
+ 
+.SS Vector half precision
+ 
+ FACGT  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 16;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ CompareOp cmp;
+ boolean abs;
+ 
+ case E:U:ac of
+     when '000' cmp = CompareOp_EQ; abs = FALSE;
+     when '010' cmp = CompareOp_GE; abs = FALSE;
+     when '011' cmp = CompareOp_GE; abs = TRUE;
+     when '110' cmp = CompareOp_GT; abs = FALSE;
+     when '111' cmp = CompareOp_GT; abs = TRUE;
+     otherwise  UNDEFINED;
+.SS Vector single-precision and double-precision - A64 - FACGT_asimdsame_only
+ 
+                       21                                          
+       29            22 |                    10                    
+     30 |          23 | |                  11 |                    
+   31 | |        24 | | |        16      12 | |         5         0
+    | | |         | | | |         |       | | |         |         |
+   0|.|1|0 1 1 1 0|1|.|1|. . . . .|1 1 1 0|1|1|. . . . .|. . . . .|
+    | |           | |   |                 |   |         |
+    | `-U         | |   `-Rm              |   `-Rn      `-Rd
+    `-Q           | `-sz                  `-ac
+                  `-E
+  
+  
+ 
+.SS Vector single-precision and double-precision
+ 
+ FACGT  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if sz:Q == '10' then UNDEFINED;
+ integer esize = 32 << UInt(sz);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ CompareOp cmp;
+ boolean abs;
+ 
+ case E:U:ac of
+     when '000' cmp = CompareOp_EQ; abs = FALSE;
+     when '010' cmp = CompareOp_GE; abs = FALSE;
+     when '011' cmp = CompareOp_GE; abs = TRUE;
+     when '110' cmp = CompareOp_GT; abs = FALSE;
+     when '111' cmp = CompareOp_GT; abs = TRUE;
+     otherwise  UNDEFINED;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ boolean test_passed;
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     element2 = Elem[operand2, e, esize];
+     if abs then
+         element1 = FPAbs(element1);
+         element2 = FPAbs(element2);
+     case cmp of
+         when CompareOp_EQ test_passed = FPCompareEQ(element1, element2, FPCR);
+         when CompareOp_GE test_passed = FPCompareGE(element1, element2, FPCR);
+         when CompareOp_GT test_passed = FPCompareGT(element1, element2, FPCR);
+     Elem[result, e, esize] = if test_passed then Ones() else Zeros();
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Hm>
+  Encoded in Rm
+  Is the 16-bit name of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <V>
+  Encoded in sz
+  Is a width specifier,
+
+  sz <V> 
+  0  S   
+  1  D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in Q
+  For the vector half precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in sz:Q
+  For the vector single-precision and double-precision variant: is an
+  arrangement specifier,
+
+  sz Q <T>      
+  0  0 2S       
+  0  1 4S       
+  1  0 RESERVED 
+  1  1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ boolean test_passed;
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     element2 = Elem[operand2, e, esize];
+     if abs then
+         element1 = FPAbs(element1);
+         element2 = FPAbs(element2);
+     case cmp of
+         when CompareOp_EQ test_passed = FPCompareEQ(element1, element2, FPCR);
+         when CompareOp_GE test_passed = FPCompareGE(element1, element2, FPCR);
+         when CompareOp_GT test_passed = FPCompareGT(element1, element2, FPCR);
+     Elem[result, e, esize] = if test_passed then Ones() else Zeros();
+ 
+ V[d] = result;
+

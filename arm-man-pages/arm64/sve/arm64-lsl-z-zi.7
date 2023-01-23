@@ -1,0 +1,103 @@
+.nh
+.TH "LSL (immediate, unpredicated)" "7" " "  "instruction" "sve"
+.SS LSL (immediate, unpredicated)
+ Logical shift left by immediate (unpredicated)
+
+ Shift left by immediate each element of the source vector, and place the
+ results in the corresponding elements of the destination vector. The immediate
+ shift amount is an unsigned value in the range 0 to number of bits per element
+ minus 1. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - lsl_z_zi_
+ 
+                                                                   
+                                             10                    
+                       21                  11 |                    
+                 24  22 |  19    16      12 | |         5         0
+                  |   | |   |     |       | | |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. .|. . .|1 0 0 1|1|1|. . . . .|. . . . .|
+                  |     |   |             | | |         |
+                  |     |   `-imm3        | | `-Zn      `-Zd
+                  |     `-tszl            | `-opc<0>
+                  `-tszh                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ LSL     <Zd>.<T>, <Zn>.<T>, #<const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ bits(4) tsize = tszh:tszl;
+ case tsize of
+     when '0000' UNDEFINED;
+     when '0001' esize = 8;
+     when '001x' esize = 16;
+     when '01xx' esize = 32;
+     when '1xxx' esize = 64;
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer shift = UInt(tsize:imm3) - esize;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     Elem[result, e, esize] = LSL(element1, shift);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in tszh:tszl
+  Is the size specifier,
+
+  tszh tszl <T>      
+  00   00   RESERVED 
+  00   01   B        
+  00   1x   H        
+  01   xx   S        
+  1x   xx   D        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <const>
+  Encoded in imm3:tsz
+  Is the immediate shift amount, in the range 0 to number of bits per element
+  minus 1, encoded in "tsz:imm3".
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     Elem[result, e, esize] = LSL(element1, shift);
+ 
+ Z[d] = result;
+

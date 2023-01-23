@@ -1,0 +1,101 @@
+.nh
+.TH "LSLV -- A64" "7" " "  "instruction" "general"
+.SS LSLV
+ Logical Shift Left Variable
+
+ Logical Shift Left Variable shifts a register value left by a variable number
+ of bits, shifting in zeros, and writes the result to the destination register.
+ The remainder obtained by dividing the second source register by the data size
+ defines the number of bits by which the first source register is left-shifted.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |              21        16      12  10         5         0
+    | | |               |         |       |   |         |         |
+  |.|0|0|1 1 0 1 0 1 1 0|. . . . .|0 0 1 0|0 0|. . . . .|. . . . .|
+  | | |                 |         |       |   |         |
+  | | `-S               `-Rm      |       |   `-Rn      `-Rd
+  | `-op                          |       `-op2
+  `-sf                            `-opcode2<5:2>
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ LSLV  <Wd>, <Wn>, <Wm>
+.SS 64-bit(sf == 1)
+ 
+ LSLV  <Xd>, <Xn>, <Xm>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer datasize = if sf == '1' then 64 else 32;
+ ShiftType shift_type = DecodeShift(op2);
+ 
+ bits(datasize) result;
+ bits(datasize) operand2 = X[m];
+ 
+ result = ShiftReg(n, shift_type, UInt(operand2) MOD datasize);
+ X[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the first general-purpose source register, encoded in
+  the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the second general-purpose source register holding a
+  shift amount from 0 to 31 in its bottom 5 bits, encoded in the "Rm" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the first general-purpose source register, encoded in
+  the "Rn" field.
+
+ <Xm>
+  Encoded in Rm
+  Is the 64-bit name of the second general-purpose source register holding a
+  shift amount from 0 to 63 in its bottom 6 bits, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ bits(datasize) result;
+ bits(datasize) operand2 = X[m];
+ 
+ result = ShiftReg(n, shift_type, UInt(operand2) MOD datasize);
+ X[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

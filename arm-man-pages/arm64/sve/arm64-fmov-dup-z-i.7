@@ -1,0 +1,63 @@
+.nh
+.TH "FMOV (zero, unpredicated)" "7" " "  "alias" "sve"
+.SS FMOV (zero, unpredicated)
+ FMOV is an alias of DUP
+
+ Move floating-point +0.0 to vector elements (unpredicated)
+
+ Unconditionally broadcast the floating-point constant +0.0 into each element of
+ the destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dup_z_i_
+ 
+                                                                   
+                               17                                  
+                             18 |      13                          
+                 24  22    19 | |    14 |               5         0
+                  |   |     | | |     | |               |         |
+   0 0 1 0 0 1 0 1|. .|1 1 1|0|0|0 1 1|0|0 0 0 0 0 0 0 0|. . . . .|
+                  |         | |       | |               |
+                  `-size    | |       | `-imm8          `-Zd
+                            | |       `-sh
+                            | `-opc<0>
+                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ FMOV    <Zd>.<T>, #0.0
+ 
+ DUP <Zd>.<T>, #0
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+
+
+.SS Operation
+
+ The manual of DUP gives pseudocode for FMOV.

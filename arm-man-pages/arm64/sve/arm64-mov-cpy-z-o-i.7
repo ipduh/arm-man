@@ -1,0 +1,89 @@
+.nh
+.TH "MOV (immediate, predicated, zeroing)" "7" " "  "alias" "sve"
+.SS MOV (immediate, predicated, zeroing)
+ MOV is an alias of CPY
+
+ Move signed integer immediate to vector elements (zeroing)
+
+ Move a signed integer immediate to each active element in the destination
+ vector. Inactive elements in the destination vector register are set to zero.
+
+ The immediate operand is a signed value in the range -128 to +127, and for
+ element widths of 16 bits or higher it may also be a signed multiple of 256 in
+ the range -32768 to +32512 (excluding 0).
+
+ The immediate is encoded in 8 bits with an optional left shift by 8. The
+ preferred disassembly when the shift option is specified is "#<simm8>, LSL #8".
+ However an assembler and disassembler may also allow use of the shifted 16-bit
+ value unless the immediate is 0 and the shift amount is 8, which must be
+ unambiguously described as "#0, LSL #8".
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - cpy_z_o_i_
+ 
+                                       13                          
+                                     14 |                          
+                                   15 | |                          
+                 24  22  20      16 | | |               5         0
+                  |   |   |       | | | |               |         |
+   0 0 0 0 0 1 0 1|. .|0 1|. . . .|0|0|.|. . . . . . . .|. . . . .|
+                  |       |         | | |               |
+                  `-size  `-Pg      | | `-imm8          `-Zd
+                                    | `-sh
+                                    `-M
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, <Pg>/Z, #<imm>{, <shift>}
+ 
+ CPY     <Zd>.<T>, <Pg>/Z, #<imm>{, <shift>}
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <imm>
+  Encoded in imm8
+  Is a signed immediate in the range -128 to 127, encoded in the "imm8" field.
+
+ <shift>
+  Encoded in sh
+  Is the optional left shift to apply to the immediate, defaulting to LSL #0 and
+
+  sh <shift> 
+  0  LSL #0  
+  1  LSL #8  
+
+
+
+.SS Operation
+
+ The manual of CPY gives pseudocode for MOV.

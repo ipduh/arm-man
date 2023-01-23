@@ -1,0 +1,115 @@
+.nh
+.TH "LASTB (scalar)" "7" " "  "instruction" "sve"
+.SS LASTB (scalar)
+ Extract last element to general-purpose register
+
+ If there is an active element then extract the last active element from the
+ final source vector register. If there are no active elements, extract the
+ highest-numbered element. Then zero-extend and place the extracted element in
+ the destination general-purpose register.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - lastb_r_p_z_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22        17 |    13    10         5         0
+                  |   |         | |     |     |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 0 0 0|1|1 0 1|. . .|. . . . .|. . . . .|
+                  |             |       |     |         |
+                  `-size        `-B     `-Pg  `-Zn      `-Rd
+  
+  
+ 
+.SS SVE
+ 
+ LASTB   <R><d>, <Pg>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer rsize = if esize < 64 then 32 else 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Rd);
+ boolean isBefore = TRUE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(rsize) result;
+ integer last = LastActiveElement(mask, esize);
+ 
+ if isBefore then
+     if last < 0 then last = elements - 1;
+ else
+     last = last + 1;
+     if last >= elements then last = 0;
+ result = ZeroExtend(Elem[operand, last, esize]);
+ 
+ X[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <d>
+  Encoded in Rd
+  Is the number [0-30] of the destination general-purpose register or the name
+  ZR (31), encoded in the "Rd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(rsize) result;
+ integer last = LastActiveElement(mask, esize);
+ 
+ if isBefore then
+     if last < 0 then last = elements - 1;
+ else
+     last = last + 1;
+     if last >= elements then last = 0;
+ result = ZeroExtend(Elem[operand, last, esize]);
+ 
+ X[d] = result;
+

@@ -1,0 +1,149 @@
+.nh
+.TH "TEQ (register) -- AArch32" "7" " "  "instruction" "general"
+.SS TEQ (register)
+ Test Equivalence (register)
+
+ Test Equivalence (register) performs a bitwise exclusive OR operation on a
+ register value and an optionally-shifted register value. It updates the
+ condition flags based on the result, and discards the result.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                         20        15 | |                          
+         28        23  21 |      16 | | |12         7   5 4       0
+          |         |   | |       | | | | |         |   | |       |
+  |. . . .|0 0 0 1 0|0 1|1|. . . .|0|0|0|0|. . . . .|. .|0|. . . .|
+  |                 |     |               |         |     |
+  `-cond(!= 1111)   `-opc `-Rn            `-imm5    |     `-Rm
+                                                    `-stype
+  
+  
+ 
+.SS Rotate right with extend(imm5 == 00000 && stype == 11)
+ 
+ TEQ{<c>}{<q>} <Rn>, <Rm>, RRX
+.SS Shift or rotate by value(!(imm5 == 00000 && stype == 11))
+ 
+ TEQ{<c>}{<q>} <Rn>, <Rm> {, <shift> #<amount>}
+ 
+ n = UInt(Rn);  m = UInt(Rm);
+ (shift_t, shift_n) = DecodeImmShift(stype, imm5);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05        15                              
+               10      06 |      01 |    12       8   6   4       0
+                |       | |       | |     |       |   |   |       |
+   1 1 1 0 1 0 1|0 1 0 0|1|. . . .|0|. . .|1 1 1 1|. .|. .|. . . .|
+                |       | |         |     |       |   |   |
+                `-op1   | `-Rn      |     `-Rd    |   |   `-Rm
+                        `-S         `-imm3        |   `-stype
+                                                  `-imm2
+  
+  
+ 
+.SS Rotate right with extend(imm3 == 000 && imm2 == 00 && stype == 11)
+ 
+ TEQ{<c>}{<q>} <Rn>, <Rm>, RRX
+.SS Shift or rotate by value(!(imm3 == 000 && imm2 == 00 && stype == 11))
+ 
+ TEQ{<c>}{<q>} <Rn>, <Rm> {, <shift> #<amount>}
+ 
+ n = UInt(Rn);  m = UInt(Rm);
+ (shift_t, shift_n) = DecodeImmShift(stype, imm3:imm2);
+ if n == 15 || m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (shifted, carry) = Shift_C(R[m], shift_t, shift_n, PSTATE.C);
+     result = R[n] EOR shifted;
+     PSTATE.N = result<31>;
+     PSTATE.Z = IsZeroBit(result);
+     PSTATE.C = carry;
+     // PSTATE.V unchanged
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the first general-purpose source register, encoded in the
+  "Rn" field. The PC can be used, but this is deprecated.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the first general-purpose source register, encoded in the
+  "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the second general-purpose source register, encoded in the
+  "Rm" field. The PC can be used, but this is deprecated.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T1: is the second general-purpose source register, encoded in the
+  "Rm" field.
+
+ <shift>
+  Encoded in stype
+  Is the type of shift to be applied to the second source register,
+
+  stype <shift> 
+  00    LSL     
+  01    LSR     
+  10    ASR     
+  11    ROR     
+
+ <amount>
+  Encoded in imm5
+  For encoding A1: is the shift amount, in the range 1 to 31 (when <shift> = LSL
+  or ROR) or 1 to 32 (when <shift> = LSR or ASR) encoded in the "imm5" field as
+  <amount> modulo 32.
+
+ <amount>
+  Encoded in imm3:imm2
+  For encoding T1: is the shift amount, in the range 1 to 31 (when <shift> = LSL
+  or ROR) or 1 to 32 (when <shift> = LSR or ASR), encoded in the "imm3:imm2"
+  field as <amount> modulo 32.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (shifted, carry) = Shift_C(R[m], shift_t, shift_n, PSTATE.C);
+     result = R[n] EOR shifted;
+     PSTATE.N = result<31>;
+     PSTATE.Z = IsZeroBit(result);
+     PSTATE.C = carry;
+     // PSTATE.V unchanged
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

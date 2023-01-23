@@ -1,0 +1,171 @@
+.nh
+.TH "ADC, ADCS (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS ADC, ADCS (immediate)
+ Add with Carry (immediate)
+
+ Add with Carry (immediate) adds an immediate value and the Carry flag value to
+ a register value, and writes the result to the destination register.
+
+ If the destination register is not the PC, the ADCS variant of the instruction
+ updates the condition flags based on the result.
+
+ The field descriptions for <Rd> identify the encodings where the PC is
+ permitted as the destination register. Arm deprecates any use of these
+ encodings. However, when the destination register is the PC:
+
+ The ADC variant of the instruction is an interworking branch, see Pseudocode
+ description of operations on the AArch32 general-purpose registers and the PC.
+
+ The ADCS variant of the instruction performs an exception return without the
+ use of the stack. In this case:
+ The PE branches to the address written to the PC, and restores PSTATE from
+ SPSR_<current_mode>.
+
+ The PE checks SPSR_<current_mode> for an illegal return event.  See Illegal
+ return events from AArch32 state.
+
+ The instruction is undefined in Hyp mode.
+
+ The instruction is constrained unpredictable in User mode and System mode.
+
+
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12                       0
+          |       |     | |       |       |                       |
+  |. . . .|0 0 1 0|1 0 1|.|. . . .|. . . .|. . . . . . . . . . . .|
+  |               |     | |       |       |
+  `-cond(!= 1111) `-opc | `-Rn    `-Rd    `-imm12
+                        `-S
+  
+  
+ 
+.SS ADC(S == 0)
+ 
+ ADC{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+.SS ADCS(S == 1)
+ 
+ ADCS{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  setflags = (S == '1');  imm32 = A32ExpandImm(imm12);
+.SS T1 - T32
+ 
+                                                                   
+               10                                                  
+             11 |        05        15                              
+           12 | |      06 |      01 |    12       8               0
+            | | |       | |       | |     |       |               |
+   1 1 1 1 0|.|0|1 0 1 0|.|. . . .|0|. . .|. . . .|. . . . . . . .|
+            |   |       | |         |     |       |
+            `-i `-op1   | `-Rn      |     `-Rd    `-imm8
+                        `-S         `-imm3
+  
+  
+ 
+.SS ADC(S == 0)
+ 
+ ADC{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+.SS ADCS(S == 1)
+ 
+ ADCS{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  setflags = (S == '1');  imm32 = T32ExpandImm(i:imm3:imm8);
+ if d == 15 || n == 15 then UNPREDICTABLE;  // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(R[n], imm32, PSTATE.C);
+     if d == 15 then          // Can only occur for A32 encoding
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the same as <Rn>. Arm deprecates
+  using the PC as the destination register, but if the PC is used:
+  For the ADC variant, the instruction is a branch to the address calculated by
+  the operation. This is an interworking branch, see Pseudocode description of
+  operations on the AArch32 general-purpose registers and the PC.
+  For the ADCS variant, the instruction performs an exception return, that
+  restores PSTATE from SPSR_<current_mode>.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T1: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the same as <Rn>.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the general-purpose source register, encoded in the "Rn"
+  field. The PC can be used, but this is deprecated.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <const>
+  Encoded in imm12
+  For encoding A1: an immediate value. See Modified immediate constants in A32
+  instructions for the range of values.
+
+ <const>
+  Encoded in i:imm3:imm8
+  For encoding T1: an immediate value. See Modified immediate constants in T32
+  instructions for the range of values.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(R[n], imm32, PSTATE.C);
+     if d == 15 then          // Can only occur for A32 encoding
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

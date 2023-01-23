@@ -1,0 +1,97 @@
+.nh
+.TH "MOV (scalar) -- A64" "7" " "  "alias" "advsimd"
+.SS MOV (scalar)
+ MOV is an alias of DUP
+
+ Move vector element to scalar
+
+ Move vector element to scalar. This instruction duplicates the specified vector
+ element in the SIMD&FP source register into a scalar, and writes the result to
+ the SIMD&FP destination register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Scalar - A64 - DUP_asisdone_only
+ 
+                                                                   
+                                                                   
+       29                          15        10                    
+     30 |              21        16 |      11 |         5         0
+      | |               |         | |       | |         |         |
+   0 1|0|1 1 1 1 0 0 0 0|. . . . .|0|0 0 0 0|1|. . . . .|. . . . .|
+      |                 |           |         |         |
+      `-op              `-imm5      `-imm4    `-Rn      `-Rd
+  
+  
+ 
+.SS Scalar
+ 
+ MOV  <V><d>, <Vn>.<T>[<index>]
+ 
+ DUP  <V><d>, <Vn>.<T>[<index>]
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in imm5
+  Is the destination width specifier,
+
+  imm5  <V>      
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <T>
+  Encoded in imm5
+  Is the element width specifier,
+
+  imm5  <T>      
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <index>
+  Encoded in imm5
+  Is the element index
+
+  imm5  <index>   
+  x0000 RESERVED  
+  xxxx1 imm5<4:1> 
+  xxx10 imm5<4:2> 
+  xx100 imm5<4:3> 
+  x1000 imm5<4>   
+
+
+
+.SS Operation
+
+ The manual of DUP gives pseudocode for MOV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

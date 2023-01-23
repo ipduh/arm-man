@@ -1,0 +1,89 @@
+.nh
+.TH "ROR (immediate) -- A64" "7" " "  "alias" "general"
+.SS ROR (immediate)
+ ROR is an alias of EXTR
+
+ Rotate right (immediate)
+
+ Rotate right (immediate) provides the value of the contents of a register
+ rotated by a variable number of bits. The bits that are rotated off the right
+ end are inserted into the vacated bit positions on the left.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+                       21                                          
+                     22 |                                          
+   31  29          23 | |        16          10         5         0
+    |   |           | | |         |           |         |         |
+  |.|0 0|1 0 0 1 1 1|.|0|. . . . .|. . . . . .|. . . . .|. . . . .|
+  | |               | | |         |           |         |
+  | `-op21          | | `-Rm      `-imms      `-Rn      `-Rd
+  `-sf              | `-o0
+                    `-N
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0 && imms == 0xxxxx)
+ 
+ ROR  <Wd>, <Ws>, #<shift>
+ 
+ EXTR <Wd>, <Ws>, <Ws>, #<shift>
+.SS 64-bit(sf == 1 && N == 1)
+ 
+ ROR  <Xd>, <Xs>, #<shift>
+ 
+ EXTR <Xd>, <Xs>, <Xs>, #<shift>
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Ws>
+  Encoded in Rm:Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xs>
+  Encoded in Rm:Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <shift>
+  Encoded in imms
+  For the 32-bit variant: is the amount by which to rotate, in the range 0 to
+  31, encoded in the "imms" field.
+
+ <shift>
+  Encoded in imms
+  For the 64-bit variant: is the amount by which to rotate, in the range 0 to
+  63, encoded in the "imms" field.
+
+
+
+.SS Operation
+
+ The manual of EXTR gives pseudocode for ROR.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

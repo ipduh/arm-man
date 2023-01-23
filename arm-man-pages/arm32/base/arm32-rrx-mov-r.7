@@ -1,0 +1,91 @@
+.nh
+.TH "RRX -- AArch32" "7" " "  "alias" "general"
+.SS RRX
+ RRX is an alias of MOV
+
+ Rotate Right with Extend
+
+ Rotate Right with Extend provides the value of the contents of a register
+ shifted right by one place, with the Carry flag shifted into bit[31].
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T3).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |      16      12         7   5 4       0
+          |         |   | |       |       |         |   | |       |
+  |. . . .|0 0 0 1 1|0 1|0|0 0 0 0|. . . .|0 0 0 0 0|1 1|0|. . . .|
+  |                 |   | |       |       |         |     |
+  `-cond(!= 1111)   |   | `-Rn    `-Rd    `-imm5    |     `-Rm
+                    |   `-S                         `-stype
+                    `-opc
+  
+  
+ 
+.SS MOV, rotate right with extend
+ 
+ RRX{<c>}{<q>} {<Rd>,} <Rm>
+ 
+ MOV{<c>}{<q>} <Rd>, <Rm>, RRX
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+                         05        15                              
+               10      06 |      01 |    12       8   6   4       0
+                |       | |       | |     |       |   |   |       |
+   1 1 1 0 1 0 1|0 0 1 0|0|1 1 1 1|0|0 0 0|. . . .|0 0|1 1|. . . .|
+                |       | |         |     |       |   |   |
+                `-op1   | `-Rn      |     `-Rd    |   |   `-Rm
+                        `-S         `-imm3        |   `-stype
+                                                  `-imm2
+  
+  
+ 
+.SS MOV, rotate right with extend
+ 
+ RRX{<c>}{<q>} {<Rd>,} <Rm>
+ 
+ MOV{<c>}{<q>} <Rd>, <Rm>, RRX
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. Arm deprecates using the PC as the destination register, but if
+  the PC is used, the instruction is a branch to the address calculated by the
+  operation. This is an interworking branch, see Pseudocode description of
+  operations on the AArch32 general-purpose registers and the PC.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T3: is the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the general-purpose source register, encoded in the "Rm"
+  field. The PC can be used, but this is deprecated.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T3: is the general-purpose source register, encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ The manual of MOV gives pseudocode for RRX.

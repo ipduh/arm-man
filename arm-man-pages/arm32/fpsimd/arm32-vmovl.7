@@ -1,0 +1,137 @@
+.nh
+.TH "VMOVL -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOVL
+ Vector Move Long
+
+ Vector Move Long takes each element in a doubleword vector, sign or zero-
+ extends them to twice their original length, and places the results in a
+ quadword vector.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD one register and modified immediate for
+ the T32 instruction set, or Advanced SIMD one register and modified immediate
+ for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. . .|0 0 0|. . . .|1 0 1 0|0|0|.|1|. . . .|
+                |   | |     |     |       |       | | |   |
+                `-U | |     |     `-Vd    `-opc   | | `-M `-Vm
+                    | |     `-imm3L               | `-Q
+                    | `-imm3H(!= 000)             `-L
+                    `-D
+  
+  
+ 
+.SS A1
+ 
+ VMOVL{<c>}{<q>}.<dt> <Qd>, <Dm>
+ 
+ if imm3H == '000' then SEE "Related encodings";
+ if imm3H != '001' && imm3H != '010' && imm3H != '100' then SEE "VSHLL";
+ if Vd<0> == '1' then UNDEFINED;
+ esize = 8 * UInt(imm3H);
+ unsigned = (U == '1');  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. . .|0 0 0|. . . .|1 0 1 0|0|0|.|1|. . . .|
+        |           | |     |     |       |       | | |   |
+        `-U         | |     |     `-Vd    `-opc   | | `-M `-Vm
+                    | |     `-imm3L               | `-Q
+                    | `-imm3H(!= 000)             `-L
+                    `-D
+  
+  
+ 
+.SS T1
+ 
+ VMOVL{<c>}{<q>}.<dt> <Qd>, <Dm>
+ 
+ if imm3H == '000' then SEE "Related encodings";
+ if imm3H != '001' && imm3H != '010' && imm3H != '100' then SEE "VSHLL";
+ if Vd<0> == '1' then UNDEFINED;
+ esize = 8 * UInt(imm3H);
+ unsigned = (U == '1');  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         result = Int(Elem[Din[m],e,esize], unsigned);
+         Elem[Q[d>>1],e,2*esize] = result<2*esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in U:imm3H
+  Is the data type for the elements of the operand,
+
+  U imm3H <dt> 
+  0 001   S8   
+  0 010   S16  
+  0 100   S32  
+  1 001   U8   
+  1 010   U16  
+  1 100   U32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         result = Int(Elem[Din[m],e,esize], unsigned);
+         Elem[Q[d>>1],e,2*esize] = result<2*esize-1:0>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

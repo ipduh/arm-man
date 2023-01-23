@@ -1,0 +1,125 @@
+.nh
+.TH "CPY (immediate, merging)" "7" " "  "instruction" "sve"
+.SS CPY (immediate, merging)
+ Copy signed integer immediate to vector elements (merging)
+
+ Copy a signed integer immediate to each active element in the destination
+ vector. Inactive elements in the destination vector register remain unmodified.
+
+ The immediate operand is a signed value in the range -128 to +127, and for
+ element widths of 16 bits or higher it may also be a signed multiple of 256 in
+ the range -32768 to +32512 (excluding 0).
+
+ The immediate is encoded in 8 bits with an optional left shift by 8. The
+ preferred disassembly when the shift option is specified is "#<simm8>, LSL #8".
+ However an assembler and disassembler may also allow use of the shifted 16-bit
+ value unless the immediate is 0 and the shift amount is 8, which must be
+ unambiguously described as "#0, LSL #8".
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - cpy_z_p_i_
+ 
+                                       13                          
+                                     14 |                          
+                                   15 | |                          
+                 24  22  20      16 | | |               5         0
+                  |   |   |       | | | |               |         |
+   0 0 0 0 0 1 0 1|. .|0 1|. . . .|0|1|.|. . . . . . . .|. . . . .|
+                  |       |         | | |               |
+                  `-size  `-Pg      | | `-imm8          `-Zd
+                                    | `-sh
+                                    `-M
+  
+  
+ 
+.SS SVE
+ 
+ CPY     <Zd>.<T>, <Pg>/M, #<imm>{, <shift>}
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size:sh == '001' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer d = UInt(Zd);
+ boolean merging = TRUE;
+ integer imm = SInt(imm8);
+ if sh == '1' then imm = imm << 8;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) dest = Z[d];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = imm<esize-1:0>;
+     elsif merging then
+         Elem[result, e, esize] = Elem[dest, e, esize];
+     else
+         Elem[result, e, esize] = Zeros();
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <imm>
+  Encoded in imm8
+  Is a signed immediate in the range -128 to 127, encoded in the "imm8" field.
+
+ <shift>
+  Encoded in sh
+  Is the optional left shift to apply to the immediate, defaulting to LSL #0 and
+
+  sh <shift> 
+  0  LSL #0  
+  1  LSL #8  
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) dest = Z[d];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = imm<esize-1:0>;
+     elsif merging then
+         Elem[result, e, esize] = Elem[dest, e, esize];
+     else
+         Elem[result, e, esize] = Zeros();
+ 
+ Z[d] = result;
+

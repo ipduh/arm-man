@@ -1,0 +1,46 @@
+.nh
+.TH "SETFFR" "7" " "  "instruction" "sve"
+.SS SETFFR
+ Initialise the first-fault register to all true
+
+ Initialise the first-fault register (FFR) to all true prior to a sequence of
+ first-fault or non-fault loads. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - setffr_f_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+     30          24 | |  20                  10           4 3 2   0
+      |           | | |   |                   |           | | |   |
+   0 0|1 0 0 1 0 1|0|0|1 0|1 1 0 0 1 0 0 1 0 0|0 0 0 0 0 0|0|0|0 0|
+                  | |
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ SETFFR  
+ 
+ if !HaveSVE() then UNDEFINED;
+ 
+ CheckSVEEnabled();
+ FFR[] = Ones(PL);
+ 
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ FFR[] = Ones(PL);
+

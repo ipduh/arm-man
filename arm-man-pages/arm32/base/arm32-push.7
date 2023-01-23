@@ -1,0 +1,102 @@
+.nh
+.TH "PUSH -- AArch32" "7" " "  "instruction" "general"
+.SS PUSH
+ Push Multiple Registers to Stack
+
+ Push Multiple Registers to Stack stores multiple general-purpose registers to
+ the stack, storing to consecutive memory locations ending just below the
+ address in SP, and updates SP to point to the start of the stored data.
+
+ The lowest-numbered register is stored to the lowest memory address, through to
+ the highest-numbered register to the highest memory address. See also Encoding
+ of lists of general-purpose registers and the PC.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+           11     8                                                
+         12 |   9 |               0                                
+          | |   | |               |                                
+   1 0 1 1|0|1 0|.|. . . . . . . .|                                
+          |     | |
+          `-L   | `-register_list
+                `-M
+  
+  
+ 
+.SS T1
+ 
+ PUSH{<c>}{<q>} <registers>
+ 
+ STMDB{<c>}{<q>} SP!, <registers>
+ 
+ registers = '0':M:'000000':register_list;  UnalignedAllowed = FALSE;
+ if BitCount(registers) < 1 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = SP - 4*BitCount(registers);
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == 13 && i != LowestSetBit(registers) then  // Only possible for encoding A1
+                 MemA[address,4] = bits(32) UNKNOWN;
+             else
+                 if UnalignedAllowed then
+                     MemU[address,4] = R[i];
+                 else
+                     MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then  // Only possible for encoding A1 or A2
+         if UnalignedAllowed then
+             MemU[address,4] = PCStoreValue();
+         else
+             MemA[address,4] = PCStoreValue();
+     SP = SP - 4*BitCount(registers);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <registers>
+  Encoded in register_list
+  Is a list of one or more registers to be stored, separated by commas and
+  surrounded by { and }.           The registers in the list must be in the
+  range R0-R7, encoded in the "register_list" field, and can optionally include
+  the LR. If the LR is in the list, the "M" field is set to 1, otherwise this
+  field defaults to 0.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = SP - 4*BitCount(registers);
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == 13 && i != LowestSetBit(registers) then  // Only possible for encoding A1
+                 MemA[address,4] = bits(32) UNKNOWN;
+             else
+                 if UnalignedAllowed then
+                     MemU[address,4] = R[i];
+                 else
+                     MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then  // Only possible for encoding A1 or A2
+         if UnalignedAllowed then
+             MemU[address,4] = PCStoreValue();
+         else
+             MemA[address,4] = PCStoreValue();
+     SP = SP - 4*BitCount(registers);
+

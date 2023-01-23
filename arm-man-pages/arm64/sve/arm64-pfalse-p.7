@@ -1,0 +1,54 @@
+.nh
+.TH "PFALSE" "7" " "  "instruction" "sve"
+.SS PFALSE
+ Set all predicate elements to false
+
+ Set all elements in the destination predicate to false.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - pfalse_p_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |                      10           4       0
+                  | | |                       |           |       |
+   0 0 1 0 0 1 0 1|0|0|0 1 1 0 0 0 1 1 1 0 0 1|0 0 0 0 0 0|. . . .|
+                  | |                                     |
+                  | `-S                                   `-Pd
+                  `-op
+  
+  
+ 
+.SS SVE
+ 
+ PFALSE  <Pd>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer d = UInt(Pd);
+ 
+ CheckSVEEnabled();
+ P[d] = Zeros(PL);
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ P[d] = Zeros(PL);
+

@@ -1,0 +1,104 @@
+.nh
+.TH "POP -- AArch32" "7" " "  "instruction" "general"
+.SS POP
+ Pop Multiple Registers from Stack
+
+ Pop Multiple Registers from Stack loads multiple general-purpose registers from
+ the stack, loading from consecutive memory locations starting at the address in
+ SP, and updates SP to point just above the loaded data.
+
+ The lowest-numbered register is loaded from the lowest memory address, through
+ to the highest-numbered register from the highest memory address. See also
+ Encoding of lists of general-purpose registers and the PC.
+
+ The registers loaded can include the PC, causing a branch to a loaded address.
+ This is an interworking branch, see Pseudocode description of operations on the
+ AArch32 general-purpose registers and the PC.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+           11     8                                                
+         12 |   9 |               0                                
+          | |   | |               |                                
+   1 0 1 1|1|1 0|.|. . . . . . . .|                                
+          |     | |
+          `-L   | `-register_list
+                `-P
+  
+  
+ 
+.SS T1
+ 
+ POP{<c>}{<q>} <registers>
+ 
+ LDM{<c>}{<q>} SP!, <registers>
+ 
+ registers = P:'0000000':register_list;   UnalignedAllowed = FALSE;
+ if BitCount(registers) < 1 then UNPREDICTABLE;
+ if registers<15> == '1' && InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = SP;
+     for i = 0 to 14
+         if registers<i> == '1' then
+             R[i] = if UnalignedAllowed then MemU[address,4] else MemA[address,4];
+             address = address + 4;
+     if registers<15> == '1' then
+         if UnalignedAllowed then
+             if address<1:0> == '00' then
+                 LoadWritePC(MemU[address,4]);
+             else
+                 UNPREDICTABLE;
+         else
+             LoadWritePC(MemA[address,4]);
+     if registers<13> == '0' then SP = SP + 4*BitCount(registers);
+     if registers<13> == '1' then SP = bits(32) UNKNOWN;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <registers>
+  Encoded in register_list
+  Is a list of one or more registers to be loaded, separated by commas and
+  surrounded by { and }.           The registers in the list must be in the
+  range R0-R7, encoded in the "register_list" field, and can optionally include
+  the PC. If the PC is in the list, the "P" field is set to 1, otherwise this
+  field defaults to 0.           If the PC is in the list, the instruction must
+  be either outside any IT block, or the last instruction in an IT block.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = SP;
+     for i = 0 to 14
+         if registers<i> == '1' then
+             R[i] = if UnalignedAllowed then MemU[address,4] else MemA[address,4];
+             address = address + 4;
+     if registers<15> == '1' then
+         if UnalignedAllowed then
+             if address<1:0> == '00' then
+                 LoadWritePC(MemU[address,4]);
+             else
+                 UNPREDICTABLE;
+         else
+             LoadWritePC(MemA[address,4]);
+     if registers<13> == '0' then SP = SP + 4*BitCount(registers);
+     if registers<13> == '1' then SP = bits(32) UNKNOWN;
+

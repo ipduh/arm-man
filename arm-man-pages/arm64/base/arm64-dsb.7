@@ -1,0 +1,101 @@
+.nh
+.TH "DSB -- A64" "7" " "  "instruction" "system"
+.SS DSB
+ Data Synchronization Barrier
+
+ Data Synchronization Barrier is a memory barrier that ensures the completion of
+ memory accesses, see Data Synchronization Barrier.
+
+
+
+.SS System - A64 - DSB_BO_barriers
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8 7   5         0
+                      | |   |     |       |       | |   |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 1|. . . .|1|0 0|1 1 1 1 1|
+                      | |   |     |       |         |   |
+                      | |   `-op1 `-CRn   |         |   `-Rt
+                      | `-op0             |         `-opc
+                      `-L                 `-CRm(!= 0x00)
+  
+  
+ 
+.SS System
+ 
+ DSB  <option>|#<imm>
+ 
+ case CRm<3:2> of
+     when '00' domain = MBReqDomain_OuterShareable;
+     when '01' domain = MBReqDomain_Nonshareable; 
+     when '10' domain = MBReqDomain_InnerShareable;
+     when '11' domain = MBReqDomain_FullSystem;
+ case CRm<1:0> of
+     when '00' types = MBReqTypes_All; domain = MBReqDomain_FullSystem;
+     when '01' types = MBReqTypes_Reads;
+     when '10' types = MBReqTypes_Writes;
+     when '11' types = MBReqTypes_All;
+ 
+ DataSynchronizationBarrier(domain, types);
+ 
+
+.SS Assembler Symbols
+
+ <option>
+  Specifies the limitation on the barrier operation. Values are:
+  SYFull system is the required shareability domain, reads and writes are the
+  required access types, both before and after the barrier instruction. This
+  option is referred to as the full system barrier. Encoded as CRm = 0b1111.
+  STFull system is the required shareability domain, writes are the required
+  access type, both before and after the barrier instruction. Encoded as CRm =
+  0b1110.                                         LDFull system is the required
+  shareability domain, reads are the required access type before the barrier
+  instruction, and reads and writes are the required access types after the
+  barrier instruction. Encoded as CRm = 0b1101.
+  ISHInner Shareable is the required shareability domain, reads and writes are
+  the required access types, both before and after the barrier instruction.
+  Encoded as CRm = 0b1011.                                         ISHSTInner
+  Shareable is the required shareability domain, writes are the required access
+  type, both before and after the barrier instruction. Encoded as CRm = 0b1010.
+  ISHLDInner Shareable is the required shareability domain, reads are the
+  required access type before the barrier instruction, and reads and writes are
+  the required access types after the barrier instruction. Encoded as CRm =
+  0b1001.                                         NSHNon-shareable is the
+  required shareability domain, reads and writes are the required access, both
+  before and after the barrier instruction. Encoded as CRm = 0b0111.
+  NSHSTNon-shareable is the required shareability domain, writes are the
+  required access type, both before and after the barrier instruction. Encoded
+  as CRm = 0b0110.                                         NSHLDNon-shareable is
+  the required shareability domain, reads are the required access type before
+  the barrier instruction, and reads and writes are the required access types
+  after the barrier instruction. Encoded as CRm = 0b0101.
+  OSHOuter Shareable is the required shareability domain, reads and writes are
+  the required access types, both before and after the barrier instruction.
+  Encoded as CRm = 0b0011.                                         OSHSTOuter
+  Shareable is the required shareability domain, writes are the required access
+  type, both before and after the barrier instruction. Encoded as CRm = 0b0010.
+  OSHLDOuter Shareable is the required shareability domain, reads are the
+  required access type before the barrier instruction, and reads and writes are
+  the required access types after the barrier instruction. Encoded as CRm =
+  0b0001.                                   All other encodings of CRm, other
+  than the values 0b0000 and 0b0100, that are not listed above are reserved, and
+  can be encoded using the #<imm> syntax. All unsupported and reserved options
+  must execute as a full system barrier operation, but software must not rely on
+  this behavior. For more information on whether an access is before or after a
+  barrier instruction, see Data Memory Barrier (DMB) or see Data Synchronization
+  Barrier (DSB).                        The value 0b0000 is used to encode SSBB
+  and the value 0b0100 is used to encode PSSBB.
+
+ <imm>
+  Encoded in CRm
+  Is a 4-bit unsigned immediate, in the range 0 to 15, encoded in the "CRm"
+  field.
+
+
+
+.SS Operation
+
+ DataSynchronizationBarrier(domain, types);
+

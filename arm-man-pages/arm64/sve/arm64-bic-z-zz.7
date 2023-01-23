@@ -1,0 +1,76 @@
+.nh
+.TH "BIC (vectors, unpredicated)" "7" " "  "instruction" "sve"
+.SS BIC (vectors, unpredicated)
+ Bitwise clear vectors (unpredicated)
+
+ Bitwise AND inverted all elements of the second source vector with
+ corresponding elements of the first source vector and place the results in the
+ corresponding elements of the destination vector. This instruction is
+ unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - bic_z_zz_
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16          10         5         0
+                  | | | |         |           |         |         |
+   0 0 0 0 0 1 0 0|1|1|1|. . . . .|0 0 1 1 0 0|. . . . .|. . . . .|
+                  | |   |                     |         |
+                  | |   `-Zm                  `-Zn      `-Zd
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ BIC     <Zd>.D, <Zn>.D, <Zm>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ 
+ Z[d] = operand1 AND (NOT operand2);
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ 
+ Z[d] = operand1 AND (NOT operand2);
+

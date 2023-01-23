@@ -1,0 +1,87 @@
+.nh
+.TH "XPACD, XPACI, XPACLRI -- A64" "7" " "  "instruction" "system"
+.SS XPACD, XPACI, XPACLRI
+ Strip Pointer Authentication Code
+
+ Strip Pointer Authentication Code. This instruction removes the pointer
+ authentication code from an address. The address is in the specified general-
+ purpose register for XPACI and XPACD, and is in LR for XPACLRI.
+
+ The XPACD instruction is used for data addresses, and XPACI and XPACLRI are
+ used for instruction addresses.
+
+
+It has encodings from 2 classes: Integer and System
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                            14                            
+     30 |                          15 |      10                    
+   31 | |              21        16 | |    11 |         5         0
+    | | |               |         | | |     | |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|1|0 0 0|.|1 1 1 1 1|. . . . .|
+  |   |                 |         | | |     | |         |
+  |   `-S               `-opcode2 | | |     | `-Rn      `-Rd
+  `-sf                            | | |     `-D
+                                  | | `-opcode[3:1]
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS XPACD(D == 1)
+ 
+ XPACD  <Xd>
+.SS XPACI(D == 0)
+ 
+ XPACI  <Xd>
+ 
+ boolean data = (D == '1');
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if n != 31 then UNDEFINED;
+.SS System - A64 - XPACLRI_HI_hints
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 0|0 0 0 0|1 1 1|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ XPACLRI
+ 
+ integer d = 30;
+ boolean data = FALSE;
+ 
+ if HavePACExt() then
+     X[d] = Strip(X[d], data);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+
+
+.SS Operation
+
+ if HavePACExt() then
+     X[d] = Strip(X[d], data);
+

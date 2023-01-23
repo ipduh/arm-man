@@ -1,0 +1,172 @@
+.nh
+.TH "MSR (immediate) -- A64" "7" " "  "instruction" "system"
+.SS MSR (immediate)
+ Move immediate value to Special Register
+
+ Move immediate value to Special Register moves an immediate value to selected
+ bits of the PSTATE. For more information, see Process state, PSTATE.
+
+ The bits that can be written by this instruction are:
+
+ If ARMv8. 0-SSBS is implemented, PSTATE. SSBS.
+
+ If ARMv8. 1-PAN is implemented, PSTATE. PAN.
+
+ If ARMv8. 2-UAO is implemented, PSTATE. UAO.
+
+ If ARMv8. 4-DIT is implemented, PSTATE. DIT.
+
+ If ARMv8. 5-MemTag is implemented, PSTATE. TCO.
+
+
+
+
+.SS System - A64 - MSR_SI_pstate
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|. . .|0 1 0 0|. . . .|. . .|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt 
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ MSR  <pstatefield>, #<imm>
+ 
+ if op1 == '000' && op2 == '000' then SEE "CFINV";
+ if op1 == '000' && op2 == '001' then SEE "XAFLAG";
+ if op1 == '000' && op2 == '010' then SEE "AXFLAG";
+ 
+ AArch64.CheckSystemAccess('00', op1, '0100', CRm, op2, '11111', '0');
+ bits(2) min_EL;
+ boolean need_secure;
+ (min_EL, need_secure) = AArch64.GetMinELSecurityState(op1);
+ if UInt(PSTATE.EL) < UInt(min_EL) || (need_secure && !IsSecure()) then
+     UNDEFINED;
+ 
+ bits(4) operand = CRm;
+ PSTATEField field;
+ case op1:op2 of
+     when '000 011'
+         if !HaveUAOExt() then
+             UNDEFINED;
+         field = PSTATEField_UAO;
+     when '000 100'
+         if !HavePANExt() then
+             UNDEFINED;
+         field = PSTATEField_PAN;
+     when '000 101' field = PSTATEField_SP;
+     when '011 010'
+         if !HaveDITExt() then
+             UNDEFINED;
+         field = PSTATEField_DIT;
+     when '011 100'
+         if !HaveMTEExt() then
+             UNDEFINED;
+         field = PSTATEField_TCO;
+     when '011 110' field = PSTATEField_DAIFSet;
+     when '011 111' field = PSTATEField_DAIFClr;
+     when '011 001'
+         if !HaveSSBSExt() then
+             UNDEFINED;
+         field = PSTATEField_SSBS;
+     otherwise      UNDEFINED;
+ 
+ // Check that an AArch64 MSR/MRS access to the DAIF flags is permitted
+ if PSTATE.EL == EL0 && field IN {PSTATEField_DAIFSet, PSTATEField_DAIFClr}  then
+     if !ELUsingAArch32(EL1) && ((EL2Enabled() && HCR_EL2.<E2H,TGE> == '11') || SCTLR_EL1.UMA == '0') then
+         if EL2Enabled() && !ELUsingAArch32(EL2) && HCR_EL2.TGE == '1' then
+             AArch64.SystemAccessTrap(EL2, 0x18);
+         else
+             AArch64.SystemAccessTrap(EL1, 0x18);
+ 
+ case field of
+     when PSTATEField_SSBS
+         PSTATE.SSBS = operand<0>;
+     when PSTATEField_SP
+         PSTATE.SP = operand<0>;
+     when PSTATEField_DAIFSet
+         PSTATE.D = PSTATE.D OR operand<3>;
+         PSTATE.A = PSTATE.A OR operand<2>;
+         PSTATE.I = PSTATE.I OR operand<1>;
+         PSTATE.F = PSTATE.F OR operand<0>;
+     when PSTATEField_DAIFClr
+         PSTATE.D = PSTATE.D AND NOT(operand<3>);
+         PSTATE.A = PSTATE.A AND NOT(operand<2>);
+         PSTATE.I = PSTATE.I AND NOT(operand<1>);
+         PSTATE.F = PSTATE.F AND NOT(operand<0>);
+     when PSTATEField_PAN
+         PSTATE.PAN = operand<0>;
+     when PSTATEField_UAO
+         PSTATE.UAO = operand<0>;
+     when PSTATEField_DIT
+         PSTATE.DIT = operand<0>;
+     when PSTATEField_TCO
+         PSTATE.TCO = operand<0>;
+ 
+
+.SS Assembler Symbols
+
+ <pstatefield>
+  Encoded in op1:op2
+  Is a PSTATE field name,
+
+  op1 op2 <pstatefield> Architectural Feature 
+  000 00x SEE PSTATE                          
+  000 010 SEE PSTATE                          
+  000 011 UAO           ARMv8.2-UAO           
+  000 100 PAN           ARMv8.1-PAN           
+  000 101 SPSel                               
+  000 11x RESERVED                            
+  001 xxx RESERVED                            
+  010 xxx RESERVED                            
+  011 000 RESERVED                            
+  011 001 SSBS          ARMv8.0-SSBS          
+  011 010 DIT           ARMv8.4-DIT           
+  011 011 RESERVED                            
+  011 100 TCO           ARMv8.5-MemTag        
+  011 101 RESERVED                            
+  011 110 DAIFSet                             
+  011 111 DAIFClr                             
+  1xx xxx RESERVED                            
+
+ <imm>
+  Encoded in CRm
+  Is a 4-bit unsigned immediate, in the range 0 to 15, encoded in the "CRm"
+  field.
+
+
+
+.SS Operation
+
+ case field of
+     when PSTATEField_SSBS
+         PSTATE.SSBS = operand<0>;
+     when PSTATEField_SP
+         PSTATE.SP = operand<0>;
+     when PSTATEField_DAIFSet
+         PSTATE.D = PSTATE.D OR operand<3>;
+         PSTATE.A = PSTATE.A OR operand<2>;
+         PSTATE.I = PSTATE.I OR operand<1>;
+         PSTATE.F = PSTATE.F OR operand<0>;
+     when PSTATEField_DAIFClr
+         PSTATE.D = PSTATE.D AND NOT(operand<3>);
+         PSTATE.A = PSTATE.A AND NOT(operand<2>);
+         PSTATE.I = PSTATE.I AND NOT(operand<1>);
+         PSTATE.F = PSTATE.F AND NOT(operand<0>);
+     when PSTATEField_PAN
+         PSTATE.PAN = operand<0>;
+     when PSTATEField_UAO
+         PSTATE.UAO = operand<0>;
+     when PSTATEField_DIT
+         PSTATE.DIT = operand<0>;
+     when PSTATEField_TCO
+         PSTATE.TCO = operand<0>;
+

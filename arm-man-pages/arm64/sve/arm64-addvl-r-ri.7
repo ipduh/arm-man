@@ -1,0 +1,81 @@
+.nh
+.TH "ADDVL" "7" " "  "instruction" "sve"
+.SS ADDVL
+ Add multiple of vector register size to scalar register
+
+ Add the current vector register size in bytes multiplied by an immediate in the
+ range -32 to 31 to the 64-bit source general-purpose register or current stack
+ pointer, and place the result in the 64-bit destination general-purpose
+ register or current stack pointer.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - addvl_r_ri_
+ 
+                                                                   
+                       21                                          
+                     22 |                                          
+                   23 | |        16        11           5         0
+                    | | |         |         |           |         |
+   0 0 0 0 0 1 0 0 0|0|1|. . . . .|0 1 0 1 0|. . . . . .|. . . . .|
+                    |   |                   |           |
+                    |   `-Rn                `-imm6      `-Rd
+                    `-op
+  
+  
+ 
+.SS SVE
+ 
+ ADDVL   <Xd|SP>, <Xn|SP>, #<imm>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer n = UInt(Rn);
+ integer d = UInt(Rd);
+ integer imm = SInt(imm6);
+ 
+ CheckSVEEnabled();
+ bits(64) operand1 = if n == 31 then SP[] else X[n];
+ bits(64) result = operand1 + (imm * (VL DIV 8));
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Xd|SP>
+  Encoded in Rd
+  Is the 64-bit name of the destination general-purpose register or stack
+  pointer, encoded in the "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Rn" field.
+
+ <imm>
+  Encoded in imm6
+  Is the signed immediate operand, in the range -32 to 31, encoded in the "imm6"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(64) operand1 = if n == 31 then SP[] else X[n];
+ bits(64) result = operand1 + (imm * (VL DIV 8));
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+

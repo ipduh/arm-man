@@ -1,0 +1,121 @@
+.nh
+.TH "VACLE -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VACLE
+ VACLE is an alias of VACGE
+
+ Vector Absolute Compare Less Than or Equal
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16      12       8 7 6 5 4       0
+                | | | | | |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|0|.|. . . .|. . . .|1 1 1 0|.|.|.|1|. . . .|
+                |   | | | |       |       |       | | | | |
+                `-U | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VACLE{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+ 
+ VACGE{<c>}{<q>}.<dt> <Dd>, <Dm>, <Dn>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VACLE{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ VACGE{<c>}{<q>}.<dt> <Qd>, <Qm>, <Qn>
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12       8 7 6 5 4       0
+        | |         | | | |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|0|.|. . . .|. . . .|1 1 1 0|.|.|.|1|. . . .|
+        |           | | | |       |       |       | | | | |
+        `-U         | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VACLE{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+ 
+ VACGE{<c>}{<q>}.<dt> <Dd>, <Dm>, <Dn>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VACLE{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ VACGE{<c>}{<q>}.<dt> <Qd>, <Qm>, <Qn>
+ 
+
+.SS Assembler Symbols
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in sz
+  Is the data type for the elements of the vectors,
+
+  sz <dt> 
+  0  F32  
+  1  F16  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+
+
+.SS Operation
+
+ The manual of VACGE gives pseudocode for VACLE.

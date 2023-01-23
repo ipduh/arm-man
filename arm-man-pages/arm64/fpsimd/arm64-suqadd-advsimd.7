@@ -1,0 +1,153 @@
+.nh
+.TH "SUQADD -- A64" "7" " "  "instruction" "advsimd"
+.SS SUQADD
+ Signed saturating Accumulate of Unsigned value
+
+ Signed saturating Accumulate of Unsigned value. This instruction adds the
+ unsigned integer values of the vector elements in the source SIMD&FP register
+ to corresponding signed integer values of the vector elements in the
+ destination SIMD&FP register, and writes the resulting signed integer values to
+ the destination SIMD&FP register.
+
+ If overflow occurs with any of the results, those results are saturated. If
+ saturation occurs, the cumulative saturation bit FPSR.QC is set.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - SUQADD_asisdmisc_R
+ 
+                                                                   
+                                                                   
+       29                                                          
+     30 |        24  22        17        12  10         5         0
+      | |         |   |         |         |   |         |         |
+   0 1|0|1 1 1 1 0|. .|1 0 0 0 0|0 0 0 1 1|1 0|. . . . .|. . . . .|
+      |           |             |             |         |
+      `-U         `-size        `-opcode      `-Rn      `-Rd
+  
+  
+ 
+.SS Scalar
+ 
+ SUQADD  <V><d>, <V><n>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ 
+ boolean unsigned = (U == '1');
+.SS Vector - A64 - SUQADD_asimdmisc_R
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |        24  22        17        12  10         5         0
+    | | |         |   |         |         |   |         |         |
+   0|.|0|0 1 1 1 0|. .|1 0 0 0 0|0 0 0 1 1|1 0|. . . . .|. . . . .|
+    | |           |             |             |         |
+    | `-U         `-size        `-opcode      `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Vector
+ 
+ SUQADD  <Vd>.<T>, <Vn>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if size:Q == '110' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ boolean unsigned = (U == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ 
+ bits(datasize) operand2 = V[d];
+ integer op1;
+ integer op2;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     op1 = Int(Elem[operand, e, esize], !unsigned);
+     op2 = Int(Elem[operand2, e, esize], unsigned);
+     (Elem[result, e, esize], sat) = SatQ(op1 + op2, esize, unsigned);
+     if sat then FPSR.QC = '1';
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ 
+ bits(datasize) operand2 = V[d];
+ integer op1;
+ integer op2;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     op1 = Int(Elem[operand, e, esize], !unsigned);
+     op2 = Int(Elem[operand2, e, esize], unsigned);
+     (Elem[result, e, esize], sat) = SatQ(op1 + op2, esize, unsigned);
+     if sat then FPSR.QC = '1';
+ V[d] = result;
+

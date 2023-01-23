@@ -1,0 +1,133 @@
+.nh
+.TH "VRINTN (Advanced SIMD) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VRINTN (Advanced SIMD)
+ Vector Round floating-point to integer to Nearest
+
+ Vector Round floating-point to integer to Nearest rounds a vector of floating-
+ point values to integral floating-point values of the same size using the Round
+ to Nearest rounding mode. A zero input gives a zero result with the same sign,
+ an infinite input gives an infinite result with the same sign, and a NaN is
+ propagated as for normal arithmetic.
+
+ Related encodings: See Advanced SIMD two registers misc for the T32 instruction
+ set, or Advanced SIMD two registers misc for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                     22                    11 |                    
+                   23 |  20  18  16      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|1|0 0 0|.|.|0|. . . .|
+                    |     |   |   |           |     | |   |
+                    `-D   |   |   `-Vd        `-op  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VRINTN{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VRINTN{<q>}.<dt> <Qd>, <Qm>
+ 
+ if op<2> != op<0> then SEE "Related encodings";
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ // Rounding encoded differently from other VCVT and VRINT instructions
+ rounding = FPDecodeRM(op<2>:NOT(op<1>));  exact = FALSE;
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                             10                    
+                     07                    11 |                    
+                   08 |  05  03  01      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|1|0 0 0|.|.|0|. . . .|
+                    |     |   |   |           |     | |   |
+                    `-D   |   |   `-Vd        `-op  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VRINTN{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VRINTN{<q>}.<dt> <Qd>, <Qm>
+ 
+ if op<2> != op<0> then SEE "Related encodings";
+ if InITBlock() then UNPREDICTABLE;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ // Rounding encoded differently from other VCVT and VRINT instructions
+ rounding = FPDecodeRM(op<2>:NOT(op<1>));  exact = FALSE;
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ EncodingSpecificOperations(); CheckAdvSIMDEnabled();
+ for r = 0 to regs-1
+     for e = 0 to elements-1
+         op1 = Elem[D[m+r],e,esize];
+         result = FPRoundInt(op1, StandardFPSCRValue(), rounding, exact);
+         Elem[D[d+r],e,esize] = result;
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in size
+  Is the data type for the elements of the vectors,
+
+  size <dt> 
+  01   F16  
+  10   F32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations(); CheckAdvSIMDEnabled();
+ for r = 0 to regs-1
+     for e = 0 to elements-1
+         op1 = Elem[D[m+r],e,esize];
+         result = FPRoundInt(op1, StandardFPSCRValue(), rounding, exact);
+         Elem[D[d+r],e,esize] = result;
+

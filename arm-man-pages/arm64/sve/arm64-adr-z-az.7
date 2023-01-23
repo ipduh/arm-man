@@ -1,0 +1,174 @@
+.nh
+.TH "ADR" "7" " "  "instruction" "sve"
+.SS ADR
+ Compute vector address
+
+ Optionally sign or zero-extend the least significant 32-bits of each element
+ from a vector of offsets or indices in the second source vector, scale each
+ index by 2, 4 or 8, add to a vector of base addresses from the first source
+ vector, and place the resulting addresses in the destination vector. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 3 classes: Packed offsets, Unpacked 32-bit signed offsets and Unpacked 32-bit unsigned offsets
+
+.SS Packed offsets - A64 - adr_z_az_sd_same_scaled
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16      12  10         5         0
+                  | | | |         |       |   |         |         |
+   0 0 0 0 0 1 0 0|1|.|1|. . . . .|1 0 1 0|. .|. . . . .|. . . . .|
+                    |   |                 |   |         |
+                    |   `-Zm              |   `-Zn      `-Zd
+                    `-sz                  `-msz
+  
+  
+ 
+.SS Packed offsets
+ 
+ ADR     <Zd>.<T>, [<Zn>.<T>, <Zm>.<T>{, <mod> <amount>}]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32 << UInt(sz);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer osize = esize;
+ boolean unsigned = TRUE;
+ integer mbytes = 1 << UInt(msz);
+.SS Unpacked 32-bit signed offsets - A64 - adr_z_az_d_s32_scaled
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16      12  10         5         0
+                  | | | |         |       |   |         |         |
+   0 0 0 0 0 1 0 0|0|0|1|. . . . .|1 0 1 0|. .|. . . . .|. . . . .|
+                  | |   |                 |   |         |
+                  | |   `-Zm              |   `-Zn      `-Zd
+                  | `-opc<0>              `-msz
+                  `-opc<1>
+  
+  
+ 
+.SS Unpacked 32-bit signed offsets
+ 
+ ADR     <Zd>.D, [<Zn>.D, <Zm>.D, SXTW{ <amount>}]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer osize = 32;
+ boolean unsigned = FALSE;
+ integer mbytes = 1 << UInt(msz);
+.SS Unpacked 32-bit unsigned offsets - A64 - adr_z_az_d_u32_scaled
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16      12  10         5         0
+                  | | | |         |       |   |         |         |
+   0 0 0 0 0 1 0 0|0|1|1|. . . . .|1 0 1 0|. .|. . . . .|. . . . .|
+                  | |   |                 |   |         |
+                  | |   `-Zm              |   `-Zn      `-Zd
+                  | `-opc<0>              `-msz
+                  `-opc<1>
+  
+  
+ 
+.SS Unpacked 32-bit unsigned offsets
+ 
+ ADR     <Zd>.D, [<Zn>.D, <Zm>.D, UXTW{ <amount>}]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer osize = 32;
+ boolean unsigned = TRUE;
+ integer mbytes = 1 << UInt(msz);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) base = Z[n];
+ bits(VL) offs = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) addr = Elem[base, e, esize];
+     integer offset = Int(Elem[offs, e, esize]<osize-1:0>, unsigned);
+     Elem[result, e, esize] = addr + (offset * mbytes);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in sz
+  Is the size specifier,
+
+  sz <T> 
+  0  S   
+  1  D   
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the base scalable vector register, encoded in the "Zn" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the offset scalable vector register, encoded in the "Zm" field.
+
+ <mod>
+  Encoded in msz
+  Is the index extend and shift specifier,
+
+  msz <mod>    
+  00  [absent] 
+  x1  LSL      
+  10  LSL      
+
+ <amount>
+  Encoded in msz
+  Is the index shift amount,
+
+  msz <amount> 
+  00  [absent] 
+  01  #1       
+  10  #2       
+  11  #3       
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) base = Z[n];
+ bits(VL) offs = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) addr = Elem[base, e, esize];
+     integer offset = Int(Elem[offs, e, esize]<osize-1:0>, unsigned);
+     Elem[result, e, esize] = addr + (offset * mbytes);
+ 
+ Z[d] = result;
+

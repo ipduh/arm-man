@@ -1,0 +1,105 @@
+.nh
+.TH "FRECPS" "7" " "  "instruction" "sve"
+.SS FRECPS
+ Floating-point reciprocal step (unpredicated)
+
+ Multiply corresponding floating-point elements of the first and second source
+ vectors, subtract the products from 2.0 without intermediate rounding and place
+ the results in the corresponding elements of the destination vector. This
+ instruction is unpredicated.
+
+ This instruction can be used to perform a single Newton-Raphson iteration for
+ calculating the reciprocal of a vector of floating-point values.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - frecps_z_zz_
+ 
+                                                                   
+                                                                   
+                       21                    10                    
+                 24  22 |        16    13  11 |         5         0
+                  |   | |         |     |   | |         |         |
+   0 1 1 0 0 1 0 1|. .|0|. . . . .|0 0 0|1 1|0|. . . . .|. . . . .|
+                  |     |               |   | |         |
+                  |     `-Zm            |   | `-Zn      `-Zd
+                  `-size                |   `-opc<0>
+                                        `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ FRECPS  <Zd>.<T>, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPRecipStepFused(element1, element2);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPRecipStepFused(element1, element2);
+ 
+ Z[d] = result;
+

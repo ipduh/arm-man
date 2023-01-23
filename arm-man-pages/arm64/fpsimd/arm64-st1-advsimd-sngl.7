@@ -1,0 +1,264 @@
+.nh
+.TH "ST1 (single structure) -- A64" "7" " "  "instruction" "advsimd"
+.SS ST1 (single structure)
+ Store a single-element structure from one lane of one register
+
+ Store a single-element structure from one lane of one register. This
+ instruction stores the specified element of a SIMD&FP register to memory.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: No offset and Post-index
+
+.SS No offset - A64 - as_no_post_index
+ 
+                                                                   
+                       21                                          
+     30              22 |                12                        
+   31 |            23 | |        16    13 |  10         5         0
+    | |             | | |         |     | |   |         |         |
+   0|.|0 0 1 1 0 1 0|0|0|0 0 0 0 0|x x 0|.|. .|. . . . .|. . . . .|
+    |               | |           |     | |   |         |
+    `-Q             | `-R         |     | |   `-Rn      `-Rt
+                    `-L           |     | `-size
+                                  |     `-S
+                                  `-opcode
+  
+  
+ 
+.SS 8-bit(opcode == 000)
+ 
+ ST1  { <Vt>.B }[<index>], [<Xn|SP>]
+.SS 16-bit(opcode == 010 && size == x0)
+ 
+ ST1  { <Vt>.H }[<index>], [<Xn|SP>]
+.SS 32-bit(opcode == 100 && size == 00)
+ 
+ ST1  { <Vt>.S }[<index>], [<Xn|SP>]
+.SS 64-bit(opcode == 100 && S == 0 && size == 01)
+ 
+ ST1  { <Vt>.D }[<index>], [<Xn|SP>]
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer m = integer UNKNOWN;
+ boolean wback = FALSE;
+ boolean tag_checked = wback || n != 31;
+.SS Post-index - A64 - as_post_index
+ 
+                                                                   
+                       21                                          
+     30              22 |                12                        
+   31 |            23 | |        16    13 |  10         5         0
+    | |             | | |         |     | |   |         |         |
+   0|.|0 0 1 1 0 1 1|0|0|. . . . .|x x 0|.|. .|. . . . .|. . . . .|
+    |               | | |         |     | |   |         |
+    `-Q             | | `-Rm      |     | |   `-Rn      `-Rt
+                    | `-R         |     | `-size
+                    `-L           |     `-S
+                                  `-opcode
+  
+  
+ 
+.SS 8-bit, immediate offset(Rm == 11111 && opcode == 000)
+ 
+ ST1  { <Vt>.B }[<index>], [<Xn|SP>], #1
+.SS 8-bit, register offset(Rm != 11111 && opcode == 000)
+ 
+ ST1  { <Vt>.B }[<index>], [<Xn|SP>], <Xm>
+.SS 16-bit, immediate offset(Rm == 11111 && opcode == 010 && size == x0)
+ 
+ ST1  { <Vt>.H }[<index>], [<Xn|SP>], #2
+.SS 16-bit, register offset(Rm != 11111 && opcode == 010 && size == x0)
+ 
+ ST1  { <Vt>.H }[<index>], [<Xn|SP>], <Xm>
+.SS 32-bit, immediate offset(Rm == 11111 && opcode == 100 && size == 00)
+ 
+ ST1  { <Vt>.S }[<index>], [<Xn|SP>], #4
+.SS 32-bit, register offset(Rm != 11111 && opcode == 100 && size == 00)
+ 
+ ST1  { <Vt>.S }[<index>], [<Xn|SP>], <Xm>
+.SS 64-bit, immediate offset(Rm == 11111 && opcode == 100 && S == 0 && size == 01)
+ 
+ ST1  { <Vt>.D }[<index>], [<Xn|SP>], #8
+.SS 64-bit, register offset(Rm != 11111 && opcode == 100 && S == 0 && size == 01)
+ 
+ ST1  { <Vt>.D }[<index>], [<Xn|SP>], <Xm>
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ boolean wback = TRUE;
+ boolean tag_checked = wback || n != 31;
+ 
+ integer scale = UInt(opcode<2:1>);
+ integer selem = UInt(opcode<0>:R) + 1;
+ boolean replicate = FALSE;
+ integer index;
+ 
+ case scale of
+     when 3
+         // load and replicate
+         if L == '0' || S == '1' then UNDEFINED;
+         scale = UInt(size);
+         replicate = TRUE;
+     when 0
+         index = UInt(Q:S:size);         // B[0-15]
+     when 1
+         if size<0> == '1' then UNDEFINED;
+         index = UInt(Q:S:size<1>);      // H[0-7]
+     when 2
+         if size<1> == '1' then UNDEFINED;
+         if size<0> == '0' then
+             index = UInt(Q:S);          // S[0-3]
+         else
+             if S == '1' then UNDEFINED;
+             index = UInt(Q);            // D[0-1]
+             scale = 3;
+ 
+ MemOp memop = if L == '1' then MemOp_LOAD else MemOp_STORE;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer esize = 8 << scale;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(64) offs;
+ bits(128) rval;
+ bits(esize) element;
+ constant integer ebytes = esize DIV 8;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ offs = Zeros();
+ if replicate then
+     // load and replicate to all elements
+     for s = 0 to selem-1
+         element = Mem[address + offs, ebytes, AccType_VEC];
+         // replicate to fill 128- or 64-bit register
+         V[t] = Replicate(element, datasize DIV esize);
+         offs = offs + ebytes;
+         t = (t + 1) MOD 32;
+ else
+     // load/store one element per register
+     for s = 0 to selem-1
+         rval = V[t];
+         if memop == MemOp_LOAD then
+             // insert into one lane of 128-bit register
+             Elem[rval, index, esize] = Mem[address + offs, ebytes, AccType_VEC];
+             V[t] = rval;
+         else // memop == MemOp_STORE
+             // extract from one lane of 128-bit register
+             Mem[address + offs, ebytes, AccType_VEC] = Elem[rval, index, esize];
+         offs = offs + ebytes;
+         t = (t + 1) MOD 32;
+ 
+ if wback then
+     if m != 31 then
+         offs = X[m];
+     if n == 31 then
+         SP[] = address + offs;
+     else
+         X[n] = address + offs;
+ 
+
+.SS Assembler Symbols
+
+ <Vt>
+  Encoded in Rt
+  Is the name of the first or only SIMD&FP register to be transferred, encoded
+  in the "Rt" field.
+
+ <index>
+  Encoded in Q:S:size
+  For the 8-bit variant: is the element index, encoded in "Q:S:size".
+
+ <index>
+  Encoded in Q:S:size
+  For the 16-bit variant: is the element index, encoded in "Q:S:size<1>".
+
+ <index>
+  Encoded in Q:S
+  For the 32-bit variant: is the element index, encoded in "Q:S".
+
+ <index>
+  Encoded in Q
+  For the 64-bit variant: is the element index, encoded in "Q".
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <Xm>
+  Encoded in Rm
+  Is the 64-bit name of the general-purpose post-index register, excluding XZR,
+  encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(64) offs;
+ bits(128) rval;
+ bits(esize) element;
+ constant integer ebytes = esize DIV 8;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ offs = Zeros();
+ if replicate then
+     // load and replicate to all elements
+     for s = 0 to selem-1
+         element = Mem[address + offs, ebytes, AccType_VEC];
+         // replicate to fill 128- or 64-bit register
+         V[t] = Replicate(element, datasize DIV esize);
+         offs = offs + ebytes;
+         t = (t + 1) MOD 32;
+ else
+     // load/store one element per register
+     for s = 0 to selem-1
+         rval = V[t];
+         if memop == MemOp_LOAD then
+             // insert into one lane of 128-bit register
+             Elem[rval, index, esize] = Mem[address + offs, ebytes, AccType_VEC];
+             V[t] = rval;
+         else // memop == MemOp_STORE
+             // extract from one lane of 128-bit register
+             Mem[address + offs, ebytes, AccType_VEC] = Elem[rval, index, esize];
+         offs = offs + ebytes;
+         t = (t + 1) MOD 32;
+ 
+ if wback then
+     if m != 31 then
+         offs = X[m];
+     if n == 31 then
+         SP[] = address + offs;
+     else
+         X[n] = address + offs;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

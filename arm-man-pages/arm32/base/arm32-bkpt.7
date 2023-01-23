@@ -1,0 +1,86 @@
+.nh
+.TH "BKPT -- AArch32" "7" " "  "instruction" "general"
+.SS BKPT
+ Breakpoint
+
+ Breakpoint causes a Breakpoint Instruction exception.
+
+ Breakpoint is always unconditional, even when inside an IT block.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |                       8       4       0
+          |         |   | |                       |       |       |
+  |. . . .|0 0 0 1 0|0 1|0|. . . . . . . . . . . .|0 1 1 1|. . . .|
+  |                 |     |                               |
+  `-cond(!= 1111)   `-opc `-imm12                         `-imm4
+  
+  
+ 
+.SS A1
+ 
+ BKPT{<q>} {#}<imm>
+ 
+ imm16 = imm12:imm4;
+ if cond != '1110' then UNPREDICTABLE;  // BKPT must be encoded with AL condition
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                  8               0                                
+                  |               |                                
+   1 0 1 1 1 1 1 0|. . . . . . . .|                                
+                  |
+                  `-imm8
+  
+  
+ 
+.SS T1
+ 
+ BKPT{<q>} {#}<imm>
+ 
+ imm16 = ZeroExtend(imm8, 16);
+ 
+ EncodingSpecificOperations();
+ AArch32.SoftwareBreakpoint(imm16);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields. An BKPT instruction must be
+  unconditional.
+
+ <imm>
+  Encoded in imm12:imm4
+  For encoding A1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm12:imm4" field. This value:                        Is
+  recorded in the Comment field of ESR_ELx.ISS if the Software Breakpoint
+  Instruction exception is taken to an exception level that is using AArch64.
+  Is ignored otherwise.
+
+ <imm>
+  Encoded in imm8
+  For encoding T1: is a 8-bit unsigned immediate, in the range 0 to 255, encoded
+  in the "imm8" field. This value:                        Is recorded in the
+  Comment field of ESR_ELx.ISS if the Software Breakpoint Instruction exception
+  is taken to an exception level that is using AArch64.             Is ignored
+  otherwise.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ AArch32.SoftwareBreakpoint(imm16);
+

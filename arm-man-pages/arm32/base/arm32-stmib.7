@@ -1,0 +1,116 @@
+.nh
+.TH "STMIB, STMFA -- AArch32" "7" " "  "instruction" "general"
+.SS STMIB, STMFA
+ Store Multiple Increment Before (Full Ascending)
+
+ Store Multiple Increment Before (Full Ascending) stores multiple registers to
+ consecutive memory locations using an address from a base register. The
+ consecutive memory locations start just above this address, and the address of
+ the last of those locations can optionally be written back to the base
+ register.
+
+ The lowest-numbered register is loaded from the lowest memory address, through
+ to the highest-numbered register from the highest memory address. See also
+ Encoding of lists of general-purpose registers and the PC.
+
+ Armv8.2 permits the deprecation of some Store Multiple ordering behaviors in
+ AArch32 state, for more information see ARMv8.2-LSMAOC. For details of related
+ system instructions see STM (User registers).
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16                               0
+          |     | | | | | |       |                               |
+  |. . . .|1 0 0|1|1|0|.|0|. . . .|. . . . . . . . . . . . . . . .|
+  |             | | | | | |       |
+  |             | | | | | `-Rn    `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ STMIB{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ STMFA{<c>}{<q>} <Rn>{!}, <registers>
+ 
+ n = UInt(Rn);  registers = register_list;  wback = (W == '1');
+ if n == 15 || BitCount(registers) < 1 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] + 4;
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == n && wback && i != LowestSetBit(registers) then
+                 MemA[address,4] = bits(32) UNKNOWN;
+             else
+                 MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then
+         MemA[address,4] = PCStoreValue();
+     if wback then R[n] = R[n] + 4*BitCount(registers);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+ <registers>
+  Is a list of one or more registers to be stored, separated by commas and
+  surrounded by { and }.           The PC can be in the list. However, Arm
+  deprecates the use of instructions that include the PC in the list.
+  If base register writeback is specified, and the base register is not the
+  lowest-numbered register in the list, such an instruction stores an unknown
+  value for the base register.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] + 4;
+     for i = 0 to 14
+         if registers<i> == '1' then
+             if i == n && wback && i != LowestSetBit(registers) then
+                 MemA[address,4] = bits(32) UNKNOWN;
+             else
+                 MemA[address,4] = R[i];
+             address = address + 4;
+     if registers<15> == '1' then
+         MemA[address,4] = PCStoreValue();
+     if wback then R[n] = R[n] + 4*BitCount(registers);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

@@ -1,0 +1,51 @@
+.nh
+.TH "CPP -- A64" "7" " "  "alias" "system"
+.SS CPP
+ CPP is an alias of SYS
+
+ Cache Prefetch Prediction Restriction by Context
+
+ Cache Prefetch Prediction Restriction by Context prevents cache allocation
+ predictions, based on information gathered from earlier execution within a
+ particular execution context, from allowing later speculative execution within
+ that context to be observable through side-channels.
+
+ For more information, see CPP RCTX, Cache Prefetch Prediction Restriction by
+ Context.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|0 1 1|0 1 1 1|0 0 1 1|1 1 1|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ CPP  RCTX, <Xt>
+ 
+ SYS #3, C8, C3, #7, <Xt>
+ 
+
+.SS Assembler Symbols
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rt"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SYS gives pseudocode for CPP.

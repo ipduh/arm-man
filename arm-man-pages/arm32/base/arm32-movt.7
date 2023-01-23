@@ -1,0 +1,103 @@
+.nh
+.TH "MOVT -- AArch32" "7" " "  "instruction" "general"
+.SS MOVT
+ Move Top
+
+ Move Top writes an immediate value to the top halfword of the destination
+ register. It does not affect the contents of the bottom halfword.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+         28        23 |  20      16      12                       0
+          |         | |   |       |       |                       |
+  |. . . .|0 0 1 1 0|1|0 0|. . . .|. . . .|. . . . . . . . . . . .|
+  |                 |     |       |       |
+  `-cond(!= 1111)   `-H   `-imm4  `-Rd    `-imm12
+  
+  
+ 
+.SS A1
+ 
+ MOVT{<c>}{<q>} <Rd>, #<imm16>
+ 
+ d = UInt(Rd);  imm16 = imm4:imm12;
+ if d == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+             11    08              15                              
+           12 |  09 |    05      01 |    12       8               0
+            | |   | |     |       | |     |       |               |
+   1 1 1 1 0|.|1 0|1|1 0 0|. . . .|0|. . .|. . . .|. . . . . . . .|
+            |     |       |         |     |       |
+            `-i   `-o1    `-imm4    |     `-Rd    `-imm8
+                                    `-imm3
+  
+  
+ 
+.SS T1
+ 
+ MOVT{<c>}{<q>} <Rd>, #<imm16>
+ 
+ d = UInt(Rd);  imm16 = imm4:i:imm3:imm8;
+ if d == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     R[d]<31:16> = imm16;
+     // R[d]<15:0> unchanged
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <imm16>
+  Encoded in imm4:imm12
+  For encoding A1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm4:imm12" field.
+
+ <imm16>
+  Encoded in imm4:i:imm3:imm8
+  For encoding T1: is a 16-bit unsigned immediate, in the range 0 to 65535,
+  encoded in the "imm4:i:imm3:imm8" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     R[d]<31:16> = imm16;
+     // R[d]<15:0> unchanged
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

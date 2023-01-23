@@ -1,0 +1,200 @@
+.nh
+.TH "VCVTR -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVTR
+ Convert floating-point to integer
+
+ Convert floating-point to integer converts a value in a register from floating-
+ point to a 32-bit integer, using the rounding mode specified by the FPSCR and
+ places the result in a second register.
+
+ VCVT (between floating-point and fixed-point, floating-point) describes
+ conversions between floating-point and 16-bit integers.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Floating-point data-processing for the T32 instruction
+ set, or Floating-point data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|1|1 0 x|. . . .|1 0|. .|0|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-op
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(opc2 == 100 && size == 01)
+ 
+ VCVTR{<c>}{<q>}.U32.F16 <Sd>, <Sm>
+.SS Half-precision scalar(opc2 == 101 && size == 01)
+ 
+ VCVTR{<c>}{<q>}.S32.F16 <Sd>, <Sm>
+.SS Single-precision scalar(opc2 == 100 && size == 10)
+ 
+ VCVTR{<c>}{<q>}.U32.F32 <Sd>, <Sm>
+.SS Single-precision scalar(opc2 == 101 && size == 10)
+ 
+ VCVTR{<c>}{<q>}.S32.F32 <Sd>, <Sm>
+.SS Double-precision scalar(opc2 == 100 && size == 11)
+ 
+ VCVTR{<c>}{<q>}.U32.F64 <Sd>, <Dm>
+.SS Double-precision scalar(opc2 == 101 && size == 11)
+ 
+ VCVTR{<c>}{<q>}.S32.F64 <Sd>, <Dm>
+ 
+ if opc2 != '000' && opc2 != '10x' then SEE "Related encodings";
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ to_integer = (opc2<2> == '1');
+ if to_integer then
+     unsigned = (opc2<0> == '0');
+     rounding = if op == '1' then FPRounding_ZERO else FPRoundingMode(FPSCR);
+     d = UInt(Vd:D);
+     case size of
+         when '01' esize = 16; m = UInt(Vm:M);
+         when '10' esize = 32; m = UInt(Vm:M);
+         when '11' esize = 64; m = UInt(M:Vm);
+ else
+     unsigned = (op == '0');
+     rounding = FPRoundingMode(FPSCR);
+     m = UInt(Vm:M);
+     case size of
+         when '01' esize = 16; d = UInt(Vd:D);
+         when '10' esize = 32; d = UInt(Vd:D);
+         when '11' esize = 64; d = UInt(D:Vd);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|1|1 0 x|. . . .|1 0|. .|0|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-op
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(opc2 == 100 && size == 01)
+ 
+ VCVTR{<c>}{<q>}.U32.F16 <Sd>, <Sm>
+.SS Half-precision scalar(opc2 == 101 && size == 01)
+ 
+ VCVTR{<c>}{<q>}.S32.F16 <Sd>, <Sm>
+.SS Single-precision scalar(opc2 == 100 && size == 10)
+ 
+ VCVTR{<c>}{<q>}.U32.F32 <Sd>, <Sm>
+.SS Single-precision scalar(opc2 == 101 && size == 10)
+ 
+ VCVTR{<c>}{<q>}.S32.F32 <Sd>, <Sm>
+.SS Double-precision scalar(opc2 == 100 && size == 11)
+ 
+ VCVTR{<c>}{<q>}.U32.F64 <Sd>, <Dm>
+.SS Double-precision scalar(opc2 == 101 && size == 11)
+ 
+ VCVTR{<c>}{<q>}.S32.F64 <Sd>, <Dm>
+ 
+ if opc2 != '000' && opc2 != '10x' then SEE "Related encodings";
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ to_integer = (opc2<2> == '1');
+ if to_integer then
+     unsigned = (opc2<0> == '0');
+     rounding = if op == '1' then FPRounding_ZERO else FPRoundingMode(FPSCR);
+     d = UInt(Vd:D);
+     case size of
+         when '01' esize = 16; m = UInt(Vm:M);
+         when '10' esize = 32; m = UInt(Vm:M);
+         when '11' esize = 64; m = UInt(M:Vm);
+ else
+     unsigned = (op == '0');
+     rounding = FPRoundingMode(FPSCR);
+     m = UInt(Vm:M);
+     case size of
+         when '01' esize = 16; d = UInt(Vd:D);
+         when '10' esize = 32; d = UInt(Vd:D);
+         when '11' esize = 64; d = UInt(D:Vd);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if to_integer then
+         case esize of
+             when 16
+                 S[d] = FPToFixed(S[m]<15:0>, 0, unsigned, FPSCR, rounding);
+             when 32
+                 S[d] = FPToFixed(S[m], 0, unsigned, FPSCR, rounding);
+             when 64
+                 S[d] = FPToFixed(D[m], 0, unsigned, FPSCR, rounding);
+     else
+         case esize of
+             when 16
+                 bits(16) fp16 = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+                 S[d] = Zeros(16):fp16;
+             when 32
+                 S[d] = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+             when 64
+                 D[d] = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if to_integer then
+         case esize of
+             when 16
+                 S[d] = FPToFixed(S[m]<15:0>, 0, unsigned, FPSCR, rounding);
+             when 32
+                 S[d] = FPToFixed(S[m], 0, unsigned, FPSCR, rounding);
+             when 64
+                 S[d] = FPToFixed(D[m], 0, unsigned, FPSCR, rounding);
+     else
+         case esize of
+             when 16
+                 bits(16) fp16 = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+                 S[d] = Zeros(16):fp16;
+             when 32
+                 S[d] = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+             when 64
+                 D[d] = FixedToFP(S[m], 0, unsigned, FPSCR, rounding);
+

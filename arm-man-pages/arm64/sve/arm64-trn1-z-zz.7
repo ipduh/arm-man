@@ -1,0 +1,179 @@
+.nh
+.TH "TRN1, TRN2 (vectors)" "7" " "  "instruction" "sve"
+.SS TRN1, TRN2 (vectors)
+ Interleave even or odd elements from two vectors
+
+ Interleave alternating even or odd-numbered elements from the first and second
+ source vectors and place in elements of the destination vector. This
+ instruction is unpredicated. The 128-bit element variant of this instruction
+ requires that the current vector length is at least 256 bits, and if the
+ current vector length is not an integer multiple of 256 bits then the trailing
+ bits are set to zero.
+
+ ID_AA64ZFR0_EL1.F64MM indicates whether the 128-bit element variant of the
+ instruction is implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 4 classes: Even, Even (quadwords), Odd and Odd (quadwords)
+
+.SS Even - A64 - trn1_z_zz_
+ 
+                                                                   
+                                                                   
+                       21                    10                    
+                 24  22 |        16    13  11 |         5         0
+                  |   | |         |     |   | |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|0 1 1|1 0|0|. . . . .|. . . . .|
+                  |     |                   | |         |
+                  |     `-Zm                | `-Zn      `-Zd
+                  `-size                    `-H
+  
+  
+ 
+.SS Even
+ 
+ TRN1    <Zd>.<T>, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer part = 0;
+.SS Even (quadwords) - A64 - trn1_z_zz_q
+ 
+                                                                   
+                       21                                          
+                     22 |                    10                    
+                   23 | |        16    13  11 |         5         0
+                    | | |         |     |   | |         |         |
+   0 0 0 0 0 1 0 1 1|0|1|. . . . .|0 0 0|1 1|0|. . . . .|. . . . .|
+                    |   |                   | |         |
+                    |   `-Zm                | `-Zn      `-Zd
+                    `-op                    `-H
+  
+  
+ 
+.SS Even (quadwords)
+ 
+ TRN1    <Zd>.Q, <Zn>.Q, <Zm>.Q
+ 
+ if !HaveSVEFP64MatMulExt() then UNDEFINED;
+ integer esize = 128;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer part = 0;
+.SS Odd - A64 - trn2_z_zz_
+ 
+                                                                   
+                                                                   
+                       21                    10                    
+                 24  22 |        16    13  11 |         5         0
+                  |   | |         |     |   | |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|0 1 1|1 0|1|. . . . .|. . . . .|
+                  |     |                   | |         |
+                  |     `-Zm                | `-Zn      `-Zd
+                  `-size                    `-H
+  
+  
+ 
+.SS Odd
+ 
+ TRN2    <Zd>.<T>, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer part = 1;
+.SS Odd (quadwords) - A64 - trn2_z_zz_q
+ 
+                                                                   
+                       21                                          
+                     22 |                    10                    
+                   23 | |        16    13  11 |         5         0
+                    | | |         |     |   | |         |         |
+   0 0 0 0 0 1 0 1 1|0|1|. . . . .|0 0 0|1 1|1|. . . . .|. . . . .|
+                    |   |                   | |         |
+                    |   `-Zm                | `-Zn      `-Zd
+                    `-op                    `-H
+  
+  
+ 
+.SS Odd (quadwords)
+ 
+ TRN2    <Zd>.Q, <Zn>.Q, <Zm>.Q
+ 
+ if !HaveSVEFP64MatMulExt() then UNDEFINED;
+ integer esize = 128;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ integer part = 1;
+ 
+ CheckSVEEnabled();
+ if VL < esize * 2 then UNDEFINED;
+ integer pairs = VL DIV (esize * 2);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result = Zeros();
+ 
+ for p = 0 to pairs-1
+     Elem[result, 2*p+0, esize] = Elem[operand1, 2*p+part, esize];
+     Elem[result, 2*p+1, esize] = Elem[operand2, 2*p+part, esize];
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ if VL < esize * 2 then UNDEFINED;
+ integer pairs = VL DIV (esize * 2);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result = Zeros();
+ 
+ for p = 0 to pairs-1
+     Elem[result, 2*p+0, esize] = Elem[operand1, 2*p+part, esize];
+     Elem[result, 2*p+1, esize] = Elem[operand2, 2*p+part, esize];
+ 
+ Z[d] = result;
+

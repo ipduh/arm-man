@@ -1,0 +1,146 @@
+.nh
+.TH "BRKA, BRKAS" "7" " "  "instruction" "sve"
+.SS BRKA, BRKAS
+ Break after first true condition
+
+ Sets destination predicate elements up to and including the first active and
+ true source element to true, then sets subsequent elements to false. Inactive
+ elements in the destination predicate register remain unmodified or are set to
+ zero, depending on whether merging or zeroing predication is selected.
+ Optionally sets the First (N), None (Z), !Last (C) condition flags based on the
+ predicate result, and the V flag to zero.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Not setting the condition flags and Setting the condition flags
+
+.SS Not setting the condition flags - A64 - brka_p_p_p_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |              14      10 9       5 4       0
+                  | | |               |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|0|0 1 0 0 0 0 0 1|. . . .|0|. . . .|.|. . . .|
+                  | |                 |         |       | |
+                  | `-S               `-Pg      `-Pn    | `-Pd
+                  `-B                                   `-M
+  
+  
+ 
+.SS Not setting the condition flags
+ 
+ BRKA    <Pd>.B, <Pg>/<ZM>, <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ integer d = UInt(Pd);
+ boolean merging = (M == '1');
+ boolean setflags = FALSE;
+.SS Setting the condition flags - A64 - brkas_p_p_p_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |              14      10 9       5 4       0
+                  | | |               |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|1|0 1 0 0 0 0 0 1|. . . .|0|. . . .|0|. . . .|
+                  | |                 |         |       | |
+                  | `-S               `-Pg      `-Pn    | `-Pd
+                  `-B                                   `-M
+  
+  
+ 
+.SS Setting the condition flags
+ 
+ BRKAS   <Pd>.B, <Pg>/Z, <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ integer d = UInt(Pd);
+ boolean merging = FALSE;
+ boolean setflags = TRUE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand  = P[n];
+ bits(PL) operand2 = P[d];
+ boolean break = FALSE;
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     boolean element = ElemP[operand, e, esize] == '1';
+     if ElemP[mask, e, esize] == '1' then
+         ElemP[result, e, esize] = if !break then '1' else '0';
+         break = break || element;
+     elsif merging then
+         ElemP[result, e, esize] = ElemP[operand2, e, esize];
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <ZM>
+  Encoded in M
+  Is the predication qualifier,
+
+  M <ZM> 
+  0 Z    
+  1 M    
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(PL) operand  = P[n];
+ bits(PL) operand2 = P[d];
+ boolean break = FALSE;
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     boolean element = ElemP[operand, e, esize] == '1';
+     if ElemP[mask, e, esize] == '1' then
+         ElemP[result, e, esize] = if !break then '1' else '0';
+         break = break || element;
+     elsif merging then
+         ElemP[result, e, esize] = ElemP[operand2, e, esize];
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ if setflags then
+     PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+

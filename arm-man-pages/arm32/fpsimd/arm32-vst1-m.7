@@ -1,0 +1,378 @@
+.nh
+.TH "VST1 (multiple single elements) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VST1 (multiple single elements)
+ Store multiple single elements from one, two, three, or four registers
+
+ Store multiple single elements from one, two, three, or four registers stores
+ elements to memory from one, two, three, or four registers, without
+ interleaving.  Every element of each register is stored. For details of the
+ addressing mode see Advanced SIMD addressing mode.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly VST1 (multiple single elements).
+
+ Related encodings: See Advanced SIMD element or structure load/store for the
+ T32 instruction set, or Advanced SIMD element or structure load/store for the
+ A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1, A2, A3 and A4) and  T32 (T1, T2, T3 and T4).
+
+.SS A1 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+                   23 | | |      16      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 0 1 0 0 0|.|0|0|. . . .|. . . .|0 1 1 1|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 1;  if align<1> == '1' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS A2 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+                   23 | | |      16      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 0 1 0 0 0|.|0|0|. . . .|. . . .|1 0 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 2;  if align == '11' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS A3 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+                   23 | | |      16      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 0 1 0 0 0|.|0|0|. . . .|. . . .|0 1 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 3;  if align<1> == '1' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS A4 - A32
+ 
+                         20                                        
+                       21 |                                        
+                     22 | |                                        
+                   23 | | |      16      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 0 1 0 0 0|.|0|0|. . . .|. . . .|0 0 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 4;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 1 0 0 1 0|.|0|0|. . . .|. . . .|0 1 1 1|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 1;  if align<1> == '1' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 1 0 0 1 0|.|0|0|. . . .|. . . .|1 0 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 2;  if align == '11' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS T3 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 1 0 0 1 0|.|0|0|. . . .|. . . .|0 1 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 3;  if align<1> == '1' then UNDEFINED;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+.SS T4 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12       8   6   4       0
+                    | | | |       |       |       |   |   |       |
+   1 1 1 1 1 0 0 1 0|.|0|0|. . . .|. . . .|0 0 1 0|. .|. .|. . . .|
+                    | |   |       |       |       |   |   |
+                    | `-L `-Rn    `-Vd    `-itype |   |   `-Rm
+                    `-D                           |   `-align
+                                                  `-size
+  
+  
+ 
+.SS Offset(Rm == 1111)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]
+.SS Post-indexed(Rm == 1101)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}]!
+.SS Post-indexed(Rm != 11x1)
+ 
+ VST1{<c>}{<q>}.<size> <list>, [<Rn>{:<align>}], <Rm>
+ 
+ regs = 4;
+ alignment = if align == '00' then 1 else 4 << UInt(align);
+ ebytes = 1 << UInt(size);  elements = 8 DIV ebytes;
+ d = UInt(D:Vd);  n = UInt(Rn);  m = UInt(Rm);
+ wback = (m != 15);  register_index = (m != 15 && m != 13);
+ if n == 15 || d+regs > 32 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     address = R[n];  iswrite = TRUE;
+     - = AArch32.CheckAlignment(address, alignment, AccType_VEC, iswrite);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if ebytes != 8 then
+                 MemU[address,ebytes] = Elem[D[d+r],e];
+             else
+                 - = AArch32.CheckAlignment(address, ebytes, AccType_NORMAL, iswrite);
+                 bits(64) data = Elem[D[d+r],e];
+                 MemU[address,4] = if BigEndian() then data<63:32> else data<31:0>;
+                 MemU[address+4,4] = if BigEndian() then data<31:0> else data<63:32>;
+             address = address + ebytes;
+     if wback then
+         if register_index then
+             R[n] = R[n] + R[m];
+         else
+             R[n] = R[n] + 8*regs;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1, A2, A3 and A4: see Standard assembler syntax fields. This
+  encoding must be unconditional.
+
+ <c>
+  For encoding T1, T2, T3 and T4: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  Encoded in size
+  Is the data size,
+
+  size <size> 
+  00   8      
+  01   16     
+  10   32     
+  11   64     
+
+ <list>
+  Encoded in D:Vd
+  Is a list containing the 64-bit names of the SIMD&FP registers.           The
+  list must be one of:                                       { <Dd> }Single
+  register. Selects the A1 and T1 encodings of the instruction.
+  { <Dd>, <Dd+1> }Two single-spaced registers. Selects the A2 and T2 encodings
+  of the instruction.                                         { <Dd>, <Dd+1>,
+  <Dd+2> }Three single-spaced registers. Selects the A3 and T3 encodings of the
+  instruction.                                         { <Dd>, <Dd+1>, <Dd+2>,
+  <Dd+3> }Four single-spaced registers. Selects the A4 and T4 encodings of the
+  instruction.                                   The register <Dd> is encoded in
+  the "D:Vd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ <align>
+  Encoded in align
+  Is the optional alignment.           Whenever <align> is omitted, the standard
+  alignment is used, see Unaligned data access, and is encoded in the "align"
+  field as 0b00.           Whenever <align> is present, the permitted values
+  are:                                       6464-bit alignment, encoded in the
+  "align" field as 0b01.                                         128128-bit
+  alignment, encoded in the "align" field as 0b10. Available only if <list>
+  contains two or four registers.
+  256256-bit alignment, encoded in the "align" field as 0b11. Available only if
+  <list> contains four registers.                                   : is the
+  preferred separator before the <align> value, but the alignment can be
+  specified as @<align>, see Advanced SIMD addressing mode.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose index register containing an offset applied after the
+  access, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     address = R[n];  iswrite = TRUE;
+     - = AArch32.CheckAlignment(address, alignment, AccType_VEC, iswrite);
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if ebytes != 8 then
+                 MemU[address,ebytes] = Elem[D[d+r],e];
+             else
+                 - = AArch32.CheckAlignment(address, ebytes, AccType_NORMAL, iswrite);
+                 bits(64) data = Elem[D[d+r],e];
+                 MemU[address,4] = if BigEndian() then data<63:32> else data<31:0>;
+                 MemU[address+4,4] = if BigEndian() then data<31:0> else data<63:32>;
+             address = address + ebytes;
+     if wback then
+         if register_index then
+             R[n] = R[n] + R[m];
+         else
+             R[n] = R[n] + 8*regs;
+

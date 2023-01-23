@@ -1,0 +1,234 @@
+.nh
+.TH "VCMLA (by element) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCMLA (by element)
+ Vector Complex Multiply Accumulate (by element)
+
+ Vector Complex Multiply Accumulate (by element).
+
+ This instruction operates on complex numbers that are represented in SIMD&FP
+ registers as pairs of elements, with the more significant element holding the
+ imaginary part of the number and the less significant element holding the real
+ part of the number. Each element holds a floating-point value. It performs the
+ following computation on complex numbers from the first source register and the
+ destination register with the specified complex number from the second source
+ register:
+
+ The two elements of the transformed complex number are multiplied by:
+
+
+ The multiplication and addition operations are performed as a fused multiply-
+ add, without any intermediate rounding.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                     22                      10                    
+                   23 |                    11 |                    
+                 24 | |  20      16      12 | | 9 8 7 6 5 4       0
+                  | | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 1 0|.|.|. .|. . . .|. . . .|1|0|0|0|.|.|.|0|. . . .|
+                  | | |   |       |         |   | | | | | |
+                  | | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                  | | `-rot                 |   | | | | `-U
+                  | `-D                     |   | | | `-M
+                  `-S                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS 64-bit SIMD vector of half-precision floating-point(S == 0 && Q == 0)
+ 
+ VCMLA{<q>}.F16 <Dd>, <Dn>, <Dm>[<index>], #<rotate>
+.SS 64-bit SIMD vector of single-precision floating-point(S == 1 && Q == 0)
+ 
+ VCMLA{<q>}.F32 <Dd>, <Dn>, <Dm>[0], #<rotate>
+.SS 128-bit SIMD vector of half-precision floating-point(S == 0 && Q == 1)
+ 
+ VCMLA{<q>}.F16 <Qd>, <Qn>, <Dm>[<index>], #<rotate>
+.SS 128-bit SIMD vector of single-precision floating-point(S == 1 && Q == 1)
+ 
+ VCMLA{<q>}.F32 <Qd>, <Qn>, <Dm>[0], #<rotate>
+ 
+ if !HaveFCADDExt() then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn);
+ m = if S=='1' then UInt(M:Vm) else UInt(Vm);
+ esize = 16 << UInt(S);
+ if !HaveFP16Ext() && esize == 16 then UNDEFINED;
+ elements = 64 DIV esize;
+ regs = if Q == '0' then 1 else 2;
+ index = if S=='1' then 0 else UInt(M);
+.SS T1 - T32
+ 
+                                                                   
+                     07                      10                    
+                   08 |                    11 |                    
+                 09 | |  05      01      12 | | 9 8 7 6 5 4       0
+                  | | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 1 0|.|.|. .|. . . .|. . . .|1|0|0|0|.|.|.|0|. . . .|
+                  | | |   |       |         |   | | | | | |
+                  | | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                  | | `-rot                 |   | | | | `-U
+                  | `-D                     |   | | | `-M
+                  `-S                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS 64-bit SIMD vector of half-precision floating-point(S == 0 && Q == 0)
+ 
+ VCMLA{<q>}.F16 <Dd>, <Dn>, <Dm>[<index>], #<rotate>
+.SS 64-bit SIMD vector of single-precision floating-point(S == 1 && Q == 0)
+ 
+ VCMLA{<q>}.F32 <Dd>, <Dn>, <Dm>[0], #<rotate>
+.SS 128-bit SIMD vector of half-precision floating-point(S == 0 && Q == 1)
+ 
+ VCMLA{<q>}.F16 <Qd>, <Qn>, <Dm>[<index>], #<rotate>
+.SS 128-bit SIMD vector of single-precision floating-point(S == 1 && Q == 1)
+ 
+ VCMLA{<q>}.F32 <Qd>, <Qn>, <Dm>[0], #<rotate>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveFCADDExt() then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn);
+ m = if S=='1' then UInt(M:Vm) else UInt(Vm);
+ esize = 16 << UInt(S);
+ if !HaveFP16Ext() && esize == 16 then UNDEFINED;
+ elements = 64 DIV esize;
+ regs = if Q == '0' then 1 else 2;
+ index = if S=='1' then 0 else UInt(M);
+ 
+ EncodingSpecificOperations();
+ CheckAdvSIMDEnabled();
+ for r = 0 to regs-1
+     operand1 = D[n+r];
+     operand2 = Din[m];
+     operand3 = D[d+r];
+     for e = 0 to (elements DIV 2)-1
+         case rot of
+             when '00'
+                 element1 = Elem[operand2,index*2,esize];
+                 element2 = Elem[operand1,e*2,esize];
+                 element3 = Elem[operand2,index*2+1,esize];
+                 element4 = Elem[operand1,e*2,esize];
+             when '01'
+                 element1 = FPNeg(Elem[operand2,index*2+1,esize]);
+                 element2 = Elem[operand1,e*2+1,esize];
+                 element3 = Elem[operand2,index*2,esize];
+                 element4 = Elem[operand1,e*2+1,esize];
+             when '10'
+                 element1 = FPNeg(Elem[operand2,index*2,esize]);
+                 element2 = Elem[operand1,e*2,esize];
+                 element3 = FPNeg(Elem[operand2,index*2+1,esize]);
+                 element4 = Elem[operand1,e*2,esize];
+             when '11'
+                 element1 = Elem[operand2,index*2+1,esize];
+                 element2 = Elem[operand1,e*2+1,esize];
+                 element3 = FPNeg(Elem[operand2,index*2,esize]);
+                 element4 = Elem[operand1,e*2+1,esize];
+         result1 = FPMulAdd(Elem[operand3,e*2,esize],element2,element1, StandardFPSCRValue());
+         result2 = FPMulAdd(Elem[operand3,e*2+1,esize],element4,element3,StandardFPSCRValue());
+         Elem[D[d+r],e*2,esize] = result1;
+         Elem[D[d+r],e*2+1,esize] = result2;
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in Vm
+  For the half-precision scalar variant: is the 64-bit name of the second
+  SIMD&FP source register, encoded in the "Vm" field.
+
+ <Dm>
+  Encoded in M:Vm
+  For the single-precision scalar variant: is the 64-bit name of the second
+  SIMD&FP source register, encoded in the "M:Vm" field.
+
+ <index>
+  Encoded in M
+  Is the element index in the range 0 to 1, encoded in the "M" field.
+
+ <rotate>
+  Encoded in rot
+  Is the rotation to be applied to elements in the second SIMD&FP source
+  register,
+
+  rot <rotate> 
+  00  0        
+  01  90       
+  10  180      
+  11  270      
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ CheckAdvSIMDEnabled();
+ for r = 0 to regs-1
+     operand1 = D[n+r];
+     operand2 = Din[m];
+     operand3 = D[d+r];
+     for e = 0 to (elements DIV 2)-1
+         case rot of
+             when '00'
+                 element1 = Elem[operand2,index*2,esize];
+                 element2 = Elem[operand1,e*2,esize];
+                 element3 = Elem[operand2,index*2+1,esize];
+                 element4 = Elem[operand1,e*2,esize];
+             when '01'
+                 element1 = FPNeg(Elem[operand2,index*2+1,esize]);
+                 element2 = Elem[operand1,e*2+1,esize];
+                 element3 = Elem[operand2,index*2,esize];
+                 element4 = Elem[operand1,e*2+1,esize];
+             when '10'
+                 element1 = FPNeg(Elem[operand2,index*2,esize]);
+                 element2 = Elem[operand1,e*2,esize];
+                 element3 = FPNeg(Elem[operand2,index*2+1,esize]);
+                 element4 = Elem[operand1,e*2,esize];
+             when '11'
+                 element1 = Elem[operand2,index*2+1,esize];
+                 element2 = Elem[operand1,e*2+1,esize];
+                 element3 = FPNeg(Elem[operand2,index*2,esize]);
+                 element4 = Elem[operand1,e*2+1,esize];
+         result1 = FPMulAdd(Elem[operand3,e*2,esize],element2,element1, StandardFPSCRValue());
+         result2 = FPMulAdd(Elem[operand3,e*2+1,esize],element4,element3,StandardFPSCRValue());
+         Elem[D[d+r],e*2,esize] = result1;
+         Elem[D[d+r],e*2+1,esize] = result2;
+

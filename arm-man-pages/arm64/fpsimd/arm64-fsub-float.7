@@ -1,0 +1,138 @@
+.nh
+.TH "FSUB (scalar) -- A64" "7" " "  "instruction" "float"
+.SS FSUB (scalar)
+ Floating-point Subtract (scalar)
+
+ Floating-point Subtract (scalar). This instruction subtracts the floating-point
+ value of the second source SIMD&FP register from the floating-point value of
+ the first source SIMD&FP register, and writes the result to the destination
+ SIMD&FP register.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR, or
+ a synchronous exception being generated. For more information, see Floating-
+ point exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Floating-point - A64 - float
+ 
+                                                                   
+       29                                                          
+     30 |              21                12                        
+   31 | |        24  22 |        16    13 |  10         5         0
+    | | |         |   | |         |     | |   |         |         |
+  |0|0|0|1 1 1 1 0|. .|1|. . . . .|0 0 1|1|1 0|. . . . .|. . . . .|
+  |   |           |     |               |     |         |
+  `-M `-S         |     `-Rm            `-op  `-Rn      `-Rd
+                  `-ftype
+  
+  
+ 
+.SS Half-precision(ftype == 11)
+ 
+ FSUB  <Hd>, <Hn>, <Hm>
+.SS Single-precision(ftype == 00)
+ 
+ FSUB  <Sd>, <Sn>, <Sm>
+.SS Double-precision(ftype == 01)
+ 
+ FSUB  <Dd>, <Dn>, <Dm>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ integer datasize;
+ case ftype of
+     when '00' datasize = 32;
+     when '01' datasize = 64;
+     when '10' UNDEFINED;
+     when '11'
+         if HaveFP16Ext() then
+             datasize = 16;
+         else
+             UNDEFINED;
+ 
+ boolean sub_op = (op == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) result;
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ 
+ if sub_op then
+     result = FPSub(operand1, operand2, FPCR);
+ else
+     result = FPAdd(operand1, operand2, FPCR);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in Rd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Dn>
+  Encoded in Rn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Dm>
+  Encoded in Rm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Hm>
+  Encoded in Rm
+  Is the 16-bit name of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Sd>
+  Encoded in Rd
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Sn>
+  Encoded in Rn
+  Is the 32-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Sm>
+  Encoded in Rm
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) result;
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ 
+ if sub_op then
+     result = FPSub(operand1, operand2, FPCR);
+ else
+     result = FPAdd(operand1, operand2, FPCR);
+ 
+ V[d] = result;
+

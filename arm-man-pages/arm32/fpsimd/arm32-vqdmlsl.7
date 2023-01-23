@@ -1,0 +1,208 @@
+.nh
+.TH "VQDMLSL -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VQDMLSL
+ Vector Saturating Doubling Multiply Subtract Long
+
+ Vector Saturating Doubling Multiply Subtract Long multiplies corresponding
+ elements in two doubleword vectors, subtracts double the products from
+ corresponding elements of a quadword vector, and places the results in the same
+ quadword vector.
+
+ The second operand can be a scalar instead of a vector. For more information
+ about scalars see Advanced SIMD scalars.
+
+ If any of the results overflow, they are saturated. The cumulative saturation
+ bit, FPSCR.QC, is set if saturation occurs. For details see Pseudocode details
+ of saturation.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD data-processing for the T32 instruction
+ set, or Advanced SIMD data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12  10 9 8 7 6 5 4       0
+                | | | |   |       |       |   | | | | | | |       |
+   1 1 1 1 0 0 1|0|1|.|. .|. . . .|. . . .|1 0|1|1|.|0|.|0|. . . .|
+                |   | |   |       |           |   |   |   |
+                `-U | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS A1
+ 
+ VQDMLSL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');
+ scalar_form = FALSE;  d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                      10                    
+                 24 | |                    11 |                    
+               25 | | |  20      16      12 | |   8 7 6 5 4       0
+                | | | |   |       |       | | |   | | | | |       |
+   1 1 1 1 0 0 1|0|1|.|. .|. . . .|. . . .|0|1|1 1|.|1|.|0|. . . .|
+                |   | |   |       |         |     |   |   |
+                `-Q | |   `-Vn    `-Vd      `-op  `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS A2
+ 
+ VQDMLSL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>[<index>]
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');
+ scalar_form = TRUE;  d = UInt(D:Vd);  n = UInt(N:Vn);
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12  10 9 8 7 6 5 4       0
+        | |         | |   |       |       |   | | | | | | |       |
+   1 1 1|0|1 1 1 1 1|.|. .|. . . .|. . . .|1 0|1|1|.|0|.|0|. . . .|
+        |           | |   |       |           |   |   |   |
+        `-U         | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS T1
+ 
+ VQDMLSL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');
+ scalar_form = FALSE;  d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+.SS T2 - T32
+ 
+                                                                   
+                                             10                    
+         13          07                    11 |                    
+       14 |        08 |  05      01      12 | |   8 7 6 5 4       0
+        | |         | |   |       |       | | |   | | | | |       |
+   1 1 1|0|1 1 1 1 1|.|. .|. . . .|. . . .|0|1|1 1|.|1|.|0|. . . .|
+        |           | |   |       |         |     |   |   |
+        `-Q         | |   `-Vn    `-Vd      `-op  `-N `-M `-Vm
+                    | `-size(!= 11)
+                    `-D
+  
+  
+ 
+.SS T2
+ 
+ VQDMLSL{<c>}{<q>}.<dt> <Qd>, <Dn>, <Dm>[<index>]
+ 
+ if size == '11' then SEE "Related encodings";
+ if size == '00' || Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');
+ scalar_form = TRUE;  d = UInt(D:Vd);  n = UInt(N:Vn);
+ if size == '01' then esize = 16;  elements = 4;  m = UInt(Vm<2:0>);  index = UInt(M:Vm<3>);
+ if size == '10' then esize = 32;  elements = 2;  m = UInt(Vm);  index = UInt(M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     if scalar_form then op2 = SInt(Elem[Din[m],index,esize]);
+     for e = 0 to elements-1
+         if !scalar_form then op2 = SInt(Elem[Din[m],e,esize]);
+         op1 = SInt(Elem[Din[n],e,esize]);
+         // The following only saturates if both op1 and op2 equal -(2^(esize-1))
+         (product, sat1) = SignedSatQ(2*op1*op2, 2*esize);
+         if add then
+             result = SInt(Elem[Qin[d>>1],e,2*esize]) + SInt(product);
+         else
+             result = SInt(Elem[Qin[d>>1],e,2*esize]) - SInt(product);
+         (Elem[Q[d>>1],e,2*esize], sat2) = SignedSatQ(result, 2*esize);
+         if sat1 || sat2 then FPSCR.QC = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1 and A2: see Standard assembler syntax fields. This encoding
+  must be unconditional.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in size
+  Is the data type for the elements of the operands,
+
+  size <dt> 
+  01   S16  
+  10   S32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  For encoding A1 and T1: is the 64-bit name of the second SIMD&FP source
+  register, encoded in the "M:Vm" field.
+
+ <Dm>
+  Encoded in Vm<2:0>
+  For encoding A2 and T2: is the 64-bit name of the second SIMD&FP source
+  register, encoded in the "Vm<2:0>" field when <dt> is S16, otherwise the "Vm"
+  field.
+
+ <index>
+  Encoded in M:Vm<3>
+  Is the element index in the range 0 to 3, encoded in the "M:Vm<3>" field when
+  <dt> is S16, otherwise in range 0 to 1, encoded in the "M" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     if scalar_form then op2 = SInt(Elem[Din[m],index,esize]);
+     for e = 0 to elements-1
+         if !scalar_form then op2 = SInt(Elem[Din[m],e,esize]);
+         op1 = SInt(Elem[Din[n],e,esize]);
+         // The following only saturates if both op1 and op2 equal -(2^(esize-1))
+         (product, sat1) = SignedSatQ(2*op1*op2, 2*esize);
+         if add then
+             result = SInt(Elem[Qin[d>>1],e,2*esize]) + SInt(product);
+         else
+             result = SInt(Elem[Qin[d>>1],e,2*esize]) - SInt(product);
+         (Elem[Q[d>>1],e,2*esize], sat2) = SignedSatQ(result, 2*esize);
+         if sat1 || sat2 then FPSCR.QC = '1';
+

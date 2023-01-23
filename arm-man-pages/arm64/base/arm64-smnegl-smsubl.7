@@ -1,0 +1,67 @@
+.nh
+.TH "SMNEGL -- A64" "7" " "  "alias" "general"
+.SS SMNEGL
+ SMNEGL is an alias of SMSUBL
+
+ Signed Multiply-Negate Long
+
+ Signed Multiply-Negate Long multiplies two 32-bit register values, negates the
+ product, and writes the result to the 64-bit destination register.
+
+
+
+.SS 64-bit - A64 - SMSUBL_64WA_dp_3src
+ 
+                                                                   
+                                                                   
+                   23              15                              
+   31  29        24 |  21        16 |        10         5         0
+    |   |         | |   |         | |         |         |         |
+  |1|0 0|1 1 0 1 1|0|0 1|. . . . .|1|1 1 1 1 1|. . . . .|. . . . .|
+  | |             |     |         | |         |         |
+  | `-op54        `-U   `-Rm      | `-Ra      `-Rn      `-Rd
+  `-sf                            `-o0
+  
+  
+ 
+.SS 64-bit
+ 
+ SMNEGL  <Xd>, <Wn>, <Wm>
+ 
+ SMSUBL <Xd>, <Wn>, <Wm>, XZR
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the first general-purpose source register holding the
+  multiplicand, encoded in the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the second general-purpose source register holding the
+  multiplier, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ The manual of SMSUBL gives pseudocode for SMNEGL.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

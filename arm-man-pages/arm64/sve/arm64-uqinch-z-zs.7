@@ -1,0 +1,129 @@
+.nh
+.TH "UQINCH (vector)" "7" " "  "instruction" "sve"
+.SS UQINCH (vector)
+ Unsigned saturating increment vector by multiple of 16-bit predicate constraint
+ element count
+
+ Determines the number of active 16-bit elements implied by the named predicate
+ constraint, multiplies that by an immediate in the range 1 to 16 inclusive, and
+ then uses the result to increment all destination vector elements. The results
+ are saturated to the 16-bit unsigned integer range.
+
+ The named predicate constraint limits the number of active elements in a single
+ predicate to:
+
+ * A fixed number (VL1 to VL256)
+
+ * The largest power of two (POW2)
+
+ * The largest multiple of three or four (MUL3 or MUL4)
+
+ * All available, implicitly a multiple of two (ALL).
+
+ Unspecified or out of range constraint encodings generate an empty predicate or
+ zero element count rather than Undefined Instruction exception.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - uqinch_z_zs_
+ 
+                                                                   
+                     22                      10                    
+                   23 |                    11 |                    
+                 24 | |  20      16      12 | |         5         0
+                  | | |   |       |       | | |         |         |
+   0 0 0 0 0 1 0 0|0|1|1 0|. . . .|1 1 0 0|0|1|. . . . .|. . . . .|
+                  | |     |               | | |         |
+                  | |     `-imm4          | | `-pattern `-Zdn
+                  | `-size<0>             | `-U
+                  `-size<1>               `-D
+  
+  
+ 
+.SS SVE
+ 
+ UQINCH  <Zdn>.H{, <pattern>{, MUL #<imm>}}
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer dn = UInt(Zdn);
+ bits(5) pat = pattern;
+ integer imm = UInt(imm4) + 1;
+ boolean unsigned = TRUE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer count = DecodePredCount(pat, esize);
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = Int(Elem[operand1, e, esize], unsigned);
+     (Elem[result, e, esize], -) = SatQ(element1 + (count * imm), esize, unsigned);
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <pattern>
+  Encoded in pattern
+  Is the optional pattern specifier, defaulting to ALL,
+
+  pattern <pattern> 
+  00000   POW2      
+  00001   VL1       
+  00010   VL2       
+  00011   VL3       
+  00100   VL4       
+  00101   VL5       
+  00110   VL6       
+  00111   VL7       
+  01000   VL8       
+  01001   VL16      
+  01010   VL32      
+  01011   VL64      
+  01100   VL128     
+  01101   VL256     
+  0111x   #uimm5    
+  101x1   #uimm5    
+  10110   #uimm5    
+  1x0x1   #uimm5    
+  1x010   #uimm5    
+  1xx00   #uimm5    
+  11101   MUL4      
+  11110   MUL3      
+  11111   ALL       
+
+ <imm>
+  Encoded in imm4
+  Is the immediate multiplier, in the range 1 to 16, defaulting to 1, encoded in
+  the "imm4" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer count = DecodePredCount(pat, esize);
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = Int(Elem[operand1, e, esize], unsigned);
+     (Elem[result, e, esize], -) = SatQ(element1 + (count * imm), esize, unsigned);
+ 
+ Z[dn] = result;
+

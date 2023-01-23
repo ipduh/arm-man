@@ -1,0 +1,164 @@
+.nh
+.TH "FCVTXN, FCVTXN2 -- A64" "7" " "  "instruction" "advsimd"
+.SS FCVTXN, FCVTXN2
+ Floating-point Convert to lower precision Narrow, rounding to odd (vector)
+
+ Floating-point Convert to lower precision Narrow, rounding to odd (vector).
+ This instruction reads each vector element in the source SIMD&FP register,
+ narrows each value to half the precision of the source element using the Round
+ to Odd rounding mode, writes the result to a vector, and writes the vector to
+ the destination SIMD&FP register.
+
+ The FCVTXN instruction writes the vector to the lower half of the destination
+ register and clears the upper half, while the FCVTXN2 instruction writes the
+ vector to the upper half of the destination register without affecting the
+ other bits of the register.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR or a
+ synchronous exception being generated. For more information, see Floating-point
+ exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - FCVTXN_asisdmisc_N
+ 
+                                                                   
+                     22                                            
+       29          23 |                                            
+     30 |        24 | |        17        12  10         5         0
+      | |         | | |         |         |   |         |         |
+   0 1|1|1 1 1 1 0|0|.|1 0 0 0 0|1 0 1 1 0|1 0|. . . . .|. . . . .|
+      |             |           |             |         |
+      `-U           `-sz        `-opcode      `-Rn      `-Rd
+  
+  
+ 
+.SS Scalar
+ 
+ FCVTXN  <Vb><d>, <Va><n>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if sz == '0' then UNDEFINED;
+ integer esize = 32;
+ integer datasize = esize;
+ integer elements = 1;
+ integer part = 0;
+.SS Vector - A64 - FCVTXN_asimdmisc_N
+ 
+                                                                   
+       29            22                                            
+     30 |          23 |                                            
+   31 | |        24 | |        17        12  10         5         0
+    | | |         | | |         |         |   |         |         |
+   0|.|1|0 1 1 1 0|0|.|1 0 0 0 0|1 0 1 1 0|1 0|. . . . .|. . . . .|
+    | |             |           |             |         |
+    | `-U           `-sz        `-opcode      `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Vector
+ 
+ FCVTXN{2}  <Vd>.<Tb>, <Vn>.<Ta>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if sz == '0' then UNDEFINED;
+ integer esize = 32;
+ integer datasize = 64;
+ integer elements = 2;
+ integer part = UInt(Q);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(2*datasize) operand = V[n];
+ bits(datasize) result;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, esize] = FPConvert(Elem[operand, e, 2*esize], FPCR, FPRounding_ODD);
+ 
+ Vpart[d, part] = result;
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Tb>
+  Encoded in sz:Q
+  Is an arrangement specifier,
+
+  sz Q <Tb>     
+  0  x RESERVED 
+  1  0 2S       
+  1  1 4S       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Ta>
+  Encoded in sz
+  Is an arrangement specifier,
+
+  sz <Ta>     
+  0  RESERVED 
+  1  2D       
+
+ <Vb>
+  Encoded in sz
+  Is the destination width specifier,
+
+  sz <Vb>     
+  0  RESERVED 
+  1  S        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Va>
+  Encoded in sz
+  Is the source width specifier,
+
+  sz <Va>     
+  0  RESERVED 
+  1  D        
+
+ <n>
+  Encoded in Rn
+  Is the number of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(2*datasize) operand = V[n];
+ bits(datasize) result;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, esize] = FPConvert(Elem[operand, e, 2*esize], FPCR, FPRounding_ODD);
+ 
+ Vpart[d, part] = result;
+

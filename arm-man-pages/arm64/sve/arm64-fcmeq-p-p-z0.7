@@ -1,0 +1,250 @@
+.nh
+.TH "FCM<cc> (zero)" "7" " "  "instruction" "sve"
+.SS FCM<cc> (zero)
+ Floating-point compare vector with zero
+
+ Compare active floating-point elements in the source vector with zero, and
+ place the boolean results of the specified comparison in the corresponding
+ elements of the destination predicate. Inactive elements in the destination
+ predicate register are set to zero. Does not set the condition flags.
+
+
+
+ The <cc> symbol specifies one of the standard ARM condition codes: EQ, GE, GT,
+ LE, LT, or NE.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 6 classes: Equal, Greater than, Greater than or equal, Less than, Less than or equal and Not equal
+
+.SS Equal - A64 - fcmeq_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|1|0|0 0 1|. . .|. . . . .|0|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Equal
+ 
+ FCMEQ   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_EQ;
+.SS Greater than - A64 - fcmgt_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|0|0|0 0 1|. . .|. . . . .|1|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Greater than
+ 
+ FCMGT   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_GT;
+.SS Greater than or equal - A64 - fcmge_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|0|0|0 0 1|. . .|. . . . .|0|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Greater than or equal
+ 
+ FCMGE   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_GE;
+.SS Less than - A64 - fcmlt_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|0|1|0 0 1|. . .|. . . . .|0|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Less than
+ 
+ FCMLT   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_LT;
+.SS Less than or equal - A64 - fcmle_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|0|1|0 0 1|. . .|. . . . .|1|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Less than or equal
+ 
+ FCMLE   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_LE;
+.SS Not equal - A64 - fcmne_p_p_z0_
+ 
+                                                                   
+                                 16                                
+                               17 |                                
+                 24  22      18 | |    13    10         5 4       0
+                  |   |       | | |     |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0 1 0 0|1|1|0 0 1|. . .|. . . . .|0|. . . .|
+                  |           | |       |     |         | |
+                  `-size      | `-lt    `-Pg  `-Zn      | `-Pd
+                              `-eq                      `-ne
+  
+  
+ 
+.SS Not equal
+ 
+ FCMNE   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, #0.0
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_NE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         case op of
+             when Cmp_EQ res = FPCompareEQ(element, 0<esize-1:0>, FPCR);
+             when Cmp_GE res = FPCompareGE(element, 0<esize-1:0>, FPCR);
+             when Cmp_GT res = FPCompareGT(element, 0<esize-1:0>, FPCR);
+             when Cmp_NE res = FPCompareNE(element, 0<esize-1:0>, FPCR);
+             when Cmp_LT res = FPCompareGT(0<esize-1:0>, element, FPCR);
+             when Cmp_LE res = FPCompareGE(0<esize-1:0>, element, FPCR);
+         ElemP[result, e, esize] = if res then '1' else '0';
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         case op of
+             when Cmp_EQ res = FPCompareEQ(element, 0<esize-1:0>, FPCR);
+             when Cmp_GE res = FPCompareGE(element, 0<esize-1:0>, FPCR);
+             when Cmp_GT res = FPCompareGT(element, 0<esize-1:0>, FPCR);
+             when Cmp_NE res = FPCompareNE(element, 0<esize-1:0>, FPCR);
+             when Cmp_LT res = FPCompareGT(0<esize-1:0>, element, FPCR);
+             when Cmp_LE res = FPCompareGE(0<esize-1:0>, element, FPCR);
+         ElemP[result, e, esize] = if res then '1' else '0';
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ P[d] = result;
+

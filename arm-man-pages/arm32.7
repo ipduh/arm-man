@@ -1,0 +1,573 @@
+.nh
+.TH "AArch32-Instructions" "7" " "  " " " "
+.SS AArch32 -- Base Instructions (alphabetic order)
+ arm32-adc-i        Add with Carry (immediate).                                                                         
+ arm32-adc-r        Add with Carry (register).                                                                          
+ arm32-adc-rr       Add with Carry (register-shifted register).                                                         
+ arm32-add-adr      Add to PC: an alias of ADR.                                                                         
+ arm32-add-i        Add (immediate).                                                                                    
+ arm32-add-r        Add (register).                                                                                     
+ arm32-add-rr       Add (register-shifted register).                                                                    
+ arm32-add-sp-i     Add to SP (immediate).                                                                              
+ arm32-add-sp-r     Add to SP (register).                                                                               
+ arm32-adr          Form PC-relative address.                                                                           
+ arm32-and-i        Bitwise AND (immediate).                                                                            
+ arm32-and-r        Bitwise AND (register).                                                                             
+ arm32-and-rr       Bitwise AND (register-shifted register).                                                            
+ arm32-asr-mov-r    Arithmetic Shift Right (immediate): an alias of MOV, MOVS (register).                               
+ arm32-asr-mov-rr   Arithmetic Shift Right (register): an alias of MOV, MOVS (register-shifted register).               
+ arm32-asrs-mov-r   Arithmetic Shift Right, setting flags (immediate): an alias of MOV, MOVS (register).                
+ arm32-asrs-mov-rr  Arithmetic Shift Right, setting flags (register): an alias of MOV, MOVS (register-shifted register).
+ arm32-b            Branch.                                                                                             
+ arm32-bfc          Bit Field Clear.                                                                                    
+ arm32-bfi          Bit Field Insert.                                                                                   
+ arm32-bic-i        Bitwise Bit Clear (immediate).                                                                      
+ arm32-bic-r        Bitwise Bit Clear (register).                                                                       
+ arm32-bic-rr       Bitwise Bit Clear (register-shifted register).                                                      
+ arm32-bkpt         Breakpoint.                                                                                         
+ arm32-bl-i         Branch with Link and optional Exchange (immediate).                                                 
+ arm32-blx-r        Branch with Link and Exchange (register).                                                           
+ arm32-bx           Branch and Exchange.                                                                                
+ arm32-bxj          Branch and Exchange, previously Branch and Exchange Jazelle.                                        
+ arm32-cbnz         Compare and Branch on Nonzero or Zero.                                                              
+ arm32-clrex        Clear-Exclusive.                                                                                    
+ arm32-clz          Count Leading Zeros.                                                                                
+ arm32-cmn-i        Compare Negative (immediate).                                                                       
+ arm32-cmn-r        Compare Negative (register).                                                                        
+ arm32-cmn-rr       Compare Negative (register-shifted register).                                                       
+ arm32-cmp-i        Compare (immediate).                                                                                
+ arm32-cmp-r        Compare (register).                                                                                 
+ arm32-cmp-rr       Compare (register-shifted register).                                                                
+ arm32-cps          Change PE State.                                                                                    
+ arm32-crc32        CRC32.                                                                                              
+ arm32-crc32c       CRC32C.                                                                                             
+ arm32-csdb         Consumption of Speculative Data Barrier.                                                            
+ arm32-dbg          Debug hint.                                                                                         
+ arm32-dcps1        Debug Change PE State to EL1.                                                                       
+ arm32-dcps2        Debug Change PE State to EL2.                                                                       
+ arm32-dcps3        Debug Change PE State to EL3.                                                                       
+ arm32-dmb          Data Memory Barrier.                                                                                
+ arm32-dsb          Data Synchronization Barrier.                                                                       
+ arm32-eor-i        Bitwise Exclusive OR (immediate).                                                                   
+ arm32-eor-r        Bitwise Exclusive OR (register).                                                                    
+ arm32-eor-rr       Bitwise Exclusive OR (register-shifted register).                                                   
+ arm32-eret         Exception Return.                                                                                   
+ arm32-esb          Error Synchronization Barrier.                                                                      
+ arm32-hlt          Halting Breakpoint.                                                                                 
+ arm32-hvc          Hypervisor Call.                                                                                    
+ arm32-isb          Instruction Synchronization Barrier.                                                                
+ arm32-it           If-Then.                                                                                            
+ arm32-lda          Load-Acquire Word.                                                                                  
+ arm32-ldab         Load-Acquire Byte.                                                                                  
+ arm32-ldaex        Load-Acquire Exclusive Word.                                                                        
+ arm32-ldaexb       Load-Acquire Exclusive Byte.                                                                        
+ arm32-ldaexd       Load-Acquire Exclusive Doubleword.                                                                  
+ arm32-ldaexh       Load-Acquire Exclusive Halfword.                                                                    
+ arm32-ldah         Load-Acquire Halfword.                                                                              
+ arm32-ldc-i        Load data to System register (immediate).                                                           
+ arm32-ldc-l        Load data to System register (literal).                                                             
+ arm32-ldm-e        Load Multiple (exception return).                                                                   
+ arm32-ldm-u        Load Multiple (User registers).                                                                     
+ arm32-ldm          Load Multiple (Increment After, Full Descending).                                                   
+ arm32-ldmda        Load Multiple Decrement After (Full Ascending).                                                     
+ arm32-ldmdb        Load Multiple Decrement Before (Empty Ascending).                                                   
+ arm32-ldmib        Load Multiple Increment Before (Empty Descending).                                                  
+ arm32-ldr-i        Load Register (immediate).                                                                          
+ arm32-ldr-l        Load Register (literal).                                                                            
+ arm32-ldr-r        Load Register (register).                                                                           
+ arm32-ldrb-i       Load Register Byte (immediate).                                                                     
+ arm32-ldrb-l       Load Register Byte (literal).                                                                       
+ arm32-ldrb-r       Load Register Byte (register).                                                                      
+ arm32-ldrbt        Load Register Byte Unprivileged.                                                                    
+ arm32-ldrd-i       Load Register Dual (immediate).                                                                     
+ arm32-ldrd-l       Load Register Dual (literal).                                                                       
+ arm32-ldrd-r       Load Register Dual (register).                                                                      
+ arm32-ldrex        Load Register Exclusive.                                                                            
+ arm32-ldrexb       Load Register Exclusive Byte.                                                                       
+ arm32-ldrexd       Load Register Exclusive Doubleword.                                                                 
+ arm32-ldrexh       Load Register Exclusive Halfword.                                                                   
+ arm32-ldrh-i       Load Register Halfword (immediate).                                                                 
+ arm32-ldrh-l       Load Register Halfword (literal).                                                                   
+ arm32-ldrh-r       Load Register Halfword (register).                                                                  
+ arm32-ldrht        Load Register Halfword Unprivileged.                                                                
+ arm32-ldrsb-i      Load Register Signed Byte (immediate).                                                              
+ arm32-ldrsb-l      Load Register Signed Byte (literal).                                                                
+ arm32-ldrsb-r      Load Register Signed Byte (register).                                                               
+ arm32-ldrsbt       Load Register Signed Byte Unprivileged.                                                             
+ arm32-ldrsh-i      Load Register Signed Halfword (immediate).                                                          
+ arm32-ldrsh-l      Load Register Signed Halfword (literal).                                                            
+ arm32-ldrsh-r      Load Register Signed Halfword (register).                                                           
+ arm32-ldrsht       Load Register Signed Halfword Unprivileged.                                                         
+ arm32-ldrt         Load Register Unprivileged.                                                                         
+ arm32-lsl-mov-r    Logical Shift Left (immediate): an alias of MOV, MOVS (register).                                   
+ arm32-lsl-mov-rr   Logical Shift Left (register): an alias of MOV, MOVS (register-shifted register).                   
+ arm32-lsls-mov-r   Logical Shift Left, setting flags (immediate): an alias of MOV, MOVS (register).                    
+ arm32-lsls-mov-rr  Logical Shift Left, setting flags (register): an alias of MOV, MOVS (register-shifted register).    
+ arm32-lsr-mov-r    Logical Shift Right (immediate): an alias of MOV, MOVS (register).                                  
+ arm32-lsr-mov-rr   Logical Shift Right (register): an alias of MOV, MOVS (register-shifted register).                  
+ arm32-lsrs-mov-r   Logical Shift Right, setting flags (immediate): an alias of MOV, MOVS (register).                   
+ arm32-lsrs-mov-rr  Logical Shift Right, setting flags (register): an alias of MOV, MOVS (register-shifted register).   
+ arm32-mcr          Move to System register from general-purpose register or execute a System instruction.              
+ arm32-mcrr         Move to System register from two general-purpose registers.                                         
+ arm32-mla          Multiply Accumulate.                                                                                
+ arm32-mls          Multiply and Subtract.                                                                              
+ arm32-mov-i        Move (immediate).                                                                                   
+ arm32-mov-r        Move (register).                                                                                    
+ arm32-mov-rr       Move (register-shifted register).                                                                   
+ arm32-movt         Move Top.                                                                                           
+ arm32-mrc          Move to general-purpose register from System register.                                              
+ arm32-mrrc         Move to two general-purpose registers from System register.                                         
+ arm32-mrs          Move Special register to general-purpose register.                                                  
+ arm32-mrs-br       Move Banked or Special register to general-purpose register.                                        
+ arm32-msr-br       Move general-purpose register to Banked or Special register.                                        
+ arm32-msr-i        Move immediate value to Special register.                                                           
+ arm32-msr-r        Move general-purpose register to Special register.                                                  
+ arm32-mul          Multiply.                                                                                           
+ arm32-mvn-i        Bitwise NOT (immediate).                                                                            
+ arm32-mvn-r        Bitwise NOT (register).                                                                             
+ arm32-mvn-rr       Bitwise NOT (register-shifted register).                                                            
+ arm32-nop          No Operation.                                                                                       
+ arm32-orn-i        Bitwise OR NOT (immediate).                                                                         
+ arm32-orn-r        Bitwise OR NOT (register).                                                                          
+ arm32-orr-i        Bitwise OR (immediate).                                                                             
+ arm32-orr-r        Bitwise OR (register).                                                                              
+ arm32-orr-rr       Bitwise OR (register-shifted register).                                                             
+ arm32-pkh          Pack Halfword.                                                                                      
+ arm32-pld-l        Preload Data (literal).                                                                             
+ arm32-pld-i        Preload Data (immediate).                                                                           
+ arm32-pld-r        Preload Data (register).                                                                            
+ arm32-pli-i        Preload Instruction (immediate, literal).                                                           
+ arm32-pli-r        Preload Instruction (register).                                                                     
+ arm32-pop          Pop Multiple Registers from Stack.                                                                  
+ arm32-pop-ldm      Pop Multiple Registers from Stack: an alias of LDM, LDMIA, LDMFD.                                   
+ arm32-pop-ldr-i    Pop Single Register from Stack: an alias of LDR (immediate).                                        
+ arm32-pssbb        Physical Speculative Store Bypass Barrier.                                                          
+ arm32-push         Push Multiple Registers to Stack.                                                                   
+ arm32-push-stmdb   Push multiple registers to Stack: an alias of STMDB, STMFD.                                         
+ arm32-push-str-i   Push Single Register to Stack: an alias of STR (immediate).                                         
+ arm32-qadd         Saturating Add.                                                                                     
+ arm32-qadd16       Saturating Add 16.                                                                                  
+ arm32-qadd8        Saturating Add 8.                                                                                   
+ arm32-qasx         Saturating Add and Subtract with Exchange.                                                          
+ arm32-qdadd        Saturating Double and Add.                                                                          
+ arm32-qdsub        Saturating Double and Subtract.                                                                     
+ arm32-qsax         Saturating Subtract and Add with Exchange.                                                          
+ arm32-qsub         Saturating Subtract.                                                                                
+ arm32-qsub16       Saturating Subtract 16.                                                                             
+ arm32-qsub8        Saturating Subtract 8.                                                                              
+ arm32-rbit         Reverse Bits.                                                                                       
+ arm32-rev          Byte-Reverse Word.                                                                                  
+ arm32-rev16        Byte-Reverse Packed Halfword.                                                                       
+ arm32-revsh        Byte-Reverse Signed Halfword.                                                                       
+ arm32-rfe          Return From Exception.                                                                              
+ arm32-ror-mov-r    Rotate Right (immediate): an alias of MOV, MOVS (register).                                         
+ arm32-ror-mov-rr   Rotate Right (register): an alias of MOV, MOVS (register-shifted register).                         
+ arm32-rors-mov-r   Rotate Right, setting flags (immediate): an alias of MOV, MOVS (register).                          
+ arm32-rors-mov-rr  Rotate Right, setting flags (register): an alias of MOV, MOVS (register-shifted register).          
+ arm32-rrx-mov-r    Rotate Right with Extend: an alias of MOV, MOVS (register).                                         
+ arm32-rrxs-mov-r   Rotate Right with Extend, setting flags: an alias of MOV, MOVS (register).                          
+ arm32-rsb-i        Reverse Subtract (immediate).                                                                       
+ arm32-rsb-r        Reverse Subtract (register).                                                                        
+ arm32-rsb-rr       Reverse Subtract (register-shifted register).                                                       
+ arm32-rsc-i        Reverse Subtract with Carry (immediate).                                                            
+ arm32-rsc-r        Reverse Subtract with Carry (register).                                                             
+ arm32-rsc-rr       Reverse Subtract (register-shifted register).                                                       
+ arm32-sadd16       Signed Add 16.                                                                                      
+ arm32-sadd8        Signed Add 8.                                                                                       
+ arm32-sasx         Signed Add and Subtract with Exchange.                                                              
+ arm32-sb           Speculation Barrier.                                                                                
+ arm32-sbc-i        Subtract with Carry (immediate).                                                                    
+ arm32-sbc-r        Subtract with Carry (register).                                                                     
+ arm32-sbc-rr       Subtract with Carry (register-shifted register).                                                    
+ arm32-sbfx         Signed Bit Field Extract.                                                                           
+ arm32-sdiv         Signed Divide.                                                                                      
+ arm32-sel          Select Bytes.                                                                                       
+ arm32-setend       Set Endianness.                                                                                     
+ arm32-setpan       Set Privileged Access Never.                                                                        
+ arm32-sev          Send Event.                                                                                         
+ arm32-sevl         Send Event Local.                                                                                   
+ arm32-shadd16      Signed Halving Add 16.                                                                              
+ arm32-shadd8       Signed Halving Add 8.                                                                               
+ arm32-shasx        Signed Halving Add and Subtract with Exchange.                                                      
+ arm32-shsax        Signed Halving Subtract and Add with Exchange.                                                      
+ arm32-shsub16      Signed Halving Subtract 16.                                                                         
+ arm32-shsub8       Signed Halving Subtract 8.                                                                          
+ arm32-smc          Secure Monitor Call.                                                                                
+ arm32-smlabb       Signed Multiply Accumulate (halfwords).                                                             
+ arm32-smlad        Signed Multiply Accumulate Dual.                                                                    
+ arm32-smlal        Signed Multiply Accumulate Long.                                                                    
+ arm32-smlalbb      Signed Multiply Accumulate Long (halfwords).                                                        
+ arm32-smlald       Signed Multiply Accumulate Long Dual.                                                               
+ arm32-smlawb       Signed Multiply Accumulate (word by halfword).                                                      
+ arm32-smlsd        Signed Multiply Subtract Dual.                                                                      
+ arm32-smlsld       Signed Multiply Subtract Long Dual.                                                                 
+ arm32-smmla        Signed Most Significant Word Multiply Accumulate.                                                   
+ arm32-smmls        Signed Most Significant Word Multiply Subtract.                                                     
+ arm32-smmul        Signed Most Significant Word Multiply.                                                              
+ arm32-smuad        Signed Dual Multiply Add.                                                                           
+ arm32-smulbb       Signed Multiply (halfwords).                                                                        
+ arm32-smull        Signed Multiply Long.                                                                               
+ arm32-smulwb       Signed Multiply (word by halfword).                                                                 
+ arm32-smusd        Signed Multiply Subtract Dual.                                                                      
+ arm32-srs          Store Return State.                                                                                 
+ arm32-ssat         Signed Saturate.                                                                                    
+ arm32-ssat16       Signed Saturate 16.                                                                                 
+ arm32-ssax         Signed Subtract and Add with Exchange.                                                              
+ arm32-ssbb         Speculative Store Bypass Barrier.                                                                   
+ arm32-ssub16       Signed Subtract 16.                                                                                 
+ arm32-ssub8        Signed Subtract 8.                                                                                  
+ arm32-stc          Store data to System register.                                                                      
+ arm32-stl          Store-Release Word.                                                                                 
+ arm32-stlb         Store-Release Byte.                                                                                 
+ arm32-stlex        Store-Release Exclusive Word.                                                                       
+ arm32-stlexb       Store-Release Exclusive Byte.                                                                       
+ arm32-stlexd       Store-Release Exclusive Doubleword.                                                                 
+ arm32-stlexh       Store-Release Exclusive Halfword.                                                                   
+ arm32-stlh         Store-Release Halfword.                                                                             
+ arm32-stm-u        Store Multiple (User registers).                                                                    
+ arm32-stm          Store Multiple (Increment After, Empty Ascending).                                                  
+ arm32-stmda        Store Multiple Decrement After (Empty Descending).                                                  
+ arm32-stmdb        Store Multiple Decrement Before (Full Descending).                                                  
+ arm32-stmib        Store Multiple Increment Before (Full Ascending).                                                   
+ arm32-str-i        Store Register (immediate).                                                                         
+ arm32-str-r        Store Register (register).                                                                          
+ arm32-strb-i       Store Register Byte (immediate).                                                                    
+ arm32-strb-r       Store Register Byte (register).                                                                     
+ arm32-strbt        Store Register Byte Unprivileged.                                                                   
+ arm32-strd-i       Store Register Dual (immediate).                                                                    
+ arm32-strd-r       Store Register Dual (register).                                                                     
+ arm32-strex        Store Register Exclusive.                                                                           
+ arm32-strexb       Store Register Exclusive Byte.                                                                      
+ arm32-strexd       Store Register Exclusive Doubleword.                                                                
+ arm32-strexh       Store Register Exclusive Halfword.                                                                  
+ arm32-strh-i       Store Register Halfword (immediate).                                                                
+ arm32-strh-r       Store Register Halfword (register).                                                                 
+ arm32-strht        Store Register Halfword Unprivileged.                                                               
+ arm32-strt         Store Register Unprivileged.                                                                        
+ arm32-sub-adr      Subtract from PC: an alias of ADR.                                                                  
+ arm32-sub-i        Subtract (immediate).                                                                               
+ arm32-sub-r        Subtract (register).                                                                                
+ arm32-sub-rr       Subtract (register-shifted register).                                                               
+ arm32-sub-sp-i     Subtract from SP (immediate).                                                                       
+ arm32-sub-sp-r     Subtract from SP (register).                                                                        
+ arm32-svc          Supervisor Call.                                                                                    
+ arm32-sxtab        Signed Extend and Add Byte.                                                                         
+ arm32-sxtab16      Signed Extend and Add Byte 16.                                                                      
+ arm32-sxtah        Signed Extend and Add Halfword.                                                                     
+ arm32-sxtb         Signed Extend Byte.                                                                                 
+ arm32-sxtb16       Signed Extend Byte 16.                                                                              
+ arm32-sxth         Signed Extend Halfword.                                                                             
+ arm32-tbb          Table Branch Byte or Halfword.                                                                      
+ arm32-teq-i        Test Equivalence (immediate).                                                                       
+ arm32-teq-r        Test Equivalence (register).                                                                        
+ arm32-teq-rr       Test Equivalence (register-shifted register).                                                       
+ arm32-tsb          Trace Synchronization Barrier.                                                                      
+ arm32-tst-i        Test (immediate).                                                                                   
+ arm32-tst-r        Test (register).                                                                                    
+ arm32-tst-rr       Test (register-shifted register).                                                                   
+ arm32-uadd16       Unsigned Add 16.                                                                                    
+ arm32-uadd8        Unsigned Add 8.                                                                                     
+ arm32-uasx         Unsigned Add and Subtract with Exchange.                                                            
+ arm32-ubfx         Unsigned Bit Field Extract.                                                                         
+ arm32-udf          Permanently Undefined.                                                                              
+ arm32-udiv         Unsigned Divide.                                                                                    
+ arm32-uhadd16      Unsigned Halving Add 16.                                                                            
+ arm32-uhadd8       Unsigned Halving Add 8.                                                                             
+ arm32-uhasx        Unsigned Halving Add and Subtract with Exchange.                                                    
+ arm32-uhsax        Unsigned Halving Subtract and Add with Exchange.                                                    
+ arm32-uhsub16      Unsigned Halving Subtract 16.                                                                       
+ arm32-uhsub8       Unsigned Halving Subtract 8.                                                                        
+ arm32-umaal        Unsigned Multiply Accumulate Accumulate Long.                                                       
+ arm32-umlal        Unsigned Multiply Accumulate Long.                                                                  
+ arm32-umull        Unsigned Multiply Long.                                                                             
+ arm32-uqadd16      Unsigned Saturating Add 16.                                                                         
+ arm32-uqadd8       Unsigned Saturating Add 8.                                                                          
+ arm32-uqasx        Unsigned Saturating Add and Subtract with Exchange.                                                 
+ arm32-uqsax        Unsigned Saturating Subtract and Add with Exchange.                                                 
+ arm32-uqsub16      Unsigned Saturating Subtract 16.                                                                    
+ arm32-uqsub8       Unsigned Saturating Subtract 8.                                                                     
+ arm32-usad8        Unsigned Sum of Absolute Differences.                                                               
+ arm32-usada8       Unsigned Sum of Absolute Differences and Accumulate.                                                
+ arm32-usat         Unsigned Saturate.                                                                                  
+ arm32-usat16       Unsigned Saturate 16.                                                                               
+ arm32-usax         Unsigned Subtract and Add with Exchange.                                                            
+ arm32-usub16       Unsigned Subtract 16.                                                                               
+ arm32-usub8        Unsigned Subtract 8.                                                                                
+ arm32-uxtab        Unsigned Extend and Add Byte.                                                                       
+ arm32-uxtab16      Unsigned Extend and Add Byte 16.                                                                    
+ arm32-uxtah        Unsigned Extend and Add Halfword.                                                                   
+ arm32-uxtb         Unsigned Extend Byte.                                                                               
+ arm32-uxtb16       Unsigned Extend Byte 16.                                                                            
+ arm32-uxth         Unsigned Extend Halfword.                                                                           
+ arm32-wfe          Wait For Event.                                                                                     
+ arm32-wfi          Wait For Interrupt.                                                                                 
+ arm32-yield        Yield hint.                                                                                         
+ 
+.SS AArch32 -- SIMD&FP Instructions (alphabetic order)
+ arm32-aesd             AES single round decryption.                                                                                 
+ arm32-aese             AES single round encryption.                                                                                 
+ arm32-aesimc           AES inverse mix columns.                                                                                     
+ arm32-aesmc            AES mix columns.                                                                                             
+ arm32-fldmx            FLDM*X.                                                                                                      
+ arm32-fstmx            FSTMX.                                                                                                       
+ arm32-sha1c            SHA1 hash update (choose).                                                                                   
+ arm32-sha1h            SHA1 fixed rotate.                                                                                           
+ arm32-sha1m            SHA1 hash update (majority).                                                                                 
+ arm32-sha1p            SHA1 hash update (parity).                                                                                   
+ arm32-sha1su0          SHA1 schedule update 0.                                                                                      
+ arm32-sha1su1          SHA1 schedule update 1.                                                                                      
+ arm32-sha256h          SHA256 hash update part 1.                                                                                   
+ arm32-sha256h2         SHA256 hash update part 2.                                                                                   
+ arm32-sha256su0        SHA256 schedule update 0.                                                                                    
+ arm32-sha256su1        SHA256 schedule update 1.                                                                                    
+ arm32-vaba             Vector Absolute Difference and Accumulate.                                                                   
+ arm32-vabal            Vector Absolute Difference and Accumulate Long.                                                              
+ arm32-vabd-f           Vector Absolute Difference (floating-point).                                                                 
+ arm32-vabd-i           Vector Absolute Difference (integer).                                                                        
+ arm32-vabdl-i          Vector Absolute Difference Long (integer).                                                                   
+ arm32-vabs             Vector Absolute.                                                                                             
+ arm32-vacge            Vector Absolute Compare Greater Than or Equal.                                                               
+ arm32-vacgt            Vector Absolute Compare Greater Than.                                                                        
+ arm32-vacle-vacge      Vector Absolute Compare Less Than or Equal: an alias of VACGE.                                               
+ arm32-vaclt-vacgt      Vector Absolute Compare Less Than: an alias of VACGT.                                                        
+ arm32-vadd-f           Vector Add (floating-point).                                                                                 
+ arm32-vadd-i           Vector Add (integer).                                                                                        
+ arm32-vaddhn           Vector Add and Narrow, returning High Half.                                                                  
+ arm32-vaddl            Vector Add Long.                                                                                             
+ arm32-vaddw            Vector Add Wide.                                                                                             
+ arm32-vand-vbic-i      Vector Bitwise AND (immediate): an alias of VBIC (immediate).                                                
+ arm32-vand-r           Vector Bitwise AND (register).                                                                               
+ arm32-vbic-i           Vector Bitwise Bit Clear (immediate).                                                                        
+ arm32-vbic-r           Vector Bitwise Bit Clear (register).                                                                         
+ arm32-vbif             Vector Bitwise Insert if False.                                                                              
+ arm32-vbit             Vector Bitwise Insert if True.                                                                               
+ arm32-vbsl             Vector Bitwise Select.                                                                                       
+ arm32-vcadd            Vector Complex Add.                                                                                          
+ arm32-vceq-i           Vector Compare Equal to Zero.                                                                                
+ arm32-vceq-r           Vector Compare Equal.                                                                                        
+ arm32-vcge-i           Vector Compare Greater Than or Equal to Zero.                                                                
+ arm32-vcge-r           Vector Compare Greater Than or Equal.                                                                        
+ arm32-vcgt-i           Vector Compare Greater Than Zero.                                                                            
+ arm32-vcgt-r           Vector Compare Greater Than.                                                                                 
+ arm32-vcle-i           Vector Compare Less Than or Equal to Zero.                                                                   
+ arm32-vcle-vcge-r      Vector Compare Less Than or Equal: an alias of VCGE (register).                                              
+ arm32-vcls             Vector Count Leading Sign Bits.                                                                              
+ arm32-vclt-i           Vector Compare Less Than Zero.                                                                               
+ arm32-vclt-vcgt-r      Vector Compare Less Than: an alias of VCGT (register).                                                       
+ arm32-vclz             Vector Count Leading Zeros.                                                                                  
+ arm32-vcmla            Vector Complex Multiply Accumulate.                                                                          
+ arm32-vcmla-s          Vector Complex Multiply Accumulate (by element).                                                             
+ arm32-vcmp             Vector Compare.                                                                                              
+ arm32-vcmpe            Vector Compare, raising Invalid Operation on NaN.                                                            
+ arm32-vcnt             Vector Count Set Bits.                                                                                       
+ arm32-vcvt-ds          Convert between double-precision and single-precision.                                                       
+ arm32-vcvt-xs          Vector Convert between floating-point and fixed-point.                                                       
+ arm32-vcvt-xv          Convert between floating-point and fixed-point.                                                              
+ arm32-vcvt-is          Vector Convert between floating-point and integer.                                                           
+ arm32-vcvt-hs          Vector Convert between half-precision and single-precision.                                                  
+ arm32-vcvt-iv          Convert floating-point to integer with Round towards Zero.                                                   
+ arm32-vcvt-bfs         Vector Convert from single-precision to BFloat16.                                                            
+ arm32-vcvt-vi          Convert integer to floating-point.                                                                           
+ arm32-vcvta-asimd      Vector Convert floating-point to integer with Round to Nearest with Ties to Away.                            
+ arm32-vcvta-vfp        Convert floating-point to integer with Round to Nearest with Ties to Away.                                   
+ arm32-vcvtb            Convert to or from a half-precision value in the bottom half of a single-precision register.                 
+ arm32-vcvtb-bfs        Converts from a single-precision value to a BFloat16 value in the bottom half of a single-precision register.
+ arm32-vcvtm-asimd      Vector Convert floating-point to integer with Round towards -Infinity.                                       
+ arm32-vcvtm-vfp        Convert floating-point to integer with Round towards -Infinity.                                              
+ arm32-vcvtn-asimd      Vector Convert floating-point to integer with Round to Nearest.                                              
+ arm32-vcvtn-vfp        Convert floating-point to integer with Round to Nearest.                                                     
+ arm32-vcvtp-asimd      Vector Convert floating-point to integer with Round towards +Infinity.                                       
+ arm32-vcvtp-vfp        Convert floating-point to integer with Round towards +Infinity.                                              
+ arm32-vcvtr-iv         Convert floating-point to integer.                                                                           
+ arm32-vcvtt            Convert to or from a half-precision value in the top half of a single-precision register.                    
+ arm32-vcvtt-bfs        Converts from a single-precision value to a BFloat16 value in the top half of a single-precision register..  
+ arm32-vdiv             Divide.                                                                                                      
+ arm32-vdot-s           BFloat16 floating-point indexed dot product (vector, by element).                                            
+ arm32-vdot             BFloat16 floating-point (BF16) dot product (vector).                                                         
+ arm32-vdup-r           Duplicate general-purpose register to vector.                                                                
+ arm32-vdup-s           Duplicate vector element to vector.                                                                          
+ arm32-veor             Vector Bitwise Exclusive OR.                                                                                 
+ arm32-vext             Vector Extract.                                                                                              
+ arm32-vext-vext        Vector Extract: an alias of VEXT (byte elements).                                                            
+ arm32-vfma             Vector Fused Multiply Accumulate.                                                                            
+ arm32-vfma-bfs         BFloat16 floating-point widening multiply-add long (by scalar).                                              
+ arm32-vfma-bf          BFloat16 floating-point widening multiply-add long (vector).                                                 
+ arm32-vfmal-s          Vector Floating-point Multiply-Add Long to accumulator (by scalar).                                          
+ arm32-vfmal            Vector Floating-point Multiply-Add Long to accumulator (vector).                                             
+ arm32-vfms             Vector Fused Multiply Subtract.                                                                              
+ arm32-vfmsl-s          Vector Floating-point Multiply-Subtract Long from accumulator (by scalar).                                   
+ arm32-vfmsl            Vector Floating-point Multiply-Subtract Long from accumulator (vector).                                      
+ arm32-vfnma            Vector Fused Negate Multiply Accumulate.                                                                     
+ arm32-vfnms            Vector Fused Negate Multiply Subtract.                                                                       
+ arm32-vhadd            Vector Halving Add.                                                                                          
+ arm32-vhsub            Vector Halving Subtract.                                                                                     
+ arm32-vins             Vector move Insertion.                                                                                       
+ arm32-vjcvt            Javascript Convert to signed fixed-point, rounding toward Zero.                                              
+ arm32-vld1-m           Load multiple single 1-element structures to one, two, three, or four registers.                             
+ arm32-vld1-a           Load single 1-element structure and replicate to all lanes of one register.                                  
+ arm32-vld1-1           Load single 1-element structure to one lane of one register.                                                 
+ arm32-vld2-m           Load multiple 2-element structures to two or four registers.                                                 
+ arm32-vld2-a           Load single 2-element structure and replicate to all lanes of two registers.                                 
+ arm32-vld2-1           Load single 2-element structure to one lane of two registers.                                                
+ arm32-vld3-m           Load multiple 3-element structures to three registers.                                                       
+ arm32-vld3-a           Load single 3-element structure and replicate to all lanes of three registers.                               
+ arm32-vld3-1           Load single 3-element structure to one lane of three registers.                                              
+ arm32-vld4-m           Load multiple 4-element structures to four registers.                                                        
+ arm32-vld4-a           Load single 4-element structure and replicate to all lanes of four registers.                                
+ arm32-vld4-1           Load single 4-element structure to one lane of four registers.                                               
+ arm32-vldm             Load Multiple SIMD&FP registers.                                                                             
+ arm32-vldr-i           Load SIMD&FP register (immediate).                                                                           
+ arm32-vldr-l           Load SIMD&FP register (literal).                                                                             
+ arm32-vmax-f           Vector Maximum (floating-point).                                                                             
+ arm32-vmax-i           Vector Maximum (integer).                                                                                    
+ arm32-vmaxnm           Floating-point Maximum Number.                                                                               
+ arm32-vmin-f           Vector Minimum (floating-point).                                                                             
+ arm32-vmin-i           Vector Minimum (integer).                                                                                    
+ arm32-vminnm           Floating-point Minimum Number.                                                                               
+ arm32-vmla-s           Vector Multiply Accumulate (by scalar).                                                                      
+ arm32-vmla-f           Vector Multiply Accumulate (floating-point).                                                                 
+ arm32-vmla-i           Vector Multiply Accumulate (integer).                                                                        
+ arm32-vmlal-s          Vector Multiply Accumulate Long (by scalar).                                                                 
+ arm32-vmlal-i          Vector Multiply Accumulate Long (integer).                                                                   
+ arm32-vmls-s           Vector Multiply Subtract (by scalar).                                                                        
+ arm32-vmls-f           Vector Multiply Subtract (floating-point).                                                                   
+ arm32-vmls-i           Vector Multiply Subtract (integer).                                                                          
+ arm32-vmlsl-s          Vector Multiply Subtract Long (by scalar).                                                                   
+ arm32-vmlsl-i          Vector Multiply Subtract Long (integer).                                                                     
+ arm32-vmmla            BFloat16 floating-point matrix multiply-accumulate.                                                          
+ arm32-vmov-h           Copy 16 bits of a general-purpose register to or from a 32-bit SIMD&FP register.                             
+ arm32-vmov-s           Copy a general-purpose register to or from a 32-bit SIMD&FP register.                                        
+ arm32-vmov-d           Copy two general-purpose registers to or from a SIMD&FP register.                                            
+ arm32-vmov-ss          Copy two general-purpose registers to a pair of 32-bit SIMD&FP registers.                                    
+ arm32-vmov-rs          Copy a general-purpose register to a vector element.                                                         
+ arm32-vmov-i           Copy immediate value to a SIMD&FP register.                                                                  
+ arm32-vmov-r           Copy between FP registers.                                                                                   
+ arm32-vmov-vorr-r      Copy between SIMD registers: an alias of VORR (register).                                                    
+ arm32-vmov-sr          Copy a vector element to a general-purpose register with sign or zero extension.                             
+ arm32-vmovl            Vector Move Long.                                                                                            
+ arm32-vmovn            Vector Move and Narrow.                                                                                      
+ arm32-vmovx            Vector Move extraction.                                                                                      
+ arm32-vmrs             Move SIMD&FP Special register to general-purpose register.                                                   
+ arm32-vmsr             Move general-purpose register to SIMD&FP Special register.                                                   
+ arm32-vmul-s           Vector Multiply (by scalar).                                                                                 
+ arm32-vmul-f           Vector Multiply (floating-point).                                                                            
+ arm32-vmul-i           Vector Multiply (integer and polynomial).                                                                    
+ arm32-vmull-s          Vector Multiply Long (by scalar).                                                                            
+ arm32-vmull-i          Vector Multiply Long (integer and polynomial).                                                               
+ arm32-vmvn-i           Vector Bitwise NOT (immediate).                                                                              
+ arm32-vmvn-r           Vector Bitwise NOT (register).                                                                               
+ arm32-vneg             Vector Negate.                                                                                               
+ arm32-vnmla            Vector Negate Multiply Accumulate.                                                                           
+ arm32-vnmls            Vector Negate Multiply Subtract.                                                                             
+ arm32-vnmul            Vector Negate Multiply.                                                                                      
+ arm32-vorn-vorr-i      Vector Bitwise OR NOT (immediate): an alias of VORR (immediate).                                             
+ arm32-vorn-r           Vector bitwise OR NOT (register).                                                                            
+ arm32-vorr-i           Vector Bitwise OR (immediate).                                                                               
+ arm32-vorr-r           Vector bitwise OR (register).                                                                                
+ arm32-vpadal           Vector Pairwise Add and Accumulate Long.                                                                     
+ arm32-vpadd-f          Vector Pairwise Add (floating-point).                                                                        
+ arm32-vpadd-i          Vector Pairwise Add (integer).                                                                               
+ arm32-vpaddl           Vector Pairwise Add Long.                                                                                    
+ arm32-vpmax-f          Vector Pairwise Maximum (floating-point).                                                                    
+ arm32-vpmax-i          Vector Pairwise Maximum (integer).                                                                           
+ arm32-vpmin-f          Vector Pairwise Minimum (floating-point).                                                                    
+ arm32-vpmin-i          Vector Pairwise Minimum (integer).                                                                           
+ arm32-vpop-vldm        Pop SIMD&FP registers from Stack: an alias of VLDM, VLDMDB, VLDMIA.                                          
+ arm32-vpush-vstm       Push SIMD&FP registers to Stack: an alias of VSTM, VSTMDB, VSTMIA.                                           
+ arm32-vqabs            Vector Saturating Absolute.                                                                                  
+ arm32-vqadd            Vector Saturating Add.                                                                                       
+ arm32-vqdmlal          Vector Saturating Doubling Multiply Accumulate Long.                                                         
+ arm32-vqdmlsl          Vector Saturating Doubling Multiply Subtract Long.                                                           
+ arm32-vqdmulh          Vector Saturating Doubling Multiply Returning High Half.                                                     
+ arm32-vqdmull          Vector Saturating Doubling Multiply Long.                                                                    
+ arm32-vqmovn           Vector Saturating Move and Narrow.                                                                           
+ arm32-vqneg            Vector Saturating Negate.                                                                                    
+ arm32-vqrdmlah         Vector Saturating Rounding Doubling Multiply Accumulate Returning High Half.                                 
+ arm32-vqrdmlsh         Vector Saturating Rounding Doubling Multiply Subtract Returning High Half.                                   
+ arm32-vqrdmulh         Vector Saturating Rounding Doubling Multiply Returning High Half.                                            
+ arm32-vqrshl           Vector Saturating Rounding Shift Left.                                                                       
+ arm32-vqrshrn-vqmovn   Vector Saturating Rounding Shift Right, Narrow: an alias of VQMOVN, VQMOVUN.                                 
+ arm32-vqrshrn          Vector Saturating Rounding Shift Right, Narrow.                                                              
+ arm32-vqrshrun-vqmovn  Vector Saturating Rounding Shift Right, Narrow: an alias of VQMOVN, VQMOVUN.                                 
+ arm32-vqshl-r          Vector Saturating Shift Left (register).                                                                     
+ arm32-vqshl-i          Vector Saturating Shift Left (immediate).                                                                    
+ arm32-vqshrn-vqmovn    Vector Saturating Shift Right, Narrow: an alias of VQMOVN, VQMOVUN.                                          
+ arm32-vqshrn           Vector Saturating Shift Right, Narrow.                                                                       
+ arm32-vqshrun-vqmovn   Vector Saturating Shift Right, Narrow: an alias of VQMOVN, VQMOVUN.                                          
+ arm32-vqsub            Vector Saturating Subtract.                                                                                  
+ arm32-vraddhn          Vector Rounding Add and Narrow, returning High Half.                                                         
+ arm32-vrecpe           Vector Reciprocal Estimate.                                                                                  
+ arm32-vrecps           Vector Reciprocal Step.                                                                                      
+ arm32-vrev16           Vector Reverse in halfwords.                                                                                 
+ arm32-vrev32           Vector Reverse in words.                                                                                     
+ arm32-vrev64           Vector Reverse in doublewords.                                                                               
+ arm32-vrhadd           Vector Rounding Halving Add.                                                                                 
+ arm32-vrinta-asimd     Vector Round floating-point to integer towards Nearest with Ties to Away.                                    
+ arm32-vrinta-vfp       Round floating-point to integer to Nearest with Ties to Away.                                                
+ arm32-vrintm-asimd     Vector Round floating-point to integer towards -Infinity.                                                    
+ arm32-vrintm-vfp       Round floating-point to integer towards -Infinity.                                                           
+ arm32-vrintn-asimd     Vector Round floating-point to integer to Nearest.                                                           
+ arm32-vrintn-vfp       Round floating-point to integer to Nearest.                                                                  
+ arm32-vrintp-asimd     Vector Round floating-point to integer towards +Infinity.                                                    
+ arm32-vrintp-vfp       Round floating-point to integer towards +Infinity.                                                           
+ arm32-vrintr-vfp       Round floating-point to integer.                                                                             
+ arm32-vrintx-asimd     Vector round floating-point to integer inexact.                                                              
+ arm32-vrintx-vfp       Round floating-point to integer inexact.                                                                     
+ arm32-vrintz-asimd     Vector round floating-point to integer towards Zero.                                                         
+ arm32-vrintz-vfp       Round floating-point to integer towards Zero.                                                                
+ arm32-vrshl            Vector Rounding Shift Left.                                                                                  
+ arm32-vrshr            Vector Rounding Shift Right.                                                                                 
+ arm32-vrshr-vorr-r     Vector Rounding Shift Right: an alias of VORR (register).                                                    
+ arm32-vrshrn           Vector Rounding Shift Right and Narrow.                                                                      
+ arm32-vrshrn-vmovn     Vector Rounding Shift Right and Narrow: an alias of VMOVN.                                                   
+ arm32-vrsqrte          Vector Reciprocal Square Root Estimate.                                                                      
+ arm32-vrsqrts          Vector Reciprocal Square Root Step.                                                                          
+ arm32-vrsra            Vector Rounding Shift Right and Accumulate.                                                                  
+ arm32-vrsubhn          Vector Rounding Subtract and Narrow, returning High Half.                                                    
+ arm32-vsdot-s          Dot Product index form with signed integers..                                                                
+ arm32-vsdot            Dot Product vector form with signed integers..                                                               
+ arm32-vsel             Floating-point conditional select.                                                                           
+ arm32-vshl-i           Vector Shift Left (immediate).                                                                               
+ arm32-vshl-r           Vector Shift Left (register).                                                                                
+ arm32-vshll            Vector Shift Left Long.                                                                                      
+ arm32-vshr             Vector Shift Right.                                                                                          
+ arm32-vshr-vorr-r      Vector Shift Right: an alias of VORR (register).                                                             
+ arm32-vshrn            Vector Shift Right Narrow.                                                                                   
+ arm32-vshrn-vmovn      Vector Shift Right Narrow: an alias of VMOVN.                                                                
+ arm32-vsli             Vector Shift Left and Insert.                                                                                
+ arm32-vsmmla           Widening 8-bit signed integer matrix multiply-accumulate into 2x2 matrix.                                    
+ arm32-vsqrt            Square Root.                                                                                                 
+ arm32-vsra             Vector Shift Right and Accumulate.                                                                           
+ arm32-vsri             Vector Shift Right and Insert.                                                                               
+ arm32-vst1-m           Store multiple single elements from one, two, three, or four registers.                                      
+ arm32-vst1-1           Store single element from one lane of one register.                                                          
+ arm32-vst2-m           Store multiple 2-element structures from two or four registers.                                              
+ arm32-vst2-1           Store single 2-element structure from one lane of two registers.                                             
+ arm32-vst3-m           Store multiple 3-element structures from three registers.                                                    
+ arm32-vst3-1           Store single 3-element structure from one lane of three registers.                                           
+ arm32-vst4-m           Store multiple 4-element structures from four registers.                                                     
+ arm32-st4-1            Store single 4-element structure from one lane of four registers.                                            
+ arm32-vst4-1           Store single 4-element structure from one lane of four registers.                                            
+ arm32-vstm             Store multiple SIMD&FP registers.                                                                            
+ arm32-vstr             Store SIMD&FP register.                                                                                      
+ arm32-vsub-f           Vector Subtract (floating-point).                                                                            
+ arm32-vsub-i           Vector Subtract (integer).                                                                                   
+ arm32-vsubhn           Vector Subtract and Narrow, returning High Half.                                                             
+ arm32-vsubl            Vector Subtract Long.                                                                                        
+ arm32-vsubw            Vector Subtract Wide.                                                                                        
+ arm32-vsudot-s         Dot Product index form with signed and unsigned integers (by element).                                       
+ arm32-vswp             Vector Swap.                                                                                                 
+ arm32-vtbl             Vector Table Lookup and Extension.                                                                           
+ arm32-vtrn             Vector Transpose.                                                                                            
+ arm32-vtst             Vector Test Bits.                                                                                            
+ arm32-vudot-s          Dot Product index form with unsigned integers..                                                              
+ arm32-vudot            Dot Product vector form with unsigned integers..                                                             
+ arm32-vummla           Widening 8-bit unsigned integer matrix multiply-accumulate into 2x2 matrix.                                  
+ arm32-vusdot-s         Dot Product index form with unsigned and signed integers (by element).                                       
+ arm32-vusdot           Dot Product vector form with mixed-sign integers.                                                            
+ arm32-vusmmla          Widening 8-bit mixed integer matrix multiply-accumulate into 2x2 matrix.                                     
+ arm32-vuzp             Vector Unzip.                                                                                                
+ arm32-vuzp-vtrn        Vector Unzip: an alias of VTRN.                                                                              
+ arm32-vzip             Vector Zip.                                                                                                  
+ arm32-vzip-vtrn        Vector Zip: an alias of VTRN.                                                                                
+ 

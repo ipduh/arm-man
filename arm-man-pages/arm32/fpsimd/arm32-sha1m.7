@@ -1,0 +1,123 @@
+.nh
+.TH "SHA1M -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS SHA1M
+ SHA1 hash update (majority)
+
+ SHA1 hash update (majority).
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|0|0|.|1 0|. . . .|. . . .|1 1 0 0|.|.|.|0|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS A1
+ 
+ SHA1M.32 <Qd>, <Qn>, <Qm>
+ 
+ if !HaveSHA1Ext() then UNDEFINED;
+ if Q != '1' then UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|0|1 1 1 1 0|.|1 0|. . . .|. . . .|1 1 0 0|.|.|.|0|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS T1
+ 
+ SHA1M.32 <Qd>, <Qn>, <Qm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveSHA1Ext() then UNDEFINED;
+ if Q != '1' then UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckCryptoEnabled32();
+     X = Q[d>>1];
+     Y = Q[n>>1]<31:0>; // Note: 32 bits wide
+     W = Q[m>>1];
+     for e = 0 to 3
+         t = SHAmajority(X<63:32>, X<95:64>, X<127:96>);
+         Y = Y + ROL(X<31:0>, 5) + t + Elem[W, e, 32];
+         X<63:32> = ROL(X<63:32>, 30);
+         <Y, X> = ROL(Y:X, 32);
+     Q[d>>1] = X;
+ 
+
+.SS Assembler Symbols
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckCryptoEnabled32();
+     X = Q[d>>1];
+     Y = Q[n>>1]<31:0>; // Note: 32 bits wide
+     W = Q[m>>1];
+     for e = 0 to 3
+         t = SHAmajority(X<63:32>, X<95:64>, X<127:96>);
+         Y = Y + ROL(X<31:0>, 5) + t + Elem[W, e, 32];
+         X<63:32> = ROL(X<63:32>, 30);
+         <Y, X> = ROL(Y:X, 32);
+     Q[d>>1] = X;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

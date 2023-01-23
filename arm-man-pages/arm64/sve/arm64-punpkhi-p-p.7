@@ -1,0 +1,100 @@
+.nh
+.TH "PUNPKHI, PUNPKLO" "7" " "  "instruction" "sve"
+.SS PUNPKHI, PUNPKLO
+ Unpack and widen half of predicate
+
+ Unpack elements from the lowest or highest half of the source predicate and
+ place in elements of twice their size within the destination predicate. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: High half and Low half
+
+.SS High half - A64 - punpkhi_p_p_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                               17 |          10 9       5 4       0
+                                | |           | |       | |       |
+   0 0 0 0 0 1 0 1 0 0 1 1 0 0 0|1|0 1 0 0 0 0|0|. . . .|0|. . . .|
+                                |               |         |
+                                `-H             `-Pn      `-Pd
+  
+  
+ 
+.SS High half
+ 
+ PUNPKHI <Pd>.H, <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer n = UInt(Pn);
+ integer d = UInt(Pd);
+ boolean hi = TRUE;
+.SS Low half - A64 - punpklo_p_p_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                               17 |          10 9       5 4       0
+                                | |           | |       | |       |
+   0 0 0 0 0 1 0 1 0 0 1 1 0 0 0|0|0 1 0 0 0 0|0|. . . .|0|. . . .|
+                                |               |         |
+                                `-H             `-Pn      `-Pd
+  
+  
+ 
+.SS Low half
+ 
+ PUNPKLO <Pd>.H, <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer n = UInt(Pn);
+ integer d = UInt(Pd);
+ boolean hi = FALSE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) operand = P[n];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     ElemP[result, e, esize] = ElemP[operand, if hi then e + elements else e, esize DIV 2];
+ 
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) operand = P[n];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     ElemP[result, e, esize] = ElemP[operand, if hi then e + elements else e, esize DIV 2];
+ 
+ P[d] = result;
+

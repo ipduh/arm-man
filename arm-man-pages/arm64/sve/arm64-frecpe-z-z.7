@@ -1,0 +1,89 @@
+.nh
+.TH "FRECPE" "7" " "  "instruction" "sve"
+.SS FRECPE
+ Floating-point reciprocal estimate (unpredicated)
+
+ Find the approximate reciprocal of each floating-point element of the source
+ vector, and place the results in the corresponding elements of the destination
+ vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - frecpe_z_z_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |          10         5         0
+                  |   |     |   | |           |         |         |
+   0 1 1 0 0 1 0 1|. .|0 0 1|1 1|0|0 0 1 1 0 0|. . . . .|. . . . .|
+                  |         |   |             |         |
+                  `-size    |   `-opc<0>      `-Zn      `-Zd
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ FRECPE  <Zd>.<T>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPRecipEstimate(element, FPCR);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPRecipEstimate(element, FPCR);
+ 
+ Z[d] = result;
+

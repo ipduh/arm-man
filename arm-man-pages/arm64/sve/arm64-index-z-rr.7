@@ -1,0 +1,113 @@
+.nh
+.TH "INDEX (scalars)" "7" " "  "instruction" "sve"
+.SS INDEX (scalars)
+ Create index starting from and incremented by general-purpose register
+
+ Populates the destination vector by setting the first element to the first
+ signed scalar integer operand and monotonically incrementing the value by the
+ second signed scalar integer operand for each subsequent element. The scalar
+ source operands are general-purpose registers in which only the least
+ significant bits corresponding to the vector element size are used and any
+ remaining bits are ignored. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - index_z_rr_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. . . . .|0 1 0 0 1 1|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-Rm                  `-Rn      `-Zd
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ INDEX   <Zd>.<T>, <R><n>, <R><m>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(esize) operand1 = X[n];
+ integer element1 = SInt(operand1);
+ bits(esize) operand2 = X[m];
+ integer element2 = SInt(operand2);
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = element1 + e * element2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <n>
+  Encoded in Rn
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(esize) operand1 = X[n];
+ integer element1 = SInt(operand1);
+ bits(esize) operand2 = X[m];
+ integer element2 = SInt(operand2);
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = element1 + e * element2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+

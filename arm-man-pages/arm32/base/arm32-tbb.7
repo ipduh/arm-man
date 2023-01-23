@@ -1,0 +1,87 @@
+.nh
+.TH "TBB, TBH -- AArch32" "7" " "  "instruction" "general"
+.SS TBB, TBH
+ Table Branch Byte or Halfword
+
+ Table Branch Byte or Halfword causes a PC-relative forward branch using a table
+ of single byte or halfword offsets. A base register provides a pointer to the
+ table, and a second register supplies an index into the table. The branch
+ length is twice the value returned from the table.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+
+.SS T1 - T32
+ 
+                                       13                          
+                                     14 |    10                    
+                                   15 | |  11 |                    
+                         05      01 | | |12 | | 9 8     5 4       0
+                          |       | | | | | | | | |     | |       |
+   1 1 1 0 1 0 0 0 1 1 0 1|. . . .|1|1|1|1|0|0|0|0|0 0 0|.|. . . .|
+                          |                             | |
+                          `-Rn                          | `-Rm
+                                                        `-H
+  
+  
+ 
+.SS Byte(H == 0)
+ 
+ TBB{<c>}{<q>} [<Rn>, <Rm>]
+.SS Halfword(H == 1)
+ 
+ TBH{<c>}{<q>} [<Rn>, <Rm>, LSL #1]
+ 
+ n = UInt(Rn);  m = UInt(Rm);  is_tbh = (H == '1');
+ if m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if is_tbh then
+         halfwords = UInt(MemU[R[n]+LSL(R[m],1), 2]);
+     else
+         halfwords = UInt(MemU[R[n]+R[m], 1]);
+     BranchWritePC(PC + 2*halfwords, BranchType_INDIR);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register holding the address of the table of
+  branch lengths, encoded in the "Rn" field. The PC can be used. If it is, the
+  table immediately follows this instruction.
+
+ <Rm>
+  Encoded in Rm
+  For the byte variant: is the general-purpose index register, encoded in the
+  "Rm" field. This register contains an integer pointing to a single byte in the
+  table. The offset in the table is the value of the index.
+
+ <Rm>
+  Encoded in Rm
+  For the halfword variant: is the general-purpose index register, encoded in
+  the "Rm" field. This register contains an integer pointing to a halfword in
+  the table. The offset in the table is twice the value of the index.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if is_tbh then
+         halfwords = UInt(MemU[R[n]+LSL(R[m],1), 2]);
+     else
+         halfwords = UInt(MemU[R[n]+R[m], 1]);
+     BranchWritePC(PC + 2*halfwords, BranchType_INDIR);
+

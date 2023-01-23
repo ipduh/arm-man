@@ -1,0 +1,192 @@
+.nh
+.TH "SQSHLU -- A64" "7" " "  "instruction" "advsimd"
+.SS SQSHLU
+ Signed saturating Shift Left Unsigned (immediate)
+
+ Signed saturating Shift Left Unsigned (immediate). This instruction reads each
+ signed integer value in the vector of the source SIMD&FP register, shifts each
+ value by an immediate value, saturates the shifted result to an unsigned
+ integer value, places the result in a vector, and writes the vector to the
+ destination SIMD&FP register. The results are truncated. For rounded results,
+ see UQRSHL.
+
+ If saturation occurs, the cumulative saturation bit FPSR.QC is set.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - SQSHLU_asisdshf_R
+ 
+                                             10                    
+                                           11 |                    
+       29                                12 | |                    
+     30 |          23      19    16    13 | | |         5         0
+      | |           |       |     |     | | | |         |         |
+   0 1|1|1 1 1 1 1 0|. . . .|. . .|0 1 1|0|0|1|. . . . .|. . . . .|
+      |             |       |           |     |         |
+      `-U           |       `-immb      `-op  `-Rn      `-Rd
+                    `-immh(!= 0000)
+  
+  
+ 
+.SS Scalar
+ 
+ SQSHLU  <V><d>, <V><n>, #<shift>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if immh == '0000' then UNDEFINED;
+ integer esize = 8 << HighestSetBit(immh);
+ integer datasize = esize;
+ integer elements = 1;
+ 
+ integer shift = UInt(immh:immb) - esize;
+ 
+ boolean src_unsigned;
+ boolean dst_unsigned;
+ case op:U of
+     when '00' UNDEFINED;
+     when '01' src_unsigned = FALSE; dst_unsigned = TRUE;
+     when '10' src_unsigned = FALSE; dst_unsigned = FALSE;
+     when '11' src_unsigned = TRUE;  dst_unsigned = TRUE;
+.SS Vector - A64 - SQSHLU_asimdshf_R
+ 
+                                             10                    
+       29                                  11 |                    
+     30 |                                12 | |                    
+   31 | |          23      19    16    13 | | |         5         0
+    | | |           |       |     |     | | | |         |         |
+   0|.|1|0 1 1 1 1 0|. . . .|. . .|0 1 1|0|0|1|. . . . .|. . . . .|
+    | |             |       |           |     |         |
+    | `-U           |       `-immb      `-op  `-Rn      `-Rd
+    `-Q             `-immh(!= 0000)
+  
+  
+ 
+.SS Vector
+ 
+ SQSHLU  <Vd>.<T>, <Vn>.<T>, #<shift>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if immh == '0000' then SEE(asimdimm);
+ if immh<3>:Q == '10' then UNDEFINED;
+ integer esize = 8 << HighestSetBit(immh);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ integer shift = UInt(immh:immb) - esize;
+ 
+ boolean src_unsigned;
+ boolean dst_unsigned;
+ case op:U of
+     when '00' UNDEFINED;
+     when '01' src_unsigned = FALSE; dst_unsigned = TRUE;
+     when '10' src_unsigned = FALSE; dst_unsigned = FALSE;
+     when '11' src_unsigned = TRUE;  dst_unsigned = TRUE;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand  = V[n];
+ bits(datasize) result;
+ integer element;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element = Int(Elem[operand, e, esize], src_unsigned) << shift;
+     (Elem[result, e, esize], sat) = SatQ(element, esize, dst_unsigned);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in immh
+  Is a width specifier,
+
+  immh <V>      
+  0000 RESERVED 
+  0001 B        
+  001x H        
+  01xx S        
+  1xxx D        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in immh:Q
+  Is an arrangement specifier,
+
+  immh Q <T>                                  
+  0000 x SEE Advanced SIMD modified immediate 
+  0001 0 8B                                   
+  0001 1 16B                                  
+  001x 0 4H                                   
+  001x 1 8H                                   
+  01xx 0 2S                                   
+  01xx 1 4S                                   
+  1xxx 0 RESERVED                             
+  1xxx 1 2D                                   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <shift>
+  Encoded in immh:immb
+  For the scalar variant: is the left shift amount, in the range 0 to the
+  operand width in bits minus 1,
+
+  immh <shift>              
+  0000 RESERVED             
+  0001 (UInt(immh:immb)-8)  
+  001x (UInt(immh:immb)-16) 
+  01xx (UInt(immh:immb)-32) 
+  1xxx (UInt(immh:immb)-64) 
+
+ <shift>
+  Encoded in immh:immb
+  For the vector variant: is the left shift amount, in the range 0 to the
+  element width in bits minus 1,
+
+  immh <shift>                              
+  0000 SEE Advanced SIMD modified immediate 
+  0001 (UInt(immh:immb)-8)                  
+  001x (UInt(immh:immb)-16)                 
+  01xx (UInt(immh:immb)-32)                 
+  1xxx (UInt(immh:immb)-64)                 
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand  = V[n];
+ bits(datasize) result;
+ integer element;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element = Int(Elem[operand, e, esize], src_unsigned) << shift;
+     (Elem[result, e, esize], sat) = SatQ(element, esize, dst_unsigned);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+

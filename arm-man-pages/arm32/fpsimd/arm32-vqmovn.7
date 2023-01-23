@@ -1,0 +1,149 @@
+.nh
+.TH "VQMOVN, VQMOVUN -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VQMOVN, VQMOVUN
+ Vector Saturating Move and Narrow
+
+ Vector Saturating Move and Narrow copies each element of the operand vector to
+ the corresponding element of the destination vector.
+
+ The operand is a quadword vector. The elements can be any one of:
+
+
+ The result is a doubleword vector. The elements are half the length of the
+ operand vector elements. If the operand is unsigned, the results are unsigned.
+ If the operand is signed, the results can be signed or unsigned.
+
+ If any of the results overflow, they are saturated. The cumulative saturation
+ bit, FPSCR.QC, is set if saturation occurs. For details see Pseudocode details
+ of saturation.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |     8   6 5 4       0
+                    | |   |   |   |       | |     |   | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0|. .|.|0|. . . .|
+                    |     |   |   |               |   |   |
+                    `-D   |   |   `-Vd            |   `-M `-Vm
+                          |   `-opc1              `-op
+                          `-size
+  
+  
+ 
+.SS Signed result(op == 1x)
+ 
+ VQMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+.SS Unsigned result(op == 01)
+ 
+ VQMOVUN{<c>}{<q>}.<dt> <Dd>, <Qm>
+ 
+ if op == '00' then SEE "VMOVN";
+ if size == '11' || Vm<0> == '1' then UNDEFINED;
+ src_unsigned = (op == '11');  dest_unsigned = (op<0> == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |     8   6 5 4       0
+                    | |   |   |   |       | |     |   | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0|. .|.|0|. . . .|
+                    |     |   |   |               |   |   |
+                    `-D   |   |   `-Vd            |   `-M `-Vm
+                          |   `-opc1              `-op
+                          `-size
+  
+  
+ 
+.SS Signed result(op == 1x)
+ 
+ VQMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+.SS Unsigned result(op == 01)
+ 
+ VQMOVUN{<c>}{<q>}.<dt> <Dd>, <Qm>
+ 
+ if op == '00' then SEE "VMOVN";
+ if size == '11' || Vm<0> == '1' then UNDEFINED;
+ src_unsigned = (op == '11');  dest_unsigned = (op<0> == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         operand = Int(Elem[Qin[m>>1],e,2*esize], src_unsigned);
+         (Elem[D[d],e,esize], sat) = SatQ(operand, esize, dest_unsigned);
+         if sat then FPSCR.QC = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in op<0>:size
+  For the signed result variant: is the data type for the elements of the
+  operand,
+
+  op<0> size <dt>     
+  0     00   S16      
+  0     01   S32      
+  0     10   S64      
+  0     11   RESERVED 
+  1     00   U16      
+  1     01   U32      
+  1     10   U64      
+  1     11   RESERVED 
+
+ <dt>
+  Encoded in size
+  For the unsigned result variant: is the data type for the elements of the
+  operand,
+
+  size <dt>     
+  00   S16      
+  01   S32      
+  10   S64      
+  11   RESERVED 
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         operand = Int(Elem[Qin[m>>1],e,2*esize], src_unsigned);
+         (Elem[D[d],e,esize], sat) = SatQ(operand, esize, dest_unsigned);
+         if sat then FPSCR.QC = '1';
+

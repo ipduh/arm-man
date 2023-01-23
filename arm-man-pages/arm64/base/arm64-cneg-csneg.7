@@ -1,0 +1,84 @@
+.nh
+.TH "CNEG -- A64" "7" " "  "alias" "general"
+.SS CNEG
+ CNEG is an alias of CSNEG
+
+ Conditional Negate
+
+ Conditional Negate returns, in the destination register, the negated value of
+ the source register if the condition is TRUE, and otherwise returns the value
+ of the source register.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                    10                    
+     30 |                                  11 |                    
+   31 | |              21        16      12 | |         5         0
+    | | |               |         |       | | |         |         |
+  |.|1|0|1 1 0 1 0 1 0 0|. . . . .|. . . .|0|1|. . . . .|. . . . .|
+  | | |                 |         |         | |         |
+  | | `-S               `-Rm      |         | `-Rn      `-Rd
+  | `-op                          |         `-o2
+  `-sf                            `-cond(!= 111x)
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CNEG  <Wd>, <Wn>, <cond>
+ 
+ CSNEG <Wd>, <Wn>, <Wn>, invert(<cond>)
+.SS 64-bit(sf == 1)
+ 
+ CNEG  <Xd>, <Xn>, <cond>
+ 
+ CSNEG <Xd>, <Xn>, <Xn>, invert(<cond>)
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rm:Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rm:Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  and "Rm" fields.
+
+ <cond>
+  Encoded in cond
+  Is one of the standard conditions, excluding AL and NV, encoded in the "cond"
+  field with its least significant bit inverted.
+
+
+
+.SS Operation
+
+ The manual of CSNEG gives pseudocode for CNEG.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

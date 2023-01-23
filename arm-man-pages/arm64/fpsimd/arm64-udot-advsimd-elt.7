@@ -1,0 +1,130 @@
+.nh
+.TH "UDOT (by element) -- A64" "7" " "  "instruction" "advsimd"
+.SS UDOT (by element)
+ Dot Product unsigned arithmetic (vector, by element)
+
+ Dot Product unsigned arithmetic (vector, by element). This instruction performs
+ the dot product of the four 8-bit elements in each 32-bit element of the first
+ source register with the four 8-bit elements of an indexed 32-bit element in
+ the second source register, accumulating the result into the corresponding
+ 32-bit element of the destination register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+ In Armv8.2 and Armv8.3, this is an optional instruction. From Armv8.4 it is
+ mandatory for all implementations to support it.
+
+
+
+.SS Vector - A64 - UDOT_asimdelem_D
+ 
+                                                                   
+       29                20                  10                    
+     30 |              21 |                11 |                    
+   31 | |        24  22 | |      16      12 | |         5         0
+    | | |         |   | | |       |       | | |         |         |
+   0|.|1|0 1 1 1 1|. .|.|.|. . . .|1 1 1 0|.|0|. . . . .|. . . . .|
+    | |           |   | | |       |       |   |         |
+    | `-U         |   | | `-Rm    |       `-H `-Rn      `-Rd
+    `-Q           |   | `-M       `-opcode
+                  |   `-L
+                  `-size
+  
+  
+ 
+.SS Vector
+ 
+ UDOT  <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.4B[<index>]
+ 
+ if !HaveDOTPExt() then UNDEFINED;
+ if size  != '10' then UNDEFINED;
+ boolean signed = (U=='0');
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(M:Rm);
+ integer index = UInt(H:L);
+ 
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(datasize) result = V[d];
+ for e = 0 to elements-1 
+     integer res = 0;
+     integer element1, element2;
+     for i = 0 to 3
+         if signed then  
+             element1 = SInt(Elem[operand1, 4 * e + i, esize DIV 4]); 
+             element2 = SInt(Elem[operand2, 4 * index + i, esize DIV 4]);
+         else 
+             element1 = UInt(Elem[operand1, 4 * e + i, esize DIV 4]); 
+             element2 = UInt(Elem[operand2, 4 * index + i, esize DIV 4]);
+         res = res + element1 * element2; 
+     Elem[result, e, esize] = Elem[result, e, esize] + res;
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP third source and destination register, encoded in
+  the "Rd" field.
+
+ <Ta>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <Ta> 
+  0 2S   
+  1 4S   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Tb>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <Tb> 
+  0 8B   
+  1 16B  
+
+ <Vm>
+  Encoded in M:Rm
+  Is the name of the second SIMD&FP source register, encoded in the "M:Rm"
+  fields.
+
+ <index>
+  Encoded in H:L
+  Is the element index, encoded in the "H:L" fields.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(128) operand2 = V[m];
+ bits(datasize) result = V[d];
+ for e = 0 to elements-1 
+     integer res = 0;
+     integer element1, element2;
+     for i = 0 to 3
+         if signed then  
+             element1 = SInt(Elem[operand1, 4 * e + i, esize DIV 4]); 
+             element2 = SInt(Elem[operand2, 4 * index + i, esize DIV 4]);
+         else 
+             element1 = UInt(Elem[operand1, 4 * e + i, esize DIV 4]); 
+             element2 = UInt(Elem[operand2, 4 * index + i, esize DIV 4]);
+         res = res + element1 * element2; 
+     Elem[result, e, esize] = Elem[result, e, esize] + res;
+ V[d] = result;
+

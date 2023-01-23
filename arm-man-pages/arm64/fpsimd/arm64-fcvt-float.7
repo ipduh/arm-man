@@ -1,0 +1,116 @@
+.nh
+.TH "FCVT -- A64" "7" " "  "instruction" "float"
+.SS FCVT
+ Floating-point Convert precision (scalar)
+
+ Floating-point Convert precision (scalar). This instruction converts the
+ floating-point value in the SIMD&FP source register to the precision for the
+ destination register data type using the rounding mode that is determined by
+ the FPCR and writes the result to the SIMD&FP destination register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Floating-point - A64 - float
+ 
+                                                                   
+       29                                                          
+     30 |              21                                          
+   31 | |        24  22 |      17  15        10         5         0
+    | | |         |   | |       |   |         |         |         |
+  |0|0|0|1 1 1 1 0|. .|1|0 0 0 1|. .|1 0 0 0 0|. . . . .|. . . . .|
+  |   |           |             |             |         |
+  `-M `-S         `-ftype       `-opc         `-Rn      `-Rd
+  
+  
+ 
+.SS Half-precision to single-precision(ftype == 11 && opc == 00)
+ 
+ FCVT  <Sd>, <Hn>
+.SS Half-precision to double-precision(ftype == 11 && opc == 01)
+ 
+ FCVT  <Dd>, <Hn>
+.SS Single-precision to half-precision(ftype == 00 && opc == 11)
+ 
+ FCVT  <Hd>, <Sn>
+.SS Single-precision to double-precision(ftype == 00 && opc == 01)
+ 
+ FCVT  <Dd>, <Sn>
+.SS Double-precision to half-precision(ftype == 01 && opc == 11)
+ 
+ FCVT  <Hd>, <Dn>
+.SS Double-precision to single-precision(ftype == 01 && opc == 00)
+ 
+ FCVT  <Sd>, <Dn>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer srcsize;
+ integer dstsize;
+ 
+ if ftype == opc then UNDEFINED;
+ 
+ case ftype of
+     when '00' srcsize = 32;
+     when '01' srcsize = 64;
+     when '10' UNDEFINED;
+     when '11' srcsize = 16;
+ case opc of
+     when '00' dstsize = 32;
+     when '01' dstsize = 64;
+     when '10' UNDEFINED;
+     when '11' dstsize = 16;
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(dstsize) result;
+ bits(srcsize) operand = V[n];
+ 
+ result = FPConvert(operand, FPCR);
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in Rd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Sn>
+  Encoded in Rn
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Sd>
+  Encoded in Rd
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Dn>
+  Encoded in Rn
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(dstsize) result;
+ bits(srcsize) operand = V[n];
+ 
+ result = FPConvert(operand, FPCR);
+ V[d] = result;
+

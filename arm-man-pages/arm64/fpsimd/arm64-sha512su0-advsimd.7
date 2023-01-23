@@ -1,0 +1,89 @@
+.nh
+.TH "SHA512SU0 -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA512SU0
+ SHA512 Schedule Update 0
+
+ SHA512 Schedule Update 0 takes the values from the two 128-bit source SIMD&FP
+ registers and produces a 128-bit output value that combines the gamma0
+ functions of two iterations of the SHA512 schedule update that are performed
+ after the first 16 iterations within a block. It returns this value to the
+ destination SIMD&FP register.
+
+ This instruction is implemented only when ARMv8.2-SHA is implemented.
+
+
+
+.SS Advanced SIMD - A64 - SHA512SU0_VV2_cryptosha512_2
+ 
+                                                                   
+                                                                   
+                                                                   
+                                         12  10         5         0
+                                          |   |         |         |
+   1 1 0 0 1 1 1 0 1 1 0 0 0 0 0 0 1 0 0 0|0 0|. . . . .|. . . . .|
+                                          |   |         |
+                                          |   `-Rn      `-Rd
+                                          `-opcode
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA512SU0  <Vd>.2D, <Vn>.2D
+ 
+ if !HaveSHA512Ext() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(64) sig0;
+ bits(128) Vtmp;
+ bits(128) X = V[n];
+ bits(128) W = V[d]; 
+ sig0 = ROR(W<127:64>, 1) EOR ROR(W<127:64>, 8) EOR ('0000000':W<127:71>);
+ Vtmp<63:0> = W<63:0> + sig0;
+ sig0 = ROR(X<63:0>, 1) EOR ROR(X<63:0>, 8) EOR ('0000000':X<63:7>);
+ Vtmp<127:64> = W<127:64> + sig0;
+ V[d] = Vtmp;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP source and destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the second SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(64) sig0;
+ bits(128) Vtmp;
+ bits(128) X = V[n];
+ bits(128) W = V[d]; 
+ sig0 = ROR(W<127:64>, 1) EOR ROR(W<127:64>, 8) EOR ('0000000':W<127:71>);
+ Vtmp<63:0> = W<63:0> + sig0;
+ sig0 = ROR(X<63:0>, 1) EOR ROR(X<63:0>, 8) EOR ('0000000':X<63:7>);
+ Vtmp<127:64> = W<127:64> + sig0;
+ V[d] = Vtmp;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

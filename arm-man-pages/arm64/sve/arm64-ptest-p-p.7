@@ -1,0 +1,70 @@
+.nh
+.TH "PTEST" "7" " "  "instruction" "sve"
+.SS PTEST
+ Set condition flags for predicate
+
+ Sets the First (N), None (Z), !Last (C) condition flags based on the predicate
+ source register, and the V flag to zero.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - ptest_p_p_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+     30          24 | |  20          14      10 9       5 4 3 2 1 0
+      |           | | |   |           |       | |       | | | | | |
+   0 0|1 0 0 1 0 1|0|1|0 1|0 0 0 0 1 1|. . . .|0|. . . .|0|0|0|0|0|
+                  | |                 |         |         | | | |
+                  | `-S               `-Pg      `-Pn      | | | `-opc2<0>
+                  `-op                                    | | `-opc2<1>
+                                                          | `-opc2<2>
+                                                          `-opc2<3>
+  
+  
+ 
+.SS SVE
+ 
+ PTEST   <Pg>, <Pn>.B
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer g = UInt(Pg);
+ integer n = UInt(Pn);
+ 
+ CheckSVEEnabled();
+ bits(PL) mask = P[g];
+ bits(PL) result = P[n];
+ 
+ PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ 
+
+.SS Assembler Symbols
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(PL) mask = P[g];
+ bits(PL) result = P[n];
+ 
+ PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+

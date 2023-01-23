@@ -1,0 +1,76 @@
+.nh
+.TH "ERET -- A64" "7" " "  "instruction" "system"
+.SS ERET
+ Exception Return
+
+ Exception Return using the ELR and SPSR for the current Exception level. When
+ executed, the PE restores PSTATE from the SPSR, and branches to the address
+ held in the ELR.
+
+ The PE checks the SPSR for the current Exception level for an illegal return
+ event. See Illegal return events from AArch64 state.
+
+ ERET is undefined at EL0.
+
+
+
+.SS System - A64 - ERET_64E_branch_reg
+ 
+                                                                   
+                                             10                    
+                 24                        11 |                    
+               25 |    21        16      12 | |         5         0
+                | |     |         |       | | |         |         |
+   1 1 0 1 0 1 1|0|1 0 0|1 1 1 1 1|0 0 0 0|0|0|1 1 1 1 1|0 0 0 0 0|
+                | |     |         |       | | |         |
+                | |     `-op2     |       | | `-Rn      `-op4
+                | `-opc[2:0]      |       | `-M
+                `-opc[3]          |       `-A
+                                  `-op3[5:2]
+  
+  
+ 
+.SS System
+ 
+ ERET
+ 
+ if PSTATE.EL == EL0 then UNDEFINED;
+ boolean pac = (A == '1');
+ boolean use_key_a = (M == '0');
+ 
+ if !pac && op4 != '00000' then
+     UNDEFINED;
+ elsif pac && (!HavePACExt() || op4 != '11111') then
+     UNDEFINED;
+ 
+ if Rn != '11111' then 
+     UNDEFINED;
+ 
+ AArch64.CheckForERetTrap(pac, use_key_a);
+ bits(64) target = ELR[];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     if use_key_a then
+         target = AuthIA(ELR[], SP[], auth_then_branch);
+     else
+         target = AuthIB(ELR[], SP[], auth_then_branch);
+ 
+ AArch64.ExceptionReturn(target, SPSR[]);
+ 
+
+
+.SS Operation
+
+ AArch64.CheckForERetTrap(pac, use_key_a);
+ bits(64) target = ELR[];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     if use_key_a then
+         target = AuthIA(ELR[], SP[], auth_then_branch);
+     else
+         target = AuthIB(ELR[], SP[], auth_then_branch);
+ 
+ AArch64.ExceptionReturn(target, SPSR[]);
+

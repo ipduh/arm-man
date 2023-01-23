@@ -1,0 +1,102 @@
+.nh
+.TH "MOV (from general) -- A64" "7" " "  "alias" "advsimd"
+.SS MOV (from general)
+ MOV is an alias of INS
+
+ Move general-purpose register to a vector element
+
+ Move general-purpose register to a vector element. This instruction copies the
+ contents of the source general-purpose register to the specified vector element
+ in the destination SIMD&FP register.
+
+ This instruction can insert data into individual elements within a SIMD&FP
+ register without clearing the remaining bits to zero.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - INS_asimdins_IR_r
+ 
+                                                                   
+       29                                                          
+     30 |                          15        10                    
+   31 | |              21        16 |      11 |         5         0
+    | | |               |         | |       | |         |         |
+   0|1|0|0 1 1 1 0 0 0 0|. . . . .|0|0 0 1 1|1|. . . . .|. . . . .|
+    | |                 |           |         |         |
+    | `-op              `-imm5      `-imm4    `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ MOV  <Vd>.<Ts>[<index>], <R><n>
+ 
+ INS  <Vd>.<Ts>[<index>], <R><n>
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ts>
+  Encoded in imm5
+  Is an element size specifier,
+
+  imm5  <Ts>     
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <index>
+  Encoded in imm5
+  Is the element index
+
+  imm5  <index>   
+  x0000 RESERVED  
+  xxxx1 imm5<4:1> 
+  xxx10 imm5<4:2> 
+  xx100 imm5<4:3> 
+  x1000 imm5<4>   
+
+ <R>
+  Encoded in imm5
+  Is the width specifier for the general-purpose source register,
+
+  imm5  <R>      
+  x0000 RESERVED 
+  xxxx1 W        
+  xxx10 W        
+  xx100 W        
+  x1000 X        
+
+ <n>
+  Encoded in Rn
+  Is the number [0-30] of the general-purpose source register or ZR (31),
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of INS gives pseudocode for MOV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

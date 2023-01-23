@@ -1,0 +1,137 @@
+.nh
+.TH "MRC -- AArch32" "7" " "  "instruction" "general"
+.SS MRC
+ Move to general-purpose register from System register
+
+ Move to general-purpose register from System register. This instruction copies
+ the value of a System register to a general-purpose register.
+
+ The System register descriptions identify valid encodings for this instruction.
+ Other encodings are undefined. For more information see About the AArch32
+ System register interface and General behavior of System registers.
+
+ In an implementation that includes EL2, MRC accesses to system control
+ registers can be trapped to Hyp mode, meaning that an attempt to execute an MRC
+ instruction in a Non-secure mode other than Hyp mode, that would be permitted
+ in the absence of the Hyp trap controls, generates a Hyp Trap exception.  For
+ more information, see EL2 configurable instruction enables, disables, and
+ traps.
+
+ Because of the range of possible traps to Hyp mode, the MRC pseudocode does not
+ show these possible traps.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12     9 8     5 4       0
+          |       |     | |       |       |     | |     | |       |
+  |. . . .|1 1 1 0|. . .|1|. . . .|. . . .|1 1 1|.|. . .|1|. . . .|
+  |               |     | |       |       |     | |       |
+  `-cond(!= 1111) |     | `-CRn   `-Rt    |     | `-opc2  `-CRm
+                  |     `-L               |     `-coproc<0>
+                  `-opc1                  `-coproc<3:1>
+  
+  
+ 
+.SS A1
+ 
+ MRC{<c>}{<q>} <coproc>, {#}<opc1>, <Rt>, <CRn>, <CRm>{, {#}<opc2>}
+ 
+ t = UInt(Rt);  cp = if coproc<0> == '0' then 14 else 15;
+ // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13              05                                        
+       14 |      09    06 |      01      12     9 8     5 4       0
+        | |       |     | |       |       |     | |     | |       |
+   1 1 1|0|1 1 1 0|. . .|1|. . . .|. . . .|1 1 1|.|. . .|1|. . . .|
+        |         |     | |       |       |     | |       |
+        `-o0      |     | `-CRn   `-Rt    |     | `-opc2  `-CRm
+                  |     `-L               |     `-coproc<0>
+                  `-opc1                  `-coproc<3:1>
+  
+  
+ 
+.SS T1
+ 
+ MRC{<c>}{<q>} <coproc>, {#}<opc1>, <Rt>, <CRn>, <CRm>{, {#}<opc2>}
+ 
+ t = UInt(Rt);  cp = if coproc<0> == '0' then 14 else 15;
+ // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     bits(32) value = AArch32.SysRegRead(cp, ThisInstr());
+     if t != 15 then
+         R[t] = value;
+     elsif AArch32.SysRegReadCanWriteAPSR(cp, ThisInstr()) then
+         PSTATE.<N,Z,C,V> = value<31:28>;
+         // value<27:0> are not used.
+     else
+         PSTATE.<N,Z,C,V> = bits(4) UNKNOWN;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <coproc>
+  Encoded in coproc<0>
+  Is the System register encoding space,
+
+  coproc<0> <coproc> 
+  0         p14      
+  1         p15      
+
+ <opc1>
+  Encoded in opc1
+  Is the opc1 parameter within the System register encoding space, in the range
+  0 to7, encoded in the "opc1" field.
+
+ <Rt>
+  Encoded in Rt
+  Is the general-purpose register to be transferred or APSR_nzcv (encoded as
+  0b1111), encoded in the "Rt" field. If APSR_nzcv is used, bits [31:28] of the
+  transferred value are written to the PSTATE condition flags.
+
+ <CRn>
+  Encoded in CRn
+  Is the CRn parameter within the System register encoding space, in the range
+  c0 to c15, encoded in the "CRn" field.
+
+ <CRm>
+  Encoded in CRm
+  Is the CRm parameter within the System register encoding space, in the range
+  c0 to c15, encoded in the "CRm" field.
+
+ <opc2>
+  Encoded in opc2
+  Is the opc2 parameter within the System register encoding space, in the range
+  0 to7, encoded in the "opc2" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     bits(32) value = AArch32.SysRegRead(cp, ThisInstr());
+     if t != 15 then
+         R[t] = value;
+     elsif AArch32.SysRegReadCanWriteAPSR(cp, ThisInstr()) then
+         PSTATE.<N,Z,C,V> = value<31:28>;
+         // value<27:0> are not used.
+     else
+         PSTATE.<N,Z,C,V> = bits(4) UNKNOWN;
+

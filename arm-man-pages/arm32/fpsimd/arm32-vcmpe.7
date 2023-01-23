@@ -1,0 +1,229 @@
+.nh
+.TH "VCMPE -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCMPE
+ Vector Compare, raising Invalid Operation on NaN
+
+ Vector Compare, raising Invalid Operation on NaN compares two floating-point
+ registers, or one floating-point register and zero. It writes the result to the
+ FPSCR flags. These are normally transferred to the PSTATE.{N, Z, C, V}
+ Condition flags by a subsequent VMRS instruction.
+
+ It raises an Invalid Operation exception if either operand is any type of NaN.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|1 0 0|. . . .|1 0|. .|1|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   `-E `-M `-Vm
+                          | `-opc2            `-size
+                          `-o1
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VCMPE{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VCMPE{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VCMPE{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ quiet_nan_exc = (E == '1');  with_zero = FALSE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|1 0 1|. . . .|1 0|. .|1|1|0|0|0 0 0 0|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   `-E `-M `-Vm
+                          | `-opc2            `-size
+                          `-o1
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VCMPE{<c>}{<q>}.F16 <Sd>, #0.0
+.SS Single-precision scalar(size == 10)
+ 
+ VCMPE{<c>}{<q>}.F32 <Sd>, #0.0
+.SS Double-precision scalar(size == 11)
+ 
+ VCMPE{<c>}{<q>}.F64 <Dd>, #0.0
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ quiet_nan_exc = (E == '1');  with_zero = TRUE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D);
+     when '10' esize = 32; d = UInt(Vd:D);
+     when '11' esize = 64; d = UInt(D:Vd);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|1 0 0|. . . .|1 0|. .|1|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   `-E `-M `-Vm
+                          | `-opc2            `-size
+                          `-o1
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VCMPE{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VCMPE{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VCMPE{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ quiet_nan_exc = (E == '1');  with_zero = FALSE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|1 0 1|. . . .|1 0|. .|1|1|0|0|0 0 0 0|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   `-E `-M `-Vm
+                          | `-opc2            `-size
+                          `-o1
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VCMPE{<c>}{<q>}.F16 <Sd>, #0.0
+.SS Single-precision scalar(size == 10)
+ 
+ VCMPE{<c>}{<q>}.F32 <Sd>, #0.0
+.SS Double-precision scalar(size == 11)
+ 
+ VCMPE{<c>}{<q>}.F64 <Dd>, #0.0
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ quiet_nan_exc = (E == '1');  with_zero = TRUE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D);
+     when '10' esize = 32; d = UInt(Vd:D);
+     when '11' esize = 64; d = UInt(D:Vd);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     bits(4) nzcv;
+     case esize of
+         when 16
+             bits(16) op16 = if with_zero then FPZero('0') else S[m]<15:0>;
+             nzcv = FPCompare(S[d]<15:0>, op16, quiet_nan_exc, FPSCR);
+         when 32
+             bits(32) op32 = if with_zero then FPZero('0') else S[m];
+             nzcv = FPCompare(S[d], op32, quiet_nan_exc, FPSCR);
+         when 64
+             bits(64) op64 = if with_zero then FPZero('0') else D[m];
+             nzcv = FPCompare(D[d], op64, quiet_nan_exc, FPSCR);
+ 
+     FPSCR.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     bits(4) nzcv;
+     case esize of
+         when 16
+             bits(16) op16 = if with_zero then FPZero('0') else S[m]<15:0>;
+             nzcv = FPCompare(S[d]<15:0>, op16, quiet_nan_exc, FPSCR);
+         when 32
+             bits(32) op32 = if with_zero then FPZero('0') else S[m];
+             nzcv = FPCompare(S[d], op32, quiet_nan_exc, FPSCR);
+         when 64
+             bits(64) op64 = if with_zero then FPZero('0') else D[m];
+             nzcv = FPCompare(D[d], op64, quiet_nan_exc, FPSCR);
+ 
+     FPSCR.<N,Z,C,V> = nzcv;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

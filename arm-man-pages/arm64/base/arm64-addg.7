@@ -1,0 +1,110 @@
+.nh
+.TH "ADDG -- A64" "7" " "  "instruction" "general"
+.SS ADDG
+ Add with Tag
+
+ Add with Tag adds an immediate value scaled by the Tag granule to the address
+ in the source register, modifies the Logical Address Tag of the address using
+ an immediate value, and writes the result to the destination register. Tags
+ specified in GCR_EL1.Exclude are excluded from the possible outputs when
+ modifying the Logical Address Tag.
+
+
+
+.SS Integer - A64 - ADDG_64_addsub_immtags
+ 
+                                                                   
+       29                                                          
+     30 |            22                                            
+   31 | |          23 |          16  14      10         5         0
+    | | |           | |           |   |       |         |         |
+  |1|0|0|1 0 0 0 1 1|0|. . . . . .|0 0|. . . .|. . . . .|. . . . .|
+  | | |             | |           |   |       |         |
+  | | `-S           | `-uimm6     |   `-uimm4 `-Xn      `-Xd
+  | `-op            `-o2          `-op3
+  `-sf
+  
+  
+ 
+.SS Integer
+ 
+ ADDG  <Xd|SP>, <Xn|SP>, #<uimm6>, #<uimm4>
+ 
+ integer d = UInt(Xd);
+ integer n = UInt(Xn);
+ bits(4) tag_offset = uimm4;
+ bits(64) offset = LSL(ZeroExtend(uimm6, 64), LOG2_TAG_GRANULE);
+ boolean ADD = TRUE;
+ 
+ bits(64) operand1 = if n == 31 then SP[] else X[n];
+ bits(4) start_tag = AArch64.AllocationTagFromAddress(operand1);
+ bits(16) exclude = GCR_EL1.Exclude;
+ bits(64) result;
+ bits(4) rtag;
+ 
+ if AArch64.AllocationTagAccessIsEnabled() then
+     rtag = AArch64.ChooseNonExcludedTag(start_tag, tag_offset, exclude);
+ else
+     rtag = '0000';
+ 
+ if ADD then
+     (result, -) = AddWithCarry(operand1, offset, '0');
+ else
+     (result, -) = AddWithCarry(operand1, NOT(offset), '1');
+ 
+ result = AArch64.AddressWithAllocationTag(result, rtag);
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Xd|SP>
+  Encoded in Xd
+  Is the 64-bit name of the destination general-purpose register or stack
+  pointer, encoded in the "Xd" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Xn" field.
+
+ <uimm6>
+  Encoded in uimm6
+  Is an unsigned immediate, a multiple of 16 in the range 0 to 1008, encoded in
+  the "uimm6" field.
+
+ <uimm4>
+  Encoded in uimm4
+  Is an unsigned immediate, in the range 0 to 15, encoded in the "uimm4" field.
+
+
+
+.SS Operation
+
+ bits(64) operand1 = if n == 31 then SP[] else X[n];
+ bits(4) start_tag = AArch64.AllocationTagFromAddress(operand1);
+ bits(16) exclude = GCR_EL1.Exclude;
+ bits(64) result;
+ bits(4) rtag;
+ 
+ if AArch64.AllocationTagAccessIsEnabled() then
+     rtag = AArch64.ChooseNonExcludedTag(start_tag, tag_offset, exclude);
+ else
+     rtag = '0000';
+ 
+ if ADD then
+     (result, -) = AddWithCarry(operand1, offset, '0');
+ else
+     (result, -) = AddWithCarry(operand1, NOT(offset), '1');
+ 
+ result = AArch64.AddressWithAllocationTag(result, rtag);
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+

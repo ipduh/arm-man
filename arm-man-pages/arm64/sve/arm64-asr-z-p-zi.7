@@ -1,0 +1,114 @@
+.nh
+.TH "ASR (immediate, predicated)" "7" " "  "instruction" "sve"
+.SS ASR (immediate, predicated)
+ Arithmetic shift right by immediate (predicated)
+
+ Shift right by immediate, preserving the sign bit, each active element of the
+ source vector, and destructively place the results in the corresponding
+ elements of the source vector. The immediate shift amount is an unsigned value
+ in the range 1 to number of bits per element. Inactive elements in the
+ destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - asr_z_p_zi_
+ 
+                               17                                  
+                             18 |                                  
+                           19 | |                                  
+                 24  22  20 | | |16    13    10   8     5         0
+                  |   |   | | | | |     |     |   |     |         |
+   0 0 0 0 0 1 0 0|. .|0 0|0|0|0|0|1 0 0|. . .|. .|. . .|. . . . .|
+                  |       | | | |       |     |   |     |
+                  `-tszh  | | | `-U     `-Pg  |   |     `-Zdn
+                          | | `-L             |   `-imm3
+                          | `-opc<0>          `-tszl
+                          `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ ASR     <Zdn>.<T>, <Pg>/M, <Zdn>.<T>, #<const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ bits(4) tsize = tszh:tszl;
+ case tsize of
+     when '0000' UNDEFINED;
+     when '0001' esize = 8;
+     when '001x' esize = 16;
+     when '01xx' esize = 32;
+     when '1xxx' esize = 64;
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ integer shift = (2 * esize) - UInt(tsize:imm3);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) mask = P[g];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = ASR(element1, shift);
+     else
+         Elem[result, e, esize] = Elem[operand1, e, esize];
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in tszh:tszl
+  Is the size specifier,
+
+  tszh tszl <T>      
+  00   00   RESERVED 
+  00   01   B        
+  00   1x   H        
+  01   xx   S        
+  1x   xx   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <const>
+  Encoded in imm3:tsz
+  Is the immediate shift amount, in the range 1 to number of bits per element,
+  encoded in "tsz:imm3".
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) mask = P[g];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = ASR(element1, shift);
+     else
+         Elem[result, e, esize] = Elem[operand1, e, esize];
+ 
+ Z[dn] = result;
+

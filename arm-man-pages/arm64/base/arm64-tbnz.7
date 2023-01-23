@@ -1,0 +1,80 @@
+.nh
+.TH "TBNZ -- A64" "7" " "  "instruction" "general"
+.SS TBNZ
+ Test bit and Branch if Nonzero
+
+ Test bit and Branch if Nonzero compares the value of a bit in a general-purpose
+ register with zero, and conditionally branches to a label at a PC-relative
+ offset if the comparison is not equal. It provides a hint that this is not a
+ subroutine call or return. This instruction does not affect condition flags.
+
+
+
+.SS 14-bit signed PC-relative branch offset - A64 - TBNZ_only_testbranch
+ 
+                                                                   
+                                                                   
+                 24                                                
+   31          25 |        19                           5         0
+    |           | |         |                           |         |
+  |.|0 1 1 0 1 1|1|. . . . .|. . . . . . . . . . . . . .|. . . . .|
+  |             | |         |                           |
+  `-b5          | `-b40     `-imm14                     `-Rt
+                `-op
+  
+  
+ 
+.SS 14-bit signed PC-relative branch offset
+ 
+ TBNZ  <R><t>, #<imm>, <label>
+ 
+ integer t = UInt(Rt);
+ 
+ integer datasize = if b5 == '1' then 64 else 32;
+ integer bit_pos = UInt(b5:b40);
+ bit bit_val = op;
+ bits(64) offset = SignExtend(imm14:'00', 64);
+ 
+ bits(datasize) operand = X[t];
+ 
+ if operand<bit_pos> == bit_val then
+     BranchTo(PC[] + offset, BranchType_DIR);
+ 
+
+.SS Assembler Symbols
+
+ <R>
+  Encoded in b5
+  Is a width specifier,
+
+  b5 <R> 
+  0  W   
+  1  X   
+
+  In assembler source code an 'X' specifier is always permitted, but a 'W'
+  specifier is only permitted when the bit number is less than 32.
+
+ <t>
+  Encoded in Rt
+  Is the number [0-30] of the general-purpose register to be tested or the name
+  ZR (31), encoded in the "Rt" field.
+
+ <imm>
+  Encoded in b40:b5
+  Is the bit number to be tested, in the range 0 to 63, encoded in "b5:b40".
+
+ <label>
+  Encoded in imm14
+  Is the program label to be conditionally branched to. Its offset from the
+  address of this instruction, in the range +/-32KB, is encoded as "imm14" times
+  4.
+
+
+
+.SS Operation
+
+ bits(datasize) operand = X[t];
+ 
+ if operand<bit_pos> == bit_val then
+     BranchTo(PC[] + offset, BranchType_DIR);
+

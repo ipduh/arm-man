@@ -1,0 +1,107 @@
+.nh
+.TH "FEXPA" "7" " "  "instruction" "sve"
+.SS FEXPA
+ Floating-point exponential accelerator
+
+ The FEXPA instruction accelerates the polynomial series calculation of the
+ exp(x) function.
+
+ The double-precision variant copies the low 52 bits of an entry from a hard-
+ wired table of 64-bit coefficients, indexed by the low 6 bits of each element
+ of the source vector, and prepends to that the next 11 bits of the source
+ element (src<16:6>), setting the sign bit to zero.
+
+ The single-precision variant copies the low 23 bits of an entry from hard-wired
+ table of 32-bit coefficients, indexed by the low 6 bits of each element of the
+ source vector, and prepends to that the next 8 bits of the source element
+ (src<13:6>), setting the sign bit to zero.
+
+ The half-precision variant copies the low 10 bits of an entry from hard-wired
+ table of 16-bit coefficients, indexed by the low 5 bits of each element of the
+ source vector, and prepends to that the next 5 bits of the source element
+ (src<9:5>), setting the sign bit to zero.
+
+ A coefficient table entry with index m holds the floating-point value 2(m/64),
+ or for the half-precision variant 2(m/32). This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - fexpa_z_z_
+ 
+                                                                   
+                                                                   
+                       21        16                                
+                 24  22 |      17 |          10         5         0
+                  |   | |       | |           |         |         |
+   0 0 0 0 0 1 0 0|. .|1|0 0 0 0|0|1 0 1 1 1 0|. . . . .|. . . . .|
+                  |     |       |             |         |
+                  |     |       `-opc<0>      `-Zn      `-Zd
+                  |     `-opc<4:1>
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ FEXPA   <Zd>.<T>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand  = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPExpA(element);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand  = Z[n];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     Elem[result, e, esize] = FPExpA(element);
+ 
+ Z[d] = result;
+

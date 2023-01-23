@@ -1,0 +1,94 @@
+.nh
+.TH "INDEX (immediates)" "7" " "  "instruction" "sve"
+.SS INDEX (immediates)
+ Create index starting from and incremented by immediate
+
+ Populates the destination vector by setting the first element to the first
+ signed immediate integer operand and monotonically incrementing the value by
+ the second signed immediate integer operand for each subsequent element. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - index_z_ii_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. . . . .|0 1 0 0 0 0|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-imm5b               `-imm5    `-Zd
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ INDEX   <Zd>.<T>, #<imm1>, #<imm2>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer d = UInt(Zd);
+ integer imm1 = SInt(imm5);
+ integer imm2 = SInt(imm5b);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = imm1 + e * imm2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <imm1>
+  Encoded in imm5
+  Is the first signed immediate operand, in the range -16 to 15, encoded in the
+  "imm5" field.
+
+ <imm2>
+  Encoded in imm5b
+  Is the second signed immediate operand, in the range -16 to 15, encoded in the
+  "imm5b" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = imm1 + e * imm2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+

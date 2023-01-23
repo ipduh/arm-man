@@ -1,0 +1,163 @@
+.nh
+.TH "STC -- AArch32" "7" " "  "instruction" "general"
+.SS STC
+ Store data to System register
+
+ Store data to System register calculates an address from a base register value
+ and an immediate offset, and stores a word from the DBGDTRRXint System register
+ to memory. It can use offset, post-indexed, pre-indexed, or unindexed
+ addressing. For information about memory accesses see Memory accesses.
+
+ In an implementation that includes EL2, the permitted STC access to DBGDTRRXint
+ can be trapped to Hyp mode, meaning that an attempt to execute an STC
+ instruction in a Non-secure mode other than Hyp mode, that would be permitted
+ in the absence of the Hyp trap controls, generates a Hyp Trap exception.  For
+ more information, see Trapping general Non-secure System register accesses to
+ debug registers.
+
+ For simplicity, the STC pseudocode does not show this possible trap to Hyp
+ mode.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12     9 8               0
+          |     | | | | | |       |       |     | |               |
+  |. . . .|1 1 0|.|.|0|.|0|. . . .|0 1 0 1|1 1 1|0|. . . . . . . .|
+  |             | | | | | |       |             | |
+  |             | | | | | `-Rn    `-CRd         | `-imm8
+  |             | | | | `-L                     `-cp15
+  |             | | | `-W
+  |             | | `-D
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Offset(P == 1 && W == 0)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>{, #{+/-}<imm>}]
+.SS Post-indexed(P == 0 && W == 1)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>], #{+/-}<imm>
+.SS Pre-indexed(P == 1 && W == 1)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>, #{+/-}<imm>]!
+.SS Unindexed(P == 0 && U == 1 && W == 0)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>], <option>
+ 
+ if P == '0' && U == '0' && W == '0' then UNDEFINED;
+ n = UInt(Rn);  cp = 14;
+ imm32 = ZeroExtend(imm8:'00', 32);  index = (P == '1');  add = (U == '1');  wback = (W == '1');
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                     07                                            
+                   08 |                                            
+         13      09 | |  05                                        
+       14 |    10 | | |06 |      01      12     9 8               0
+        | |     | | | | | |       |       |     | |               |
+   1 1 1|0|1 1 0|.|.|0|.|0|. . . .|0 1 0 1|1 1 1|0|. . . . . . . .|
+        |       | | | | | |       |             | |
+        `-o0    | | | | | `-Rn    `-CRd         | `-imm8
+                | | | | `-L                     `-cp15
+                | | | `-W
+                | | `-D
+                | `-U
+                `-P
+  
+  
+ 
+.SS Offset(P == 1 && W == 0)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>{, #{+/-}<imm>}]
+.SS Post-indexed(P == 0 && W == 1)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>], #{+/-}<imm>
+.SS Pre-indexed(P == 1 && W == 1)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>, #{+/-}<imm>]!
+.SS Unindexed(P == 0 && U == 1 && W == 0)
+ 
+ STC{<c>}{<q>} p14, c5, [<Rn>], <option>
+ 
+ if P == '0' && U == '0' && W == '0' then UNDEFINED;
+ n = UInt(Rn);  cp = 14;
+ imm32 = ZeroExtend(imm8:'00', 32);  index = (P == '1');  add = (U == '1');  wback = (W == '1');
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset_addr = if add then (R[n] + imm32) else (R[n] - imm32);
+     address = if index then offset_addr else R[n];
+ 
+     // System register read from DBGDTRRXint.
+     MemA[address,4] = DBGDTR_EL0[];
+ 
+     if wback then R[n] = offset_addr;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  For the offset or unindexed variant: is the general-purpose base register,
+  encoded in the "Rn" field. The PC can be used, but this is deprecated.
+
+ <Rn>
+  Encoded in Rn
+  For the offset, post-indexed or pre-indexed variant: is the general-purpose
+  base register, encoded in the "Rn" field.
+
+ <option>
+  Encoded in imm8
+  Is an 8-bit immediate, in the range 0 to 255 enclosed in { }, encoded in the
+  "imm8" field. The value of this field is ignored when executing this
+  instruction.
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ <imm>
+  Encoded in imm8
+  Is the immediate offset used for forming the address, a multiple of 4 in the
+  range 0-1020, defaulting to 0 and encoded in the "imm8" field, as <imm>/4.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset_addr = if add then (R[n] + imm32) else (R[n] - imm32);
+     address = if index then offset_addr else R[n];
+ 
+     // System register read from DBGDTRRXint.
+     MemA[address,4] = DBGDTR_EL0[];
+ 
+     if wback then R[n] = offset_addr;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

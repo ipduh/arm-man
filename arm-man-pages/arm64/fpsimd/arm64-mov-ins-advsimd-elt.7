@@ -1,0 +1,104 @@
+.nh
+.TH "MOV (element) -- A64" "7" " "  "alias" "advsimd"
+.SS MOV (element)
+ MOV is an alias of INS
+
+ Move vector element to another vector element
+
+ Move vector element to another vector element. This instruction copies the
+ vector element of the source SIMD&FP register to the specified vector element
+ of the destination SIMD&FP register.
+
+ This instruction can insert data into individual elements within a SIMD&FP
+ register without clearing the remaining bits to zero.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - INS_asimdins_IV_v
+ 
+                                                                   
+       29                                                          
+     30 |                          15        10                    
+   31 | |              21        16 |      11 |         5         0
+    | | |               |         | |       | |         |         |
+   0|1|1|0 1 1 1 0 0 0 0|. . . . .|0|. . . .|1|. . . . .|. . . . .|
+    | |                 |           |         |         |
+    | `-op              `-imm5      `-imm4    `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ MOV  <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>]
+ 
+ INS  <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>]
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ts>
+  Encoded in imm5
+  Is an element size specifier,
+
+  imm5  <Ts>     
+  x0000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+
+ <index1>
+  Encoded in imm5
+  Is the destination element index
+
+  imm5  <index1>  
+  x0000 RESERVED  
+  xxxx1 imm5<4:1> 
+  xxx10 imm5<4:2> 
+  xx100 imm5<4:3> 
+  x1000 imm5<4>   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <index2>
+  Encoded in imm5:imm4
+  Is the source element index
+
+  imm5  <index2>  
+  x0000 RESERVED  
+  xxxx1 imm4<3:0> 
+  xxx10 imm4<3:1> 
+  xx100 imm4<3:2> 
+  x1000 imm4<3>   
+
+   Unspecified bits in "imm4" are ignored but should be set to zero by an
+  assembler.
+
+
+
+.SS Operation
+
+ The manual of INS gives pseudocode for MOV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

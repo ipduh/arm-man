@@ -1,0 +1,74 @@
+.nh
+.TH "MOV (scalar, unpredicated)" "7" " "  "alias" "sve"
+.SS MOV (scalar, unpredicated)
+ MOV is an alias of DUP
+
+ Move general-purpose register to vector elements (unpredicated)
+
+ Unconditionally broadcast the general-purpose scalar source register into each
+ element of the destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dup_z_r_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                      10         5         0
+                  |   |                       |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 0 0 0 0 0 0 1 1 1 0|. . . . .|. . . . .|
+                  |                           |         |
+                  `-size                      `-Rn      `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, <R><n|SP>
+ 
+ DUP     <Zd>.<T>, <R><n|SP>
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <n|SP>
+  Encoded in Rn
+  Is the number [0-30] of the general-purpose source register or the name SP
+  (31), encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of DUP gives pseudocode for MOV.

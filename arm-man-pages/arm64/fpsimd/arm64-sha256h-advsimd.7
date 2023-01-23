@@ -1,0 +1,84 @@
+.nh
+.TH "SHA256H -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA256H
+ SHA256 hash update (part 1)
+
+ SHA256 hash update (part 1).
+
+
+
+.SS Advanced SIMD - A64 - SHA256H_QQV_cryptosha3
+ 
+                                                                   
+                                                                   
+                       21          15    12                        
+                 24  22 |        16 |  13 |  10         5         0
+                  |   | |         | |   | |   |         |         |
+   0 1 0 1 1 1 1 0|0 0|0|. . . . .|0|1 0|0|0 0|. . . . .|. . . . .|
+                  |     |               |     |         |
+                  |     `-Rm            `-P   `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA256H  <Qd>, <Qn>, <Vm>.4S
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if !HaveSHA256Ext() then UNDEFINED;
+ boolean part1 = (P == '0');
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) result;
+ if part1 then
+     result = SHA256hash(V[d], V[n], V[m], TRUE);
+ else
+     result = SHA256hash(V[n], V[d], V[m], FALSE);
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Qd>
+  Encoded in Rd
+  Is the 128-bit name of the SIMD&FP source and destination, encoded in the "Rd"
+  field.
+
+ <Qn>
+  Encoded in Rn
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the third SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) result;
+ if part1 then
+     result = SHA256hash(V[d], V[n], V[m], TRUE);
+ else
+     result = SHA256hash(V[n], V[d], V[m], FALSE);
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

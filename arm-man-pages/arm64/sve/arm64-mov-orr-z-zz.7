@@ -1,0 +1,56 @@
+.nh
+.TH "MOV (vector, unpredicated)" "7" " "  "alias" "sve"
+.SS MOV (vector, unpredicated)
+ MOV is an alias of ORR
+
+ Move vector register (unpredicated)
+
+ Move vector register. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - orr_z_zz_
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16          10         5         0
+                  | | | |         |           |         |         |
+   0 0 0 0 0 1 0 0|0|1|1|. . . . .|0 0 1 1 0 0|. . . . .|. . . . .|
+                  | |   |                     |         |
+                  | |   `-Zm                  `-Zn      `-Zd
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.D, <Zn>.D
+ 
+ ORR <Zd>.D, <Zn>.D, <Zn>.D
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of ORR gives pseudocode for MOV.

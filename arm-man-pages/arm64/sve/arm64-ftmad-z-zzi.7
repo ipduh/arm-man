@@ -1,0 +1,115 @@
+.nh
+.TH "FTMAD" "7" " "  "instruction" "sve"
+.SS FTMAD
+ Floating-point trigonometric multiply-add coefficient
+
+ The FTMAD instruction calculates the series terms for either sin(x) or cos(x),
+ where the argument x has been adjusted to be in the range -π/4 < x ≤ π/4.
+
+ To calculate the series terms of sin(x) and cos(x) the initial source operands
+ of FTMAD should be zero in the first source vector and x2 in the second source
+ vector. The FTMAD instruction is then executed eight times to calculate the sum
+ of eight series terms, which gives a result of sufficient precision.
+
+ The FTMAD instruction multiplies each element of the first source vector by the
+ absolute value of the corresponding element of the second source vector and
+ performs a fused addition of each product with a value obtained from a table of
+ hard-wired coefficients, and places the results destructively in the first
+ source vector.
+
+ The coefficients are different for sin(x) and cos(x), and are selected by a
+ combination of the sign bit in the second source element and an immediate index
+ in the range 0 to 7.
+
+ This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - ftmad_z_zzi_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22    19    16          10         5         0
+                  |   |     |     |           |         |         |
+   0 1 1 0 0 1 0 1|. .|0 1 0|. . .|1 0 0 0 0 0|. . . . .|. . . . .|
+                  |         |                 |         |
+                  `-size    `-imm3            `-Zm      `-Zdn
+  
+  
+ 
+.SS SVE
+ 
+ FTMAD   <Zdn>.<T>, <Zdn>.<T>, <Zm>.<T>, #<imm>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ integer imm = UInt(imm3);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPTrigMAdd(imm, element1, element2, FPCR);
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+ <imm>
+  Encoded in imm3
+  Is the unsigned immediate operand, in the range 0 to 7, encoded in the "imm3"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPTrigMAdd(imm, element1, element2, FPCR);
+ 
+ Z[dn] = result;
+

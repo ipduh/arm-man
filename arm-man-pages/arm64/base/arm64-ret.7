@@ -1,0 +1,141 @@
+.nh
+.TH "RET -- A64" "7" " "  "instruction" "general"
+.SS RET
+ Return from subroutine
+
+ Return from subroutine branches unconditionally to an address in a register,
+ with a hint that this is a subroutine return.
+
+
+
+.SS Integer - A64 - RET_64R_branch_reg
+ 
+                                                                   
+                   23                        10                    
+                 24 |                      11 |                    
+               25 | |  21        16      12 | |         5         0
+                | | |   |         |       | | |         |         |
+   1 1 0 1 0 1 1|0|0|1 0|1 1 1 1 1|0 0 0 0|0|0|. . . . .|0 0 0 0 0|
+                | | |   |         |       | | |         |
+                | | |   `-op2     |       | | `-Rn      `-Rm
+                | | `-op          |       | `-M
+                | `-opc[2:1]      |       `-A
+                `-Z               `-op3[5:2]
+  
+  
+ 
+.SS Integer
+ 
+ RET  {<Xn>}
+ 
+ integer n = UInt(Rn);
+ BranchType branch_type;
+ integer m = UInt(Rm);
+ boolean pac = (A == '1');
+ boolean use_key_a = (M == '0');
+ boolean source_is_sp = ((Z == '1') && (m == 31));
+ 
+ if !pac && m != 0 then 
+     UNDEFINED;
+ elsif pac && !HavePACExt() then 
+     UNDEFINED;
+ 
+ case op of
+     when '00' branch_type = BranchType_INDIR;
+     when '01' branch_type = BranchType_INDCALL;
+     when '10' branch_type = BranchType_RET;
+     otherwise UNDEFINED;
+ 
+ if pac then
+     if Z == '0' && m != 31 then
+         UNDEFINED;
+ 
+     if branch_type == BranchType_RET then
+         if n != 31 then UNDEFINED;
+         n = 30;
+         source_is_sp = TRUE;
+ 
+ bits(64) target = X[n];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     bits(64) modifier = if source_is_sp then SP[] else X[m];
+ 
+     if use_key_a then
+         target = AuthIA(target, modifier, auth_then_branch);
+     else
+         target = AuthIB(target, modifier, auth_then_branch);
+ 
+ if branch_type == BranchType_INDCALL then X[30] = PC[] + 4;
+ 
+ // Value in BTypeNext will be used to set PSTATE.BTYPE
+ case branch_type of
+     when BranchType_INDIR           // BR, BRAA, BRAB, BRAAZ, BRABZ
+         if InGuardedPage then
+             if n == 16 || n == 17 then
+                 BTypeNext = '01';
+             else
+                 BTypeNext = '11';
+         else
+             BTypeNext = '01';
+     when BranchType_INDCALL         // BLR, BLRAA, BLRAB, BLRAAZ, BLRABZ
+         BTypeNext = '10';
+     when BranchType_RET             // RET, RETAA, RETAB 
+         BTypeNext = '00';
+ 
+ BranchTo(target, branch_type);
+ 
+
+.SS Assembler Symbols
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose register holding the address to be
+  branched to, encoded in the "Rn" field. Defaults to X30 if absent.
+
+
+
+.SS Operation
+
+ bits(64) target = X[n];
+ boolean auth_then_branch = TRUE;
+ 
+ if pac then
+     bits(64) modifier = if source_is_sp then SP[] else X[m];
+ 
+     if use_key_a then
+         target = AuthIA(target, modifier, auth_then_branch);
+     else
+         target = AuthIB(target, modifier, auth_then_branch);
+ 
+ if branch_type == BranchType_INDCALL then X[30] = PC[] + 4;
+ 
+ // Value in BTypeNext will be used to set PSTATE.BTYPE
+ case branch_type of
+     when BranchType_INDIR           // BR, BRAA, BRAB, BRAAZ, BRABZ
+         if InGuardedPage then
+             if n == 16 || n == 17 then
+                 BTypeNext = '01';
+             else
+                 BTypeNext = '11';
+         else
+             BTypeNext = '01';
+     when BranchType_INDCALL         // BLR, BLRAA, BLRAB, BLRAAZ, BLRABZ
+         BTypeNext = '10';
+     when BranchType_RET             // RET, RETAA, RETAB 
+         BTypeNext = '00';
+ 
+ BranchTo(target, branch_type);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

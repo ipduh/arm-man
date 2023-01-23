@@ -1,0 +1,173 @@
+.nh
+.TH "VQSHRN, VQSHRUN -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VQSHRN, VQSHRUN
+ Vector Saturating Shift Right, Narrow
+
+ Vector Saturating Shift Right, Narrow takes each element in a quadword vector
+ of integers, right shifts them by an immediate value, and places the truncated
+ results in a doubleword vector.
+
+ For rounded results, see VQRSHRN and VQRSHRUN.
+
+ The operand elements must all be the same size, and can be any one of:
+
+
+ The result elements are half the width of the operand elements. If the operand
+ elements are signed, the results can be either signed or unsigned. If the
+ operand elements are unsigned, the result elements must also be unsigned.
+
+ If any of the results overflow, they are saturated. The cumulative saturation
+ bit, FPSCR.QC, is set if saturation occurs. For details see Pseudocode details
+ of saturation.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD one register and modified immediate for
+ the T32 instruction set, or Advanced SIMD one register and modified immediate
+ for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |          16      12     9 8 7 6 5 4       0
+                | | | |           |       |     | | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. . . . . .|. . . .|1 0 0|.|0|0|.|1|. . . .|
+                |   | |           |             | | | |   |
+                `-U | `-imm6      `-Vd          | | | `-M `-Vm
+                    `-D                         | | `-Q
+                                                | `-L
+                                                `-op
+  
+  
+ 
+.SS Signed result(!(imm6 == 000xxx) && op == 1)
+ 
+ VQSHRN{<c>}{<q>}.<type><size> <Dd>, <Qm>, #<imm>
+.SS Unsigned result(U == 1 && !(imm6 == 000xxx) && op == 0)
+ 
+ VQSHRUN{<c>}{<q>}.<type><size> <Dd>, <Qm>, #<imm>
+ 
+ if imm6 == '000xxx' then SEE "Related encodings";
+ if U == '0' && op == '0' then SEE "VSHRN";
+ if Vm<0> == '1' then UNDEFINED;
+ case imm6 of
+     when '001xxx'  esize = 8;  elements = 8;  shift_amount = 16 - UInt(imm6);
+     when '01xxxx'  esize = 16;  elements = 4;  shift_amount = 32 - UInt(imm6);
+     when '1xxxxx'  esize = 32;  elements = 2;  shift_amount = 64 - UInt(imm6);
+ src_unsigned = (U == '1' && op == '1');  dest_unsigned = (U == '1');
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |          01      12     9 8 7 6 5 4       0
+        | |         | |           |       |     | | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. . . . . .|. . . .|1 0 0|.|0|0|.|1|. . . .|
+        |           | |           |             | | | |   |
+        `-U         | `-imm6      `-Vd          | | | `-M `-Vm
+                    `-D                         | | `-Q
+                                                | `-L
+                                                `-op
+  
+  
+ 
+.SS Signed result(!(imm6 == 000xxx) && op == 1)
+ 
+ VQSHRN{<c>}{<q>}.<type><size> <Dd>, <Qm>, #<imm>
+.SS Unsigned result(U == 1 && !(imm6 == 000xxx) && op == 0)
+ 
+ VQSHRUN{<c>}{<q>}.<type><size> <Dd>, <Qm>, #<imm>
+ 
+ if imm6 == '000xxx' then SEE "Related encodings";
+ if U == '0' && op == '0' then SEE "VSHRN";
+ if Vm<0> == '1' then UNDEFINED;
+ case imm6 of
+     when '001xxx'  esize = 8;  elements = 8;  shift_amount = 16 - UInt(imm6);
+     when '01xxxx'  esize = 16;  elements = 4;  shift_amount = 32 - UInt(imm6);
+     when '1xxxxx'  esize = 32;  elements = 2;  shift_amount = 64 - UInt(imm6);
+ src_unsigned = (U == '1' && op == '1');  dest_unsigned = (U == '1');
+ d = UInt(D:Vd);  m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         operand = Int(Elem[Qin[m>>1],e,2*esize], src_unsigned);
+         (result, sat) = SatQ(operand >> shift_amount, esize, dest_unsigned);
+         Elem[D[d],e,esize] = result;
+         if sat then FPSCR.QC = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <type>
+  Encoded in U
+  For the signed result variant: is the data type for the elements of the
+  vectors,
+
+  U <type> 
+  0 S      
+  1 U      
+
+ <type>
+  Encoded in U
+  For the unsigned result variant: is the data type for the elements of the
+  vectors,
+
+  U <type> 
+  1 S      
+
+ <size>
+  Encoded in imm6<5:3>
+  Is the data size for the elements of the vectors,
+
+  imm6<5:3> <size> 
+  001       16     
+  01x       32     
+  1xx       64     
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <imm>
+  Encoded in imm6
+  Is an immediate value, in the range 1 to <size>/2, encoded in the "imm6" field
+  as <size>/2 - <imm>.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         operand = Int(Elem[Qin[m>>1],e,2*esize], src_unsigned);
+         (result, sat) = SatQ(operand >> shift_amount, esize, dest_unsigned);
+         Elem[D[d],e,esize] = result;
+         if sat then FPSCR.QC = '1';
+

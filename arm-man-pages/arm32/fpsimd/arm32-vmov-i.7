@@ -1,0 +1,386 @@
+.nh
+.TH "VMOV (immediate) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOV (immediate)
+ Copy immediate value to a SIMD&FP register
+
+ Copy immediate value to a SIMD&FP register places an immediate constant into
+ every element of the destination register.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode.  For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD one register and modified immediate for
+ the T32 instruction set, or Advanced SIMD one register and modified immediate
+ for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1, A2, A3, A4 and A5) and  T32 (T1, T2, T3, T4 and T5).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|0 x x 0|0|.|0|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+         28        23 |  20      16      12  10   8 7 6 5 4       0
+          |         | |   |       |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|. . . .|. . . .|1 0|. .|0|0|0|0|. . . .|
+  |                 |     |       |           |           |
+  `-cond(!= 1111)   `-D   `-imm4H `-Vd        `-size      `-imm4L
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VMOV{<c>}{<q>}.F16 <Sd>, #<imm>
+.SS Single-precision scalar(size == 10)
+ 
+ VMOV{<c>}{<q>}.F32 <Sd>, #<imm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMOV{<c>}{<q>}.F64 <Dd>, #<imm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ single_register = (size != '11'); advsimd = FALSE;
+ bits(16) imm16;
+ bits(32) imm32;
+ bits(64) imm64;
+ case size of
+     when '01' d = UInt(Vd:D);  imm16 = VFPExpandImm(imm4H:imm4L); imm32 = Zeros(16) : imm16;
+     when '10' d = UInt(Vd:D);  imm32 = VFPExpandImm(imm4H:imm4L);
+     when '11' d = UInt(D:Vd);  imm64 = VFPExpandImm(imm4H:imm4L);  regs = 1;
+.SS A3 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 0 x 0|0|.|0|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I16 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I16 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS A4 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 1 x x|0|.|0|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.<dt> <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.<dt> <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS A5 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |    19    16      12       8 7 6 5 4       0
+                | | | |     |     |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|0 0 0|. . .|. . . .|1 1 1 0|0|.|1|1|. . . .|
+                |   |       |     |       |         | |   |
+                `-i `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I64 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I64 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|0 x x 0|0|.|0|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I32 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I32 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                     07                                            
+                   08 |  05      01      12  10   8 7 6 5 4       0
+                    | |   |       |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|. . . .|. . . .|1 0|. .|0|0|0|0|. . . .|
+                    |     |       |           |           |
+                    `-D   `-imm4H `-Vd        `-size      `-imm4L
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VMOV{<c>}{<q>}.F16 <Sd>, #<imm>
+.SS Single-precision scalar(size == 10)
+ 
+ VMOV{<c>}{<q>}.F32 <Sd>, #<imm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMOV{<c>}{<q>}.F64 <Dd>, #<imm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ single_register = (size != '11'); advsimd = FALSE;
+ bits(16) imm16;
+ bits(32) imm32;
+ bits(64) imm64;
+ case size of
+     when '01' d = UInt(Vd:D);  imm16 = VFPExpandImm(imm4H:imm4L); imm32 = Zeros(16) : imm16;
+     when '10' d = UInt(Vd:D);  imm32 = VFPExpandImm(imm4H:imm4L);
+     when '11' d = UInt(D:Vd);  imm64 = VFPExpandImm(imm4H:imm4L);  regs = 1;
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 0 x 0|0|.|0|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I16 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I16 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T4 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 1 x x|0|.|0|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.<dt> <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.<dt> <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+.SS T5 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |    04    01      12       8 7 6 5 4       0
+        | |         | |     |     |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|0 0 0|. . .|. . . .|1 1 1 0|0|.|1|1|. . . .|
+        |           |       |     |       |         | |   |
+        `-i         `-D     |     `-Vd    `-cmode   | |   `-imm4
+                            `-imm3                  | `-op
+                                                    `-Q
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMOV{<c>}{<q>}.I64 <Dd>, #<imm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMOV{<c>}{<q>}.I64 <Qd>, #<imm>
+ 
+ if op == '0' && cmode<0> == '1' && cmode<3:2> != '11' then SEE "VORR (immediate)";
+ if op == '1' && cmode != '1110' then SEE "Related encodings";
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ single_register = FALSE;  advsimd = TRUE;  imm64 = AdvSIMDExpandImm(op, cmode, i:imm3:imm4);
+ d = UInt(D:Vd);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if single_register then
+         S[d] = imm32;
+     else
+         for r = 0 to regs-1
+             D[d+r] = imm64;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1, A3, A4 and A5: see Standard assembler syntax fields. This
+  encoding must be unconditional.
+
+ <c>
+  For encoding A2, T1, T2, T3, T4 and T5: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in cmode
+  The data type,
+
+  cmode <dt> 
+  110x  I32  
+  1110  I8   
+  1111  F32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <imm>
+  For encoding A1, A3, A4, A5, T1, T3, T4 and T5: is a constant of the specified
+  type that is replicated to fill the destination register. For details of the
+  range of constants available and the encoding of <imm>, see Modified immediate
+  constants in T32 and A32 Advanced SIMD instructions.
+
+ <imm>
+  For encoding A2 and T2: is a signed floating-point constant with 3-bit
+  exponent and normalized 4 bits of precision, encoded in "imm4H:imm4L". For
+  details of the range of constants available and the encoding of <imm>, see
+  Modified immediate constants in T32 and A32 floating-point instructions.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if single_register then
+         S[d] = imm32;
+     else
+         for r = 0 to regs-1
+             D[d+r] = imm64;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

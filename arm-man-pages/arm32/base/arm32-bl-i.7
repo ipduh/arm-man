@@ -1,0 +1,176 @@
+.nh
+.TH "BL, BLX (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS BL, BLX (immediate)
+ Branch with Link and optional Exchange (immediate)
+
+ Branch with Link calls a subroutine at a PC-relative address, and setting LR to
+ the return address.
+
+ Branch with Link and Exchange Instruction Sets (immediate) calls a subroutine
+ at a PC-relative address, setting LR to the return address, and changes the
+ instruction set from A32 to T32, or from T32 to A32.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                 24                                                
+         28    25 |                                               0
+          |     | |                                               |
+  |. . . .|1 0 1|1|. . . . . . . . . . . . . . . . . . . . . . . .|
+  |             | |
+  |             | `-imm24
+  |             `-H
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ BL{<c>}{<q>} <label>
+ 
+ imm32 = SignExtend(imm24:'00', 32);  targetInstrSet = InstrSet_A32;
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                 24                                                
+         28    25 |                                               0
+          |     | |                                               |
+  |1 1 1 1|1 0 1|.|. . . . . . . . . . . . . . . . . . . . . . . .|
+  |             | |
+  `-cond        | `-imm24
+                `-H
+  
+  
+ 
+.SS A2
+ 
+ BLX{<c>}{<q>} <label>
+ 
+ imm32 = SignExtend(imm24:H:'0', 32);  targetInstrSet = InstrSet_T32;
+.SS T1 - T32
+ 
+                                           11                      
+                                         12 |                      
+             11                        13 | |                      
+           12 |                  01  14 | | |                     0
+            | |                   |   | | | |                     |
+   1 1 1 1 0|.|. . . . . . . . . .|1 1|.|1|.|. . . . . . . . . . .|
+            | |                       |   | |
+            | `-imm10                 |   | `-imm11
+            `-S                       |   `-J2
+                                      `-J1
+  
+  
+ 
+.SS T1
+ 
+ BL{<c>}{<q>} <label>
+ 
+ I1 = NOT(J1 EOR S);  I2 = NOT(J2 EOR S);  imm32 = SignExtend(S:I1:I2:imm10:imm11:'0', 32);
+ targetInstrSet = InstrSet_T32;
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                                           11                      
+                                         12 |                      
+             11                        13 | |                      
+           12 |                  01  14 | | |                   1 0
+            | |                   |   | | | |                   | |
+   1 1 1 1 0|.|. . . . . . . . . .|1 1|.|0|.|. . . . . . . . . .|.|
+            | |                       |   | |                   |
+            | `-imm10H                |   | `-imm10L            `-H
+            `-S                       |   `-J2
+                                      `-J1
+  
+  
+ 
+.SS T2
+ 
+ BLX{<c>}{<q>} <label>
+ 
+ if H == '1' then UNDEFINED;
+ I1 = NOT(J1 EOR S);  I2 = NOT(J2 EOR S);  imm32 = SignExtend(S:I1:I2:imm10H:imm10L:'00', 32);
+ targetInstrSet = InstrSet_A32;
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if CurrentInstrSet() == InstrSet_A32 then
+         LR = PC - 4;
+     else
+         LR = PC<31:1> : '1';
+     if targetInstrSet == InstrSet_A32 then
+         targetAddress = Align(PC,4) + imm32;
+     else
+         targetAddress = PC + imm32;
+     SelectInstrSet(targetInstrSet);
+     BranchWritePC(targetAddress, BranchType_DIRCALL);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1, T1 and T2: see Standard assembler syntax fields.
+
+ <c>
+  For encoding A2: see Standard assembler syntax fields. <c> must be AL or
+  omitted.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <label>
+  Encoded in imm24
+  For encoding A1: the label of the instruction that is to be branched to. The
+  assembler calculates the required value of the offset from the PC value of the
+  BL instruction to this label, then selects an encoding that sets imm32 to that
+  offset.           Permitted offsets are multiples of 4 in the range –33554432
+  to 33554428.
+
+ <label>
+  Encoded in imm24:H
+  For encoding A2: the label of the instruction that is to be branched to. The
+  assembler calculates the required value of the offset from the PC value of the
+  BLX instruction to this label, then selects an encoding with imm32 set to that
+  offset.           Permitted offsets are even numbers in the range –33554432 to
+  33554430.
+
+ <label>
+  For encoding T1: the label of the instruction that is to be branched to.
+  The assembler calculates the required value of the offset from the PC value of
+  the BL instruction to this label, then selects an encoding with imm32 set to
+  that offset.           Permitted offsets are even numbers in the range
+  –16777216 to 16777214.
+
+ <label>
+  For encoding T2: the label of the instruction that is to be branched to.
+  The assembler calculates the required value of the offset from the Align(PC,
+  4) value of the BLX instruction to this label, then selects an encoding with
+  imm32 set to that offset.           Permitted offsets are multiples of 4 in
+  the range –16777216 to 16777212.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if CurrentInstrSet() == InstrSet_A32 then
+         LR = PC - 4;
+     else
+         LR = PC<31:1> : '1';
+     if targetInstrSet == InstrSet_A32 then
+         targetAddress = Align(PC,4) + imm32;
+     else
+         targetAddress = PC + imm32;
+     SelectInstrSet(targetInstrSet);
+     BranchWritePC(targetAddress, BranchType_DIRCALL);
+

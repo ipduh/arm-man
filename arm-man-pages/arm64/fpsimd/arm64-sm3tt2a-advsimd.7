@@ -1,0 +1,123 @@
+.nh
+.TH "SM3TT2A -- A64" "7" " "  "instruction" "advsimd"
+.SS SM3TT2A
+ SM3TT2A
+
+ SM3TT2A takes three 128-bit vectors from three source SIMD&FP register and a
+ 2-bit immediate index value, and returns a 128-bit result in the destination
+ SIMD&FP register. It performs a three-way exclusive OR of the three 32-bit
+ fields held in the upper three elements of the first source vector, and adds
+ the resulting 32-bit value and the following three other 32-bit values:
+
+
+ A three-way exclusive OR is performed of the result of this addition, the
+ result of the addition rotated left by 9, and the result of the addition
+ rotated left by 17. The result of this exclusive OR is returned as the top
+ element of the returned result. The other elements of this result are taken
+ from elements of the first source vector, with the element returned in
+ bits<63:32> being rotated left by 19.
+
+ This instruction is implemented only when ARMv8.2-SM is implemented.
+
+
+
+.SS Advanced SIMD - A64 - SM3TT2A_VVV4_crypto3_imm2
+ 
+                                                                   
+                                                                   
+                                                                   
+                       21        16  14  12  10         5         0
+                        |         |   |   |   |         |         |
+   1 1 0 0 1 1 1 0 0 1 0|. . . . .|1 0|. .|1 0|. . . . .|. . . . .|
+                        |             |   |   |         |
+                        `-Rm          |   |   `-Rn      `-Rd
+                                      |   `-opcode
+                                      `-imm2
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SM3TT2A  <Vd>.4S, <Vn>.4S, <Vm>.S[<imm2>]
+ 
+ if !HaveSM3Ext() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ integer i = UInt(imm2);
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(128) Vn = V[n];
+ bits(128) Vd = V[d];
+ bits(32) Wj;
+ bits(128) result; 
+ bits(32) TT2;
+ 
+ Wj = Elem[Vm,i,32];
+ TT2 = Vd<63:32> EOR (Vd<127:96> EOR Vd<95:64>);
+ TT2 = (TT2 + Vd<31:0> + Vn<127:96> + Wj)<31:0>;
+ 
+ result<31:0> = Vd<63:32>;
+ result<63:32> = ROL(Vd<95:64>,19); 
+ result<95:64> = Vd<127:96>; 
+ result<127:96> = TT2 EOR ROL(TT2,9) EOR ROL(TT2,17); 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP source and destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the second SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the third SIMD&FP source register, encoded in the "Rm" field.
+
+ <imm2>
+  Encoded in imm2
+  Is a 32-bit element indexed out of <Vm>, encoded in "imm2".
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vm = V[m];
+ bits(128) Vn = V[n];
+ bits(128) Vd = V[d];
+ bits(32) Wj;
+ bits(128) result; 
+ bits(32) TT2;
+ 
+ Wj = Elem[Vm,i,32];
+ TT2 = Vd<63:32> EOR (Vd<127:96> EOR Vd<95:64>);
+ TT2 = (TT2 + Vd<31:0> + Vn<127:96> + Wj)<31:0>;
+ 
+ result<31:0> = Vd<63:32>;
+ result<63:32> = ROL(Vd<95:64>,19); 
+ result<95:64> = Vd<127:96>; 
+ result<127:96> = TT2 EOR ROL(TT2,9) EOR ROL(TT2,17); 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

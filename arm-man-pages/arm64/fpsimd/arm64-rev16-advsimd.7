@@ -1,0 +1,132 @@
+.nh
+.TH "REV16 (vector) -- A64" "7" " "  "instruction" "advsimd"
+.SS REV16 (vector)
+ Reverse elements in 16-bit halfwords (vector)
+
+ Reverse elements in 16-bit halfwords (vector). This instruction reverses the
+ order of 8-bit elements in each halfword of the vector in the source SIMD&FP
+ register, places the results into a vector, and writes the vector to the
+ destination SIMD&FP register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Vector - A64 - REV16_asimdmisc_R
+ 
+                                                                   
+       29                                                          
+     30 |                                12                        
+   31 | |        24  22        17      13 |  10         5         0
+    | | |         |   |         |       | |   |         |         |
+   0|.|0|0 1 1 1 0|. .|1 0 0 0 0|0 0 0 0|1|1 0|. . . . .|. . . . .|
+    | |           |                     |     |         |
+    | `-U         `-size                `-o0  `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Vector
+ 
+ REV16  <Vd>.<T>, <Vn>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ // size=esize:   B(0),  H(1),  S(1), D(S)
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ 
+ // op=REVx: 64(0), 32(1), 16(2)
+ bits(2) op = o0:U; 
+ 
+ // => op+size: 
+ //    64+B = 0, 64+H = 1, 64+S = 2, 64+D = X
+ //    32+B = 1, 32+H = 2, 32+S = X, 32+D = X
+ //    16+B = 2, 16+H = X, 16+S = X, 16+D = X
+ //     8+B = X,  8+H = X,  8+S = X,  8+D = X
+ // => 3-(op+size) (index bits in group)
+ //    64/B = 3, 64+H = 2, 64+S = 1, 64+D = X
+ //    32+B = 2, 32+H = 1, 32+S = X, 32+D = X
+ //    16+B = 1, 16+H = X, 16+S = X, 16+D = X
+ //     8+B = X,  8+H = X,  8+S = X,  8+D = X
+ 
+ // index bits within group: 1, 2, 3
+ if UInt(op)+UInt(size) >= 3 then UNDEFINED;
+ 
+ integer container_size;
+ case op of
+     when '10' container_size = 16;
+     when '01' container_size = 32;
+     when '00' container_size = 64;
+ 
+ integer containers = datasize DIV container_size;
+ integer elements_per_container = container_size DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ integer element = 0;
+ integer rev_element;
+ for c = 0 to containers-1
+     rev_element = element + elements_per_container - 1;
+     for e = 0 to elements_per_container-1
+         Elem[result, rev_element, esize] = Elem[operand, element, esize];
+         element = element + 1;
+         rev_element = rev_element - 1;
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   x RESERVED 
+  1x   x RESERVED 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ bits(datasize) result;
+ integer element = 0;
+ integer rev_element;
+ for c = 0 to containers-1
+     rev_element = element + elements_per_container - 1;
+     for e = 0 to elements_per_container-1
+         Elem[result, rev_element, esize] = Elem[operand, element, esize];
+         element = element + 1;
+         rev_element = rev_element - 1;
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

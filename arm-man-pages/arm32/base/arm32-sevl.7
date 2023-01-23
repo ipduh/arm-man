@@ -1,0 +1,93 @@
+.nh
+.TH "SEVL -- AArch32" "7" " "  "instruction" "general"
+.SS SEVL
+ Send Event Local
+
+ Send Event Local is a hint instruction that causes an event to be signaled
+ locally without requiring the event to be signaled to other PEs in the
+ multiprocessor system. It can prime a wait-loop which starts with a WFE
+ instruction.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20  18  16 | | |12                       0
+          |         | |   |   |   | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0|0 0|1|1|1|1|0 0 0 0 0 0 0 0 0 1 0 1|
+  |                 |     |   |           |
+  `-cond(!= 1111)   `-R   |   `-imm4<1:0> `-imm12
+                          `-imm4<3:2>
+  
+  
+ 
+.SS A1
+ 
+ SEVL{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                  8       4       0                                
+                  |       |       |                                
+   1 0 1 1 1 1 1 1|0 1 0 1|0 0 0 0|                                
+                  |
+                  `-hint
+  
+  
+ 
+.SS T1
+ 
+ SEVL{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T2 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 0|0 1 0 1|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T2
+ 
+ SEVL{<c>}.W
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SendEventLocal();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     SendEventLocal();
+

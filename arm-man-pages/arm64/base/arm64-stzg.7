@@ -1,0 +1,172 @@
+.nh
+.TH "STZG -- A64" "7" " "  "instruction" "general"
+.SS STZG
+ Store Allocation Tag, Zeroing
+
+ Store Allocation Tag, Zeroing stores an Allocation Tag to memory, zeroing the
+ associated data location. The address used for the store is calculated from the
+ base register and an immediate signed offset scaled by the Tag granule. The
+ Allocation Tag is calculated from the Logical Address Tag in the source
+ register.
+
+ This instruction generates an Unchecked access.
+
+
+It has encodings from 3 classes: Post-index, Pre-index and Signed offset
+
+.SS Post-index - A64 - STZG_64Spost_ldsttags
+ 
+                       21                                          
+                     22 |                    10                    
+                   23 | |                  11 |                    
+                 24 | | |                12 | |         5         0
+                  | | | |                 | | |         |         |
+   1 1 0 1 1 0 0 1|0|1|1|. . . . . . . . .|0|1|. . . . .|. . . . .|
+                  | |   |                 | | |         |
+                  | |   `-imm9            | | `-Xn      `-Xt
+                  | `-opc<0>              | `-op2<0>
+                  `-opc<1>                `-op2<1>
+  
+  
+ 
+.SS Post-index
+ 
+ STZG  <Xt|SP>, [<Xn|SP>], #<simm>
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ bits(64) offset = LSL(SignExtend(imm9, 64), LOG2_TAG_GRANULE);
+ boolean writeback = TRUE;
+ boolean postindex = TRUE;
+ boolean zero_data = TRUE;
+.SS Pre-index - A64 - STZG_64Spre_ldsttags
+ 
+                       21                                          
+                     22 |                    10                    
+                   23 | |                  11 |                    
+                 24 | | |                12 | |         5         0
+                  | | | |                 | | |         |         |
+   1 1 0 1 1 0 0 1|0|1|1|. . . . . . . . .|1|1|. . . . .|. . . . .|
+                  | |   |                 | | |         |
+                  | |   `-imm9            | | `-Xn      `-Xt
+                  | `-opc<0>              | `-op2<0>
+                  `-opc<1>                `-op2<1>
+  
+  
+ 
+.SS Pre-index
+ 
+ STZG  <Xt|SP>, [<Xn|SP>, #<simm>]!
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ bits(64) offset = LSL(SignExtend(imm9, 64), LOG2_TAG_GRANULE);
+ boolean writeback = TRUE;
+ boolean postindex = FALSE;
+ boolean zero_data = TRUE;
+.SS Signed offset - A64 - STZG_64Soffset_ldsttags
+ 
+                       21                                          
+                     22 |                    10                    
+                   23 | |                  11 |                    
+                 24 | | |                12 | |         5         0
+                  | | | |                 | | |         |         |
+   1 1 0 1 1 0 0 1|0|1|1|. . . . . . . . .|1|0|. . . . .|. . . . .|
+                  | |   |                 | | |         |
+                  | |   `-imm9            | | `-Xn      `-Xt
+                  | `-opc<0>              | `-op2<0>
+                  `-opc<1>                `-op2<1>
+  
+  
+ 
+.SS Signed offset
+ 
+ STZG  <Xt|SP>, [<Xn|SP>{, #<simm>}]
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ bits(64) offset = LSL(SignExtend(imm9, 64), LOG2_TAG_GRANULE);
+ boolean writeback = FALSE;
+ boolean postindex = FALSE;
+ boolean zero_data = TRUE;
+ 
+ bits(64) address;
+ 
+ SetTagCheckedInstruction(FALSE);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if !postindex then
+     address = address + offset;
+ 
+ if zero_data then
+     Mem[address, TAG_GRANULE, AccType_NORMAL] = Zeros(TAG_GRANULE * 8);
+ 
+ bits(64) data = if t == 31 then SP[] else X[t];
+ bits(4) tag = AArch64.AllocationTagFromAddress(data);
+ AArch64.MemTag[address, AccType_NORMAL] = tag;
+ 
+ if writeback then
+     if postindex then
+         address = address + offset;
+ 
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Xt|SP>
+  Encoded in Xt
+  Is the 64-bit name of the general-purpose register to be transferred, encoded
+  in the "Xt" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Xn" field.
+
+ <simm>
+  Encoded in imm9
+  Is the optional signed immediate offset, a multiple of 16 in the range -4096
+  to 4080, defaulting to 0 and encoded in the "imm9" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ 
+ SetTagCheckedInstruction(FALSE);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if !postindex then
+     address = address + offset;
+ 
+ if zero_data then
+     Mem[address, TAG_GRANULE, AccType_NORMAL] = Zeros(TAG_GRANULE * 8);
+ 
+ bits(64) data = if t == 31 then SP[] else X[t];
+ bits(4) tag = AArch64.AllocationTagFromAddress(data);
+ AArch64.MemTag[address, AccType_NORMAL] = tag;
+ 
+ if writeback then
+     if postindex then
+         address = address + offset;
+ 
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+

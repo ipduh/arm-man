@@ -1,0 +1,103 @@
+.nh
+.TH "DECP (vector)" "7" " "  "instruction" "sve"
+.SS DECP (vector)
+ Decrement vector by count of true predicate elements
+
+ Counts the number of true elements in the source predicate and then uses the
+ result to decrement all destination vector elements.
+
+ The predicate size specifier may be omitted in assembler source code, but this
+ is deprecated and will be prohibited in a future release of the architecture.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - decp_z_p_z_
+ 
+                                                                   
+                                 16                                
+                               17 |          10                    
+                 24  22      18 | |        11 | 9       5         0
+                  |   |       | | |         | | |       |         |
+   0 0 1 0 0 1 0 1|. .|1 0 1 1|0|1|1 0 0 0 0|0|0|. . . .|. . . . .|
+                  |           | |           | | |       |
+                  `-size      | `-D         | | `-Pm    `-Zdn
+                              `-op          | `-opc2<0>
+                                            `-opc2<1>
+  
+  
+ 
+.SS SVE
+ 
+ DECP    <Zdn>.<T>, <Pm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer m = UInt(Pm);
+ integer dn = UInt(Zdn);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) operand2 = P[m];
+ bits(VL) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, esize] = Elem[operand1, e, esize] - count;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pm>
+  Encoded in Pm
+  Is the name of the source scalable predicate register, encoded in the "Pm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(PL) operand2 = P[m];
+ bits(VL) result;
+ integer count = 0;
+ 
+ for e = 0 to elements-1
+     if ElemP[operand2, e, esize] == '1' then
+         count = count + 1;
+ 
+ for e = 0 to elements-1
+     Elem[result, e, esize] = Elem[operand1, e, esize] - count;
+ 
+ Z[dn] = result;
+

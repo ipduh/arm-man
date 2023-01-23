@@ -1,0 +1,110 @@
+.nh
+.TH "INDEX (immediate, scalar)" "7" " "  "instruction" "sve"
+.SS INDEX (immediate, scalar)
+ Create index starting from immediate and incremented by general-purpose
+ register
+
+ Populates the destination vector by setting the first element to the first
+ signed immediate integer operand and monotonically incrementing the value by
+ the second signed scalar integer operand for each subsequent element. The
+ scalar source operand is a general-purpose register in which only the least
+ significant bits corresponding to the vector element size are used and any
+ remaining bits are ignored. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - index_z_ir_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. . . . .|0 1 0 0 1 0|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-Rm                  `-imm5    `-Zd
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ INDEX   <Zd>.<T>, #<imm>, <R><m>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer m = UInt(Rm);
+ integer d = UInt(Zd);
+ integer imm = SInt(imm5);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(esize) operand2 = X[m];
+ integer element2 = SInt(operand2);
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = imm + e * element2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <imm>
+  Encoded in imm5
+  Is the signed immediate operand, in the range -16 to 15, encoded in the "imm5"
+  field.
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <m>
+  Encoded in Rm
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(esize) operand2 = X[m];
+ integer element2 = SInt(operand2);
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer index = imm + e * element2;
+     Elem[result, e, esize] = index<esize-1:0>;
+ 
+ Z[d] = result;
+

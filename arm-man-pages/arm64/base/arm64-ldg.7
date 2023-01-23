@@ -1,0 +1,87 @@
+.nh
+.TH "LDG -- A64" "7" " "  "instruction" "general"
+.SS LDG
+ Load Allocation Tag
+
+ Load Allocation Tag loads an Allocation Tag from a memory address, generates a
+ Logical Address Tag from the Allocation Tag and merges it into the destination
+ register. The address used for the load is calculated from the base register
+ and an immediate signed offset scaled by the Tag granule.
+
+
+
+.SS Integer - A64 - LDG_64Loffset_ldsttags
+ 
+                       21                                          
+                     22 |                    10                    
+                   23 | |                  11 |                    
+                 24 | | |                12 | |         5         0
+                  | | | |                 | | |         |         |
+   1 1 0 1 1 0 0 1|0|1|1|. . . . . . . . .|0|0|. . . . .|. . . . .|
+                  | |   |                 | | |         |
+                  | |   `-imm9            | | `-Xn      `-Xt
+                  | `-opc<0>              | `-op2<0>
+                  `-opc<1>                `-op2<1>
+  
+  
+ 
+.SS Integer
+ 
+ LDG  <Xt>, [<Xn|SP>{, #<simm>}]
+ 
+ integer t = UInt(Xt);
+ integer n = UInt(Xn);
+ bits(64) offset = LSL(SignExtend(imm9, 64), LOG2_TAG_GRANULE);
+ 
+ bits(64) address;
+ bits(4) tag;
+ 
+ if n == 31 then
+     CheckSPAlignment(); 
+     address = SP[];
+ else
+     address = X[n];
+ 
+ address = address + offset;
+ address = Align(address, TAG_GRANULE);
+ 
+ tag = AArch64.MemTag[address, AccType_NORMAL];
+ X[t] = AArch64.AddressWithAllocationTag(X[t], tag);
+ 
+
+.SS Assembler Symbols
+
+ <Xt>
+  Encoded in Xt
+  Is the 64-bit name of the general-purpose register to be transferred, encoded
+  in the "Xt" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Xn" field.
+
+ <simm>
+  Encoded in imm9
+  Is the optional signed immediate offset, a multiple of 16 in the range -4096
+  to 4080, defaulting to 0 and encoded in the "imm9" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(4) tag;
+ 
+ if n == 31 then
+     CheckSPAlignment(); 
+     address = SP[];
+ else
+     address = X[n];
+ 
+ address = address + offset;
+ address = Align(address, TAG_GRANULE);
+ 
+ tag = AArch64.MemTag[address, AccType_NORMAL];
+ X[t] = AArch64.AddressWithAllocationTag(X[t], tag);
+

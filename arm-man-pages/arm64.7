@@ -1,0 +1,1268 @@
+.nh
+.TH "A64-Instructions" "7" " "  " " " "
+.SS A64 -- Base Instructions (alphabetic order)
+ arm64-adc                     Add with Carry.                                                                                                         
+ arm64-adcs                    Add with Carry, setting flags.                                                                                          
+ arm64-add-addsub-ext          Add (extended register).                                                                                                
+ arm64-add-addsub-imm          Add (immediate).                                                                                                        
+ arm64-add-addsub-shift        Add (shifted register).                                                                                                 
+ arm64-addg                    Add with Tag.                                                                                                           
+ arm64-adds-addsub-ext         Add (extended register), setting flags.                                                                                 
+ arm64-adds-addsub-imm         Add (immediate), setting flags.                                                                                         
+ arm64-adds-addsub-shift       Add (shifted register), setting flags.                                                                                  
+ arm64-adr                     Form PC-relative address.                                                                                               
+ arm64-adrp                    Form PC-relative address to 4KB page.                                                                                   
+ arm64-and-log-imm             Bitwise AND (immediate).                                                                                                
+ arm64-and-log-shift           Bitwise AND (shifted register).                                                                                         
+ arm64-ands-log-imm            Bitwise AND (immediate), setting flags.                                                                                 
+ arm64-ands-log-shift          Bitwise AND (shifted register), setting flags.                                                                          
+ arm64-asr-sbfm                Arithmetic Shift Right (immediate): an alias of SBFM.                                                                   
+ arm64-asr-asrv                Arithmetic Shift Right (register): an alias of ASRV.                                                                    
+ arm64-asrv                    Arithmetic Shift Right Variable.                                                                                        
+ arm64-at-sys                  Address Translate: an alias of SYS.                                                                                     
+ arm64-autda                   Authenticate Data address, using key A.                                                                                 
+ arm64-autdb                   Authenticate Data address, using key B.                                                                                 
+ arm64-autia                   Authenticate Instruction address, using key A.                                                                          
+ arm64-autib                   Authenticate Instruction address, using key B.                                                                          
+ arm64-axflag                  Convert floating-point condition flags from Arm to external format.                                                     
+ arm64-b-uncond                Branch.                                                                                                                 
+ arm64-b-cond                  Branch conditionally.                                                                                                   
+ arm64-bfc-bfm                 Bitfield Clear: an alias of BFM.                                                                                        
+ arm64-bfi-bfm                 Bitfield Insert: an alias of BFM.                                                                                       
+ arm64-bfm                     Bitfield Move.                                                                                                          
+ arm64-bfxil-bfm               Bitfield extract and insert at low end: an alias of BFM.                                                                
+ arm64-bic-log-shift           Bitwise Bit Clear (shifted register).                                                                                   
+ arm64-bics                    Bitwise Bit Clear (shifted register), setting flags.                                                                    
+ arm64-bl                      Branch with Link.                                                                                                       
+ arm64-blr                     Branch with Link to Register.                                                                                           
+ arm64-blra                    Branch with Link to Register, with pointer authentication.                                                              
+ arm64-br                      Branch to Register.                                                                                                     
+ arm64-bra                     Branch to Register, with pointer authentication.                                                                        
+ arm64-brk                     Breakpoint instruction.                                                                                                 
+ arm64-bti                     Branch Target Identification.                                                                                           
+ arm64-cas                     Compare and Swap word or doubleword in memory.                                                                          
+ arm64-casb                    Compare and Swap byte in memory.                                                                                        
+ arm64-cash                    Compare and Swap halfword in memory.                                                                                    
+ arm64-casp                    Compare and Swap Pair of words or doublewords in memory.                                                                
+ arm64-cbnz                    Compare and Branch on Nonzero.                                                                                          
+ arm64-cbz                     Compare and Branch on Zero.                                                                                             
+ arm64-ccmn-imm                Conditional Compare Negative (immediate).                                                                               
+ arm64-ccmn-reg                Conditional Compare Negative (register).                                                                                
+ arm64-ccmp-imm                Conditional Compare (immediate).                                                                                        
+ arm64-ccmp-reg                Conditional Compare (register).                                                                                         
+ arm64-cfinv                   Invert Carry Flag.                                                                                                      
+ arm64-cfp-sys                 Control Flow Prediction Restriction by Context: an alias of SYS.                                                        
+ arm64-cinc-csinc              Conditional Increment: an alias of CSINC.                                                                               
+ arm64-cinv-csinv              Conditional Invert: an alias of CSINV.                                                                                  
+ arm64-clrex                   Clear Exclusive.                                                                                                        
+ arm64-cls-int                 Count Leading Sign bits.                                                                                                
+ arm64-clz-int                 Count Leading Zeros.                                                                                                    
+ arm64-cmn-adds-addsub-ext     Compare Negative (extended register): an alias of ADDS (extended register).                                             
+ arm64-cmn-adds-addsub-imm     Compare Negative (immediate): an alias of ADDS (immediate).                                                             
+ arm64-cmn-adds-addsub-shift   Compare Negative (shifted register): an alias of ADDS (shifted register).                                               
+ arm64-cmp-subs-addsub-ext     Compare (extended register): an alias of SUBS (extended register).                                                      
+ arm64-cmp-subs-addsub-imm     Compare (immediate): an alias of SUBS (immediate).                                                                      
+ arm64-cmp-subs-addsub-shift   Compare (shifted register): an alias of SUBS (shifted register).                                                        
+ arm64-cmpp-subps              Compare with Tag: an alias of SUBPS.                                                                                    
+ arm64-cneg-csneg              Conditional Negate: an alias of CSNEG.                                                                                  
+ arm64-cpp-sys                 Cache Prefetch Prediction Restriction by Context: an alias of SYS.                                                      
+ arm64-crc32                   CRC32 checksum.                                                                                                         
+ arm64-crc32c                  CRC32C checksum.                                                                                                        
+ arm64-csdb                    Consumption of Speculative Data Barrier.                                                                                
+ arm64-csel                    Conditional Select.                                                                                                     
+ arm64-cset-csinc              Conditional Set: an alias of CSINC.                                                                                     
+ arm64-csetm-csinv             Conditional Set Mask: an alias of CSINV.                                                                                
+ arm64-csinc                   Conditional Select Increment.                                                                                           
+ arm64-csinv                   Conditional Select Invert.                                                                                              
+ arm64-csneg                   Conditional Select Negation.                                                                                            
+ arm64-dc-sys                  Data Cache operation: an alias of SYS.                                                                                  
+ arm64-dcps1                   Debug Change PE State to EL1..                                                                                          
+ arm64-dcps2                   Debug Change PE State to EL2..                                                                                          
+ arm64-dcps3                   Debug Change PE State to EL3.                                                                                           
+ arm64-dgh                     Data Gathering Hint.                                                                                                    
+ arm64-dmb                     Data Memory Barrier.                                                                                                    
+ arm64-drps                    Debug restore process state.                                                                                            
+ arm64-dsb                     Data Synchronization Barrier.                                                                                           
+ arm64-dvp-sys                 Data Value Prediction Restriction by Context: an alias of SYS.                                                          
+ arm64-eon                     Bitwise Exclusive OR NOT (shifted register).                                                                            
+ arm64-eor-log-imm             Bitwise Exclusive OR (immediate).                                                                                       
+ arm64-eor-log-shift           Bitwise Exclusive OR (shifted register).                                                                                
+ arm64-eret                    Exception Return.                                                                                                       
+ arm64-ereta                   Exception Return, with pointer authentication.                                                                          
+ arm64-esb                     Error Synchronization Barrier.                                                                                          
+ arm64-extr                    Extract register.                                                                                                       
+ arm64-gmi                     Tag Mask Insert.                                                                                                        
+ arm64-hint                    Hint instruction.                                                                                                       
+ arm64-hlt                     Halt instruction.                                                                                                       
+ arm64-hvc                     Hypervisor Call.                                                                                                        
+ arm64-ic-sys                  Instruction Cache operation: an alias of SYS.                                                                           
+ arm64-irg                     Insert Random Tag.                                                                                                      
+ arm64-isb                     Instruction Synchronization Barrier.                                                                                    
+ arm64-ldadd                   Atomic add on word or doubleword in memory.                                                                             
+ arm64-ldaddb                  Atomic add on byte in memory.                                                                                           
+ arm64-ldaddh                  Atomic add on halfword in memory.                                                                                       
+ arm64-ldapr                   Load-Acquire RCpc Register.                                                                                             
+ arm64-ldaprb                  Load-Acquire RCpc Register Byte.                                                                                        
+ arm64-ldaprh                  Load-Acquire RCpc Register Halfword.                                                                                    
+ arm64-ldapur-gen              Load-Acquire RCpc Register (unscaled).                                                                                  
+ arm64-ldapurb                 Load-Acquire RCpc Register Byte (unscaled).                                                                             
+ arm64-ldapurh                 Load-Acquire RCpc Register Halfword (unscaled).                                                                         
+ arm64-ldapursb                Load-Acquire RCpc Register Signed Byte (unscaled).                                                                      
+ arm64-ldapursh                Load-Acquire RCpc Register Signed Halfword (unscaled).                                                                  
+ arm64-ldapursw                Load-Acquire RCpc Register Signed Word (unscaled).                                                                      
+ arm64-ldar                    Load-Acquire Register.                                                                                                  
+ arm64-ldarb                   Load-Acquire Register Byte.                                                                                             
+ arm64-ldarh                   Load-Acquire Register Halfword.                                                                                         
+ arm64-ldaxp                   Load-Acquire Exclusive Pair of Registers.                                                                               
+ arm64-ldaxr                   Load-Acquire Exclusive Register.                                                                                        
+ arm64-ldaxrb                  Load-Acquire Exclusive Register Byte.                                                                                   
+ arm64-ldaxrh                  Load-Acquire Exclusive Register Halfword.                                                                               
+ arm64-ldclr                   Atomic bit clear on word or doubleword in memory.                                                                       
+ arm64-ldclrb                  Atomic bit clear on byte in memory.                                                                                     
+ arm64-ldclrh                  Atomic bit clear on halfword in memory.                                                                                 
+ arm64-ldeor                   Atomic exclusive OR on word or doubleword in memory.                                                                    
+ arm64-ldeorb                  Atomic exclusive OR on byte in memory.                                                                                  
+ arm64-ldeorh                  Atomic exclusive OR on halfword in memory.                                                                              
+ arm64-ldg                     Load Allocation Tag.                                                                                                    
+ arm64-ldgm                    Load Tag Multiple.                                                                                                      
+ arm64-ldlar                   Load LOAcquire Register.                                                                                                
+ arm64-ldlarb                  Load LOAcquire Register Byte.                                                                                           
+ arm64-ldlarh                  Load LOAcquire Register Halfword.                                                                                       
+ arm64-ldnp-gen                Load Pair of Registers, with non-temporal hint.                                                                         
+ arm64-ldp-gen                 Load Pair of Registers.                                                                                                 
+ arm64-ldpsw                   Load Pair of Registers Signed Word.                                                                                     
+ arm64-ldr-imm-gen             Load Register (immediate).                                                                                              
+ arm64-ldr-lit-gen             Load Register (literal).                                                                                                
+ arm64-ldr-reg-gen             Load Register (register).                                                                                               
+ arm64-ldra                    Load Register, with pointer authentication.                                                                             
+ arm64-ldrb-imm                Load Register Byte (immediate).                                                                                         
+ arm64-ldrb-reg                Load Register Byte (register).                                                                                          
+ arm64-ldrh-imm                Load Register Halfword (immediate).                                                                                     
+ arm64-ldrh-reg                Load Register Halfword (register).                                                                                      
+ arm64-ldrsb-imm               Load Register Signed Byte (immediate).                                                                                  
+ arm64-ldrsb-reg               Load Register Signed Byte (register).                                                                                   
+ arm64-ldrsh-imm               Load Register Signed Halfword (immediate).                                                                              
+ arm64-ldrsh-reg               Load Register Signed Halfword (register).                                                                               
+ arm64-ldrsw-imm               Load Register Signed Word (immediate).                                                                                  
+ arm64-ldrsw-lit               Load Register Signed Word (literal).                                                                                    
+ arm64-ldrsw-reg               Load Register Signed Word (register).                                                                                   
+ arm64-ldset                   Atomic bit set on word or doubleword in memory.                                                                         
+ arm64-ldsetb                  Atomic bit set on byte in memory.                                                                                       
+ arm64-ldseth                  Atomic bit set on halfword in memory.                                                                                   
+ arm64-ldsmax                  Atomic signed maximum on word or doubleword in memory.                                                                  
+ arm64-ldsmaxb                 Atomic signed maximum on byte in memory.                                                                                
+ arm64-ldsmaxh                 Atomic signed maximum on halfword in memory.                                                                            
+ arm64-ldsmin                  Atomic signed minimum on word or doubleword in memory.                                                                  
+ arm64-ldsminb                 Atomic signed minimum on byte in memory.                                                                                
+ arm64-ldsminh                 Atomic signed minimum on halfword in memory.                                                                            
+ arm64-ldtr                    Load Register (unprivileged).                                                                                           
+ arm64-ldtrb                   Load Register Byte (unprivileged).                                                                                      
+ arm64-ldtrh                   Load Register Halfword (unprivileged).                                                                                  
+ arm64-ldtrsb                  Load Register Signed Byte (unprivileged).                                                                               
+ arm64-ldtrsh                  Load Register Signed Halfword (unprivileged).                                                                           
+ arm64-ldtrsw                  Load Register Signed Word (unprivileged).                                                                               
+ arm64-ldumax                  Atomic unsigned maximum on word or doubleword in memory.                                                                
+ arm64-ldumaxb                 Atomic unsigned maximum on byte in memory.                                                                              
+ arm64-ldumaxh                 Atomic unsigned maximum on halfword in memory.                                                                          
+ arm64-ldumin                  Atomic unsigned minimum on word or doubleword in memory.                                                                
+ arm64-lduminb                 Atomic unsigned minimum on byte in memory.                                                                              
+ arm64-lduminh                 Atomic unsigned minimum on halfword in memory.                                                                          
+ arm64-ldur-gen                Load Register (unscaled).                                                                                               
+ arm64-ldurb                   Load Register Byte (unscaled).                                                                                          
+ arm64-ldurh                   Load Register Halfword (unscaled).                                                                                      
+ arm64-ldursb                  Load Register Signed Byte (unscaled).                                                                                   
+ arm64-ldursh                  Load Register Signed Halfword (unscaled).                                                                               
+ arm64-ldursw                  Load Register Signed Word (unscaled).                                                                                   
+ arm64-ldxp                    Load Exclusive Pair of Registers.                                                                                       
+ arm64-ldxr                    Load Exclusive Register.                                                                                                
+ arm64-ldxrb                   Load Exclusive Register Byte.                                                                                           
+ arm64-ldxrh                   Load Exclusive Register Halfword.                                                                                       
+ arm64-lsl-ubfm                Logical Shift Left (immediate): an alias of UBFM.                                                                       
+ arm64-lsl-lslv                Logical Shift Left (register): an alias of LSLV.                                                                        
+ arm64-lslv                    Logical Shift Left Variable.                                                                                            
+ arm64-lsr-ubfm                Logical Shift Right (immediate): an alias of UBFM.                                                                      
+ arm64-lsr-lsrv                Logical Shift Right (register): an alias of LSRV.                                                                       
+ arm64-lsrv                    Logical Shift Right Variable.                                                                                           
+ arm64-madd                    Multiply-Add.                                                                                                           
+ arm64-mneg-msub               Multiply-Negate: an alias of MSUB.                                                                                      
+ arm64-mov-orr-log-imm         Move (bitmask immediate): an alias of ORR (immediate).                                                                  
+ arm64-mov-movn                Move (inverted wide immediate): an alias of MOVN.                                                                       
+ arm64-mov-orr-log-shift       Move (register): an alias of ORR (shifted register).                                                                    
+ arm64-mov-add-addsub-imm      Move between register and stack pointer: an alias of ADD (immediate).                                                   
+ arm64-mov-movz                Move (wide immediate): an alias of MOVZ.                                                                                
+ arm64-movk                    Move wide with keep.                                                                                                    
+ arm64-movn                    Move wide with NOT.                                                                                                     
+ arm64-movz                    Move wide with zero.                                                                                                    
+ arm64-mrs                     Move System Register.                                                                                                   
+ arm64-msr-imm                 Move immediate value to Special Register.                                                                               
+ arm64-msr-reg                 Move general-purpose register to System Register.                                                                       
+ arm64-msub                    Multiply-Subtract.                                                                                                      
+ arm64-mul-madd                Multiply: an alias of MADD.                                                                                             
+ arm64-mvn-orn-log-shift       Bitwise NOT: an alias of ORN (shifted register).                                                                        
+ arm64-neg-sub-addsub-shift    Negate (shifted register): an alias of SUB (shifted register).                                                          
+ arm64-negs-subs-addsub-shift  Negate, setting flags: an alias of SUBS (shifted register).                                                             
+ arm64-ngc-sbc                 Negate with Carry: an alias of SBC.                                                                                     
+ arm64-ngcs-sbcs               Negate with Carry, setting flags: an alias of SBCS.                                                                     
+ arm64-nop                     No Operation.                                                                                                           
+ arm64-orn-log-shift           Bitwise OR NOT (shifted register).                                                                                      
+ arm64-orr-log-imm             Bitwise OR (immediate).                                                                                                 
+ arm64-orr-log-shift           Bitwise OR (shifted register).                                                                                          
+ arm64-pacda                   Pointer Authentication Code for Data address, using key A.                                                              
+ arm64-pacdb                   Pointer Authentication Code for Data address, using key B.                                                              
+ arm64-pacga                   Pointer Authentication Code, using Generic key.                                                                         
+ arm64-pacia                   Pointer Authentication Code for Instruction address, using key A.                                                       
+ arm64-pacib                   Pointer Authentication Code for Instruction address, using key B.                                                       
+ arm64-prfm-imm                Prefetch Memory (immediate).                                                                                            
+ arm64-prfm-lit                Prefetch Memory (literal).                                                                                              
+ arm64-prfm-reg                Prefetch Memory (register).                                                                                             
+ arm64-prfum                   Prefetch Memory (unscaled offset).                                                                                      
+ arm64-psb                     Profiling Synchronization Barrier.                                                                                      
+ arm64-pssbb                   Physical Speculative Store Bypass Barrier.                                                                              
+ arm64-rbit-int                Reverse Bits.                                                                                                           
+ arm64-ret                     Return from subroutine.                                                                                                 
+ arm64-reta                    Return from subroutine, with pointer authentication.                                                                    
+ arm64-rev                     Reverse Bytes.                                                                                                          
+ arm64-rev16-int               Reverse bytes in 16-bit halfwords.                                                                                      
+ arm64-rev32-int               Reverse bytes in 32-bit words.                                                                                          
+ arm64-rev64-rev               Reverse Bytes: an alias of REV.                                                                                         
+ arm64-rmif                    Rotate, Mask Insert Flags.                                                                                              
+ arm64-ror-extr                Rotate right (immediate): an alias of EXTR.                                                                             
+ arm64-ror-rorv                Rotate Right (register): an alias of RORV.                                                                              
+ arm64-rorv                    Rotate Right Variable.                                                                                                  
+ arm64-sb                      Speculation Barrier.                                                                                                    
+ arm64-sbc                     Subtract with Carry.                                                                                                    
+ arm64-sbcs                    Subtract with Carry, setting flags.                                                                                     
+ arm64-sbfiz-sbfm              Signed Bitfield Insert in Zero: an alias of SBFM.                                                                       
+ arm64-sbfm                    Signed Bitfield Move.                                                                                                   
+ arm64-sbfx-sbfm               Signed Bitfield Extract: an alias of SBFM.                                                                              
+ arm64-sdiv                    Signed Divide.                                                                                                          
+ arm64-setf                    Evaluation of 8 or 16 bit flag values.                                                                                  
+ arm64-sev                     Send Event.                                                                                                             
+ arm64-sevl                    Send Event Local.                                                                                                       
+ arm64-smaddl                  Signed Multiply-Add Long.                                                                                               
+ arm64-smc                     Secure Monitor Call.                                                                                                    
+ arm64-smnegl-smsubl           Signed Multiply-Negate Long: an alias of SMSUBL.                                                                        
+ arm64-smsubl                  Signed Multiply-Subtract Long.                                                                                          
+ arm64-smulh                   Signed Multiply High.                                                                                                   
+ arm64-smull-smaddl            Signed Multiply Long: an alias of SMADDL.                                                                               
+ arm64-ssbb                    Speculative Store Bypass Barrier.                                                                                       
+ arm64-st2g                    Store Allocation Tags.                                                                                                  
+ arm64-stadd-ldadd             Atomic add on word or doubleword in memory, without return: an alias of LDADD, LDADDA, LDADDAL, LDADDL.                 
+ arm64-staddb-ldaddb           Atomic add on byte in memory, without return: an alias of LDADDB, LDADDAB, LDADDALB, LDADDLB.                           
+ arm64-staddh-ldaddh           Atomic add on halfword in memory, without return: an alias of LDADDH, LDADDAH, LDADDALH, LDADDLH.                       
+ arm64-stclr-ldclr             Atomic bit clear on word or doubleword in memory, without return: an alias of LDCLR, LDCLRA, LDCLRAL, LDCLRL.           
+ arm64-stclrb-ldclrb           Atomic bit clear on byte in memory, without return: an alias of LDCLRB, LDCLRAB, LDCLRALB, LDCLRLB.                     
+ arm64-stclrh-ldclrh           Atomic bit clear on halfword in memory, without return: an alias of LDCLRH, LDCLRAH, LDCLRALH, LDCLRLH.                 
+ arm64-steor-ldeor             Atomic exclusive OR on word or doubleword in memory, without return: an alias of LDEOR, LDEORA, LDEORAL, LDEORL.        
+ arm64-steorb-ldeorb           Atomic exclusive OR on byte in memory, without return: an alias of LDEORB, LDEORAB, LDEORALB, LDEORLB.                  
+ arm64-steorh-ldeorh           Atomic exclusive OR on halfword in memory, without return: an alias of LDEORH, LDEORAH, LDEORALH, LDEORLH.              
+ arm64-stg                     Store Allocation Tag.                                                                                                   
+ arm64-stgm                    Store Tag Multiple.                                                                                                     
+ arm64-stgp                    Store Allocation Tag and Pair of registers.                                                                             
+ arm64-stllr                   Store LORelease Register.                                                                                               
+ arm64-stllrb                  Store LORelease Register Byte.                                                                                          
+ arm64-stllrh                  Store LORelease Register Halfword.                                                                                      
+ arm64-stlr                    Store-Release Register.                                                                                                 
+ arm64-stlrb                   Store-Release Register Byte.                                                                                            
+ arm64-stlrh                   Store-Release Register Halfword.                                                                                        
+ arm64-stlur-gen               Store-Release Register (unscaled).                                                                                      
+ arm64-stlurb                  Store-Release Register Byte (unscaled).                                                                                 
+ arm64-stlurh                  Store-Release Register Halfword (unscaled).                                                                             
+ arm64-stlxp                   Store-Release Exclusive Pair of registers.                                                                              
+ arm64-stlxr                   Store-Release Exclusive Register.                                                                                       
+ arm64-stlxrb                  Store-Release Exclusive Register Byte.                                                                                  
+ arm64-stlxrh                  Store-Release Exclusive Register Halfword.                                                                              
+ arm64-stnp-gen                Store Pair of Registers, with non-temporal hint.                                                                        
+ arm64-stp-gen                 Store Pair of Registers.                                                                                                
+ arm64-str-imm-gen             Store Register (immediate).                                                                                             
+ arm64-str-reg-gen             Store Register (register).                                                                                              
+ arm64-strb-imm                Store Register Byte (immediate).                                                                                        
+ arm64-strb-reg                Store Register Byte (register).                                                                                         
+ arm64-strh-imm                Store Register Halfword (immediate).                                                                                    
+ arm64-strh-reg                Store Register Halfword (register).                                                                                     
+ arm64-stset-ldset             Atomic bit set on word or doubleword in memory, without return: an alias of LDSET, LDSETA, LDSETAL, LDSETL.             
+ arm64-stsetb-ldsetb           Atomic bit set on byte in memory, without return: an alias of LDSETB, LDSETAB, LDSETALB, LDSETLB.                       
+ arm64-stseth-ldseth           Atomic bit set on halfword in memory, without return: an alias of LDSETH, LDSETAH, LDSETALH, LDSETLH.                   
+ arm64-stsmax-ldsmax           Atomic signed maximum on word or doubleword in memory, without return: an alias of LDSMAX, LDSMAXA, LDSMAXAL, LDSMAXL.  
+ arm64-stsmaxb-ldsmaxb         Atomic signed maximum on byte in memory, without return: an alias of LDSMAXB, LDSMAXAB, LDSMAXALB, LDSMAXLB.            
+ arm64-stsmaxh-ldsmaxh         Atomic signed maximum on halfword in memory, without return: an alias of LDSMAXH, LDSMAXAH, LDSMAXALH, LDSMAXLH.        
+ arm64-stsmin-ldsmin           Atomic signed minimum on word or doubleword in memory, without return: an alias of LDSMIN, LDSMINA, LDSMINAL, LDSMINL.  
+ arm64-stsminb-ldsminb         Atomic signed minimum on byte in memory, without return: an alias of LDSMINB, LDSMINAB, LDSMINALB, LDSMINLB.            
+ arm64-stsminh-ldsminh         Atomic signed minimum on halfword in memory, without return: an alias of LDSMINH, LDSMINAH, LDSMINALH, LDSMINLH.        
+ arm64-sttr                    Store Register (unprivileged).                                                                                          
+ arm64-sttrb                   Store Register Byte (unprivileged).                                                                                     
+ arm64-sttrh                   Store Register Halfword (unprivileged).                                                                                 
+ arm64-stumax-ldumax           Atomic unsigned maximum on word or doubleword in memory, without return: an alias of LDUMAX, LDUMAXA, LDUMAXAL, LDUMAXL.
+ arm64-stumaxb-ldumaxb         Atomic unsigned maximum on byte in memory, without return: an alias of LDUMAXB, LDUMAXAB, LDUMAXALB, LDUMAXLB.          
+ arm64-stumaxh-ldumaxh         Atomic unsigned maximum on halfword in memory, without return: an alias of LDUMAXH, LDUMAXAH, LDUMAXALH, LDUMAXLH.      
+ arm64-stumin-ldumin           Atomic unsigned minimum on word or doubleword in memory, without return: an alias of LDUMIN, LDUMINA, LDUMINAL, LDUMINL.
+ arm64-stuminb-lduminb         Atomic unsigned minimum on byte in memory, without return: an alias of LDUMINB, LDUMINAB, LDUMINALB, LDUMINLB.          
+ arm64-stuminh-lduminh         Atomic unsigned minimum on halfword in memory, without return: an alias of LDUMINH, LDUMINAH, LDUMINALH, LDUMINLH.      
+ arm64-stur-gen                Store Register (unscaled).                                                                                              
+ arm64-sturb                   Store Register Byte (unscaled).                                                                                         
+ arm64-sturh                   Store Register Halfword (unscaled).                                                                                     
+ arm64-stxp                    Store Exclusive Pair of registers.                                                                                      
+ arm64-stxr                    Store Exclusive Register.                                                                                               
+ arm64-stxrb                   Store Exclusive Register Byte.                                                                                          
+ arm64-stxrh                   Store Exclusive Register Halfword.                                                                                      
+ arm64-stz2g                   Store Allocation Tags, Zeroing.                                                                                         
+ arm64-stzg                    Store Allocation Tag, Zeroing.                                                                                          
+ arm64-stzgm                   Store Tag and Zero Multiple.                                                                                            
+ arm64-sub-addsub-ext          Subtract (extended register).                                                                                           
+ arm64-sub-addsub-imm          Subtract (immediate).                                                                                                   
+ arm64-sub-addsub-shift        Subtract (shifted register).                                                                                            
+ arm64-subg                    Subtract with Tag.                                                                                                      
+ arm64-subp                    Subtract Pointer.                                                                                                       
+ arm64-subps                   Subtract Pointer, setting Flags.                                                                                        
+ arm64-subs-addsub-ext         Subtract (extended register), setting flags.                                                                            
+ arm64-subs-addsub-imm         Subtract (immediate), setting flags.                                                                                    
+ arm64-subs-addsub-shift       Subtract (shifted register), setting flags.                                                                             
+ arm64-svc                     Supervisor Call.                                                                                                        
+ arm64-swp                     Swap word or doubleword in memory.                                                                                      
+ arm64-swpb                    Swap byte in memory.                                                                                                    
+ arm64-swph                    Swap halfword in memory.                                                                                                
+ arm64-sxtb-sbfm               Signed Extend Byte: an alias of SBFM.                                                                                   
+ arm64-sxth-sbfm               Sign Extend Halfword: an alias of SBFM.                                                                                 
+ arm64-sxtw-sbfm               Sign Extend Word: an alias of SBFM.                                                                                     
+ arm64-sys                     System instruction.                                                                                                     
+ arm64-sysl                    System instruction with result.                                                                                         
+ arm64-tbnz                    Test bit and Branch if Nonzero.                                                                                         
+ arm64-tbz                     Test bit and Branch if Zero.                                                                                            
+ arm64-tlbi-sys                TLB Invalidate operation: an alias of SYS.                                                                              
+ arm64-tsb                     Trace Synchronization Barrier.                                                                                          
+ arm64-tst-ands-log-imm        Test bits (immediate): an alias of ANDS (immediate).                                                                    
+ arm64-tst-ands-log-shift      Test (shifted register): an alias of ANDS (shifted register).                                                           
+ arm64-ubfiz-ubfm              Unsigned Bitfield Insert in Zero: an alias of UBFM.                                                                     
+ arm64-ubfm                    Unsigned Bitfield Move.                                                                                                 
+ arm64-ubfx-ubfm               Unsigned Bitfield Extract: an alias of UBFM.                                                                            
+ arm64-udf-perm-undef          Permanently Undefined.                                                                                                  
+ arm64-udiv                    Unsigned Divide.                                                                                                        
+ arm64-umaddl                  Unsigned Multiply-Add Long.                                                                                             
+ arm64-umnegl-umsubl           Unsigned Multiply-Negate Long: an alias of UMSUBL.                                                                      
+ arm64-umsubl                  Unsigned Multiply-Subtract Long.                                                                                        
+ arm64-umulh                   Unsigned Multiply High.                                                                                                 
+ arm64-umull-umaddl            Unsigned Multiply Long: an alias of UMADDL.                                                                             
+ arm64-uxtb-ubfm               Unsigned Extend Byte: an alias of UBFM.                                                                                 
+ arm64-uxth-ubfm               Unsigned Extend Halfword: an alias of UBFM.                                                                             
+ arm64-wfe                     Wait For Event.                                                                                                         
+ arm64-wfi                     Wait For Interrupt.                                                                                                     
+ arm64-xaflag                  Convert floating-point condition flags from external format to Arm format.                                              
+ arm64-xpac                    Strip Pointer Authentication Code.                                                                                      
+ arm64-yield                   YIELD.                                                                                                                  
+ 
+.SS A64 -- SIMD and Floating-point Instructions (alphabetic order)
+ arm64-abs-advsimd           Absolute value (vector).                                                                   
+ arm64-add-advsimd           Add (vector).                                                                              
+ arm64-addhn-advsimd         Add returning High Narrow.                                                                 
+ arm64-addp-advsimd-pair     Add Pair of elements (scalar).                                                             
+ arm64-addp-advsimd-vec      Add Pairwise (vector).                                                                     
+ arm64-addv-advsimd          Add across Vector.                                                                         
+ arm64-aesd-advsimd          AES single round decryption.                                                               
+ arm64-aese-advsimd          AES single round encryption.                                                               
+ arm64-aesimc-advsimd        AES inverse mix columns.                                                                   
+ arm64-aesmc-advsimd         AES mix columns.                                                                           
+ arm64-and-advsimd           Bitwise AND (vector).                                                                      
+ arm64-bcax-advsimd          Bit Clear and XOR.                                                                         
+ arm64-bfcvt-float           Floating-point convert from single-precision to BFloat16 format (scalar).                  
+ arm64-bfcvtn-advsimd        Floating-point convert from single-precision to BFloat16 format (vector).                  
+ arm64-bfdot-advsimd-elt     BFloat16 floating-point dot product (vector, by element).                                  
+ arm64-bfdot-advsimd-vec     BFloat16 floating-point dot product (vector).                                              
+ arm64-bfmlal-advsimd-elt    BFloat16 floating-point widening multiply-add long (by element).                           
+ arm64-bfmlal-advsimd-vec    BFloat16 floating-point widening multiply-add long (vector).                               
+ arm64-bfmmla-advsimd        BFloat16 floating-point matrix multiply-accumulate into 2x2 matrix.                        
+ arm64-bic-advsimd-imm       Bitwise bit Clear (vector, immediate).                                                     
+ arm64-bic-advsimd-reg       Bitwise bit Clear (vector, register).                                                      
+ arm64-bif-advsimd           Bitwise Insert if False.                                                                   
+ arm64-bit-advsimd           Bitwise Insert if True.                                                                    
+ arm64-bsl-advsimd           Bitwise Select.                                                                            
+ arm64-cls-advsimd           Count Leading Sign bits (vector).                                                          
+ arm64-clz-advsimd           Count Leading Zero bits (vector).                                                          
+ arm64-cmeq-advsimd-reg      Compare bitwise Equal (vector).                                                            
+ arm64-cmeq-advsimd-zero     Compare bitwise Equal to zero (vector).                                                    
+ arm64-cmge-advsimd-reg      Compare signed Greater than or Equal (vector).                                             
+ arm64-cmge-advsimd-zero     Compare signed Greater than or Equal to zero (vector).                                     
+ arm64-cmgt-advsimd-reg      Compare signed Greater than (vector).                                                      
+ arm64-cmgt-advsimd-zero     Compare signed Greater than zero (vector).                                                 
+ arm64-cmhi-advsimd          Compare unsigned Higher (vector).                                                          
+ arm64-cmhs-advsimd          Compare unsigned Higher or Same (vector).                                                  
+ arm64-cmle-advsimd          Compare signed Less than or Equal to zero (vector).                                        
+ arm64-cmlt-advsimd          Compare signed Less than zero (vector).                                                    
+ arm64-cmtst-advsimd         Compare bitwise Test bits nonzero (vector).                                                
+ arm64-cnt-advsimd           Population Count per byte.                                                                 
+ arm64-dup-advsimd-elt       Duplicate vector element to vector or scalar.                                              
+ arm64-dup-advsimd-gen       Duplicate general-purpose register to vector.                                              
+ arm64-eor-advsimd           Bitwise Exclusive OR (vector).                                                             
+ arm64-eor3-advsimd          Three-way Exclusive OR.                                                                    
+ arm64-ext-advsimd           Extract vector from pair of vectors.                                                       
+ arm64-fabd-advsimd          Floating-point Absolute Difference (vector).                                               
+ arm64-fabs-float            Floating-point Absolute value (scalar).                                                    
+ arm64-fabs-advsimd          Floating-point Absolute value (vector).                                                    
+ arm64-facge-advsimd         Floating-point Absolute Compare Greater than or Equal (vector).                            
+ arm64-facgt-advsimd         Floating-point Absolute Compare Greater than (vector).                                     
+ arm64-fadd-float            Floating-point Add (scalar).                                                               
+ arm64-fadd-advsimd          Floating-point Add (vector).                                                               
+ arm64-faddp-advsimd-pair    Floating-point Add Pair of elements (scalar).                                              
+ arm64-faddp-advsimd-vec     Floating-point Add Pairwise (vector).                                                      
+ arm64-fcadd-advsimd-vec     Floating-point Complex Add.                                                                
+ arm64-fccmp-float           Floating-point Conditional quiet Compare (scalar).                                         
+ arm64-fccmpe-float          Floating-point Conditional signaling Compare (scalar).                                     
+ arm64-fcmeq-advsimd-reg     Floating-point Compare Equal (vector).                                                     
+ arm64-fcmeq-advsimd-zero    Floating-point Compare Equal to zero (vector).                                             
+ arm64-fcmge-advsimd-reg     Floating-point Compare Greater than or Equal (vector).                                     
+ arm64-fcmge-advsimd-zero    Floating-point Compare Greater than or Equal to zero (vector).                             
+ arm64-fcmgt-advsimd-reg     Floating-point Compare Greater than (vector).                                              
+ arm64-fcmgt-advsimd-zero    Floating-point Compare Greater than zero (vector).                                         
+ arm64-fcmla-advsimd-vec     Floating-point Complex Multiply Accumulate.                                                
+ arm64-fcmla-advsimd-elt     Floating-point Complex Multiply Accumulate (by element).                                   
+ arm64-fcmle-advsimd         Floating-point Compare Less than or Equal to zero (vector).                                
+ arm64-fcmlt-advsimd         Floating-point Compare Less than zero (vector).                                            
+ arm64-fcmp-float            Floating-point quiet Compare (scalar).                                                     
+ arm64-fcmpe-float           Floating-point signaling Compare (scalar).                                                 
+ arm64-fcsel-float           Floating-point Conditional Select (scalar).                                                
+ arm64-fcvt-float            Floating-point Convert precision (scalar).                                                 
+ arm64-fcvtas-float          Floating-point Convert to Signed integer, rounding to nearest with ties to Away (scalar).  
+ arm64-fcvtas-advsimd        Floating-point Convert to Signed integer, rounding to nearest with ties to Away (vector).  
+ arm64-fcvtau-float          Floating-point Convert to Unsigned integer, rounding to nearest with ties to Away (scalar).
+ arm64-fcvtau-advsimd        Floating-point Convert to Unsigned integer, rounding to nearest with ties to Away (vector).
+ arm64-fcvtl-advsimd         Floating-point Convert to higher precision Long (vector).                                  
+ arm64-fcvtms-float          Floating-point Convert to Signed integer, rounding toward Minus infinity (scalar).         
+ arm64-fcvtms-advsimd        Floating-point Convert to Signed integer, rounding toward Minus infinity (vector).         
+ arm64-fcvtmu-float          Floating-point Convert to Unsigned integer, rounding toward Minus infinity (scalar).       
+ arm64-fcvtmu-advsimd        Floating-point Convert to Unsigned integer, rounding toward Minus infinity (vector).       
+ arm64-fcvtn-advsimd         Floating-point Convert to lower precision Narrow (vector).                                 
+ arm64-fcvtns-float          Floating-point Convert to Signed integer, rounding to nearest with ties to even (scalar).  
+ arm64-fcvtns-advsimd        Floating-point Convert to Signed integer, rounding to nearest with ties to even (vector).  
+ arm64-fcvtnu-float          Floating-point Convert to Unsigned integer, rounding to nearest with ties to even (scalar).
+ arm64-fcvtnu-advsimd        Floating-point Convert to Unsigned integer, rounding to nearest with ties to even (vector).
+ arm64-fcvtps-float          Floating-point Convert to Signed integer, rounding toward Plus infinity (scalar).          
+ arm64-fcvtps-advsimd        Floating-point Convert to Signed integer, rounding toward Plus infinity (vector).          
+ arm64-fcvtpu-float          Floating-point Convert to Unsigned integer, rounding toward Plus infinity (scalar).        
+ arm64-fcvtpu-advsimd        Floating-point Convert to Unsigned integer, rounding toward Plus infinity (vector).        
+ arm64-fcvtxn-advsimd        Floating-point Convert to lower precision Narrow, rounding to odd (vector).                
+ arm64-fcvtzs-float-fix      Floating-point Convert to Signed fixed-point, rounding toward Zero (scalar).               
+ arm64-fcvtzs-float-int      Floating-point Convert to Signed integer, rounding toward Zero (scalar).                   
+ arm64-fcvtzs-advsimd-fix    Floating-point Convert to Signed fixed-point, rounding toward Zero (vector).               
+ arm64-fcvtzs-advsimd-int    Floating-point Convert to Signed integer, rounding toward Zero (vector).                   
+ arm64-fcvtzu-float-fix      Floating-point Convert to Unsigned fixed-point, rounding toward Zero (scalar).             
+ arm64-fcvtzu-float-int      Floating-point Convert to Unsigned integer, rounding toward Zero (scalar).                 
+ arm64-fcvtzu-advsimd-fix    Floating-point Convert to Unsigned fixed-point, rounding toward Zero (vector).             
+ arm64-fcvtzu-advsimd-int    Floating-point Convert to Unsigned integer, rounding toward Zero (vector).                 
+ arm64-fdiv-float            Floating-point Divide (scalar).                                                            
+ arm64-fdiv-advsimd          Floating-point Divide (vector).                                                            
+ arm64-fjcvtzs               Floating-point Javascript Convert to Signed fixed-point, rounding toward Zero.             
+ arm64-fmadd-float           Floating-point fused Multiply-Add (scalar).                                                
+ arm64-fmax-float            Floating-point Maximum (scalar).                                                           
+ arm64-fmax-advsimd          Floating-point Maximum (vector).                                                           
+ arm64-fmaxnm-float          Floating-point Maximum Number (scalar).                                                    
+ arm64-fmaxnm-advsimd        Floating-point Maximum Number (vector).                                                    
+ arm64-fmaxnmp-advsimd-pair  Floating-point Maximum Number of Pair of elements (scalar).                                
+ arm64-fmaxnmp-advsimd-vec   Floating-point Maximum Number Pairwise (vector).                                           
+ arm64-fmaxnmv-advsimd       Floating-point Maximum Number across Vector.                                               
+ arm64-fmaxp-advsimd-pair    Floating-point Maximum of Pair of elements (scalar).                                       
+ arm64-fmaxp-advsimd-vec     Floating-point Maximum Pairwise (vector).                                                  
+ arm64-fmaxv-advsimd         Floating-point Maximum across Vector.                                                      
+ arm64-fmin-float            Floating-point Minimum (scalar).                                                           
+ arm64-fmin-advsimd          Floating-point minimum (vector).                                                           
+ arm64-fminnm-float          Floating-point Minimum Number (scalar).                                                    
+ arm64-fminnm-advsimd        Floating-point Minimum Number (vector).                                                    
+ arm64-fminnmp-advsimd-pair  Floating-point Minimum Number of Pair of elements (scalar).                                
+ arm64-fminnmp-advsimd-vec   Floating-point Minimum Number Pairwise (vector).                                           
+ arm64-fminnmv-advsimd       Floating-point Minimum Number across Vector.                                               
+ arm64-fminp-advsimd-pair    Floating-point Minimum of Pair of elements (scalar).                                       
+ arm64-fminp-advsimd-vec     Floating-point Minimum Pairwise (vector).                                                  
+ arm64-fminv-advsimd         Floating-point Minimum across Vector.                                                      
+ arm64-fmla-advsimd-elt      Floating-point fused Multiply-Add to accumulator (by element).                             
+ arm64-fmla-advsimd-vec      Floating-point fused Multiply-Add to accumulator (vector).                                 
+ arm64-fmlal-advsimd-elt     Floating-point fused Multiply-Add Long to accumulator (by element).                        
+ arm64-fmlal-advsimd-vec     Floating-point fused Multiply-Add Long to accumulator (vector).                            
+ arm64-fmls-advsimd-elt      Floating-point fused Multiply-Subtract from accumulator (by element).                      
+ arm64-fmls-advsimd-vec      Floating-point fused Multiply-Subtract from accumulator (vector).                          
+ arm64-fmlsl-advsimd-elt     Floating-point fused Multiply-Subtract Long from accumulator (by element).                 
+ arm64-fmlsl-advsimd-vec     Floating-point fused Multiply-Subtract Long from accumulator (vector).                     
+ arm64-fmov-float-gen        Floating-point Move to or from general-purpose register without conversion.                
+ arm64-fmov-float            Floating-point Move register without conversion.                                           
+ arm64-fmov-float-imm        Floating-point move immediate (scalar).                                                    
+ arm64-fmov-advsimd          Floating-point move immediate (vector).                                                    
+ arm64-fmsub-float           Floating-point Fused Multiply-Subtract (scalar).                                           
+ arm64-fmul-advsimd-elt      Floating-point Multiply (by element).                                                      
+ arm64-fmul-float            Floating-point Multiply (scalar).                                                          
+ arm64-fmul-advsimd-vec      Floating-point Multiply (vector).                                                          
+ arm64-fmulx-advsimd-vec     Floating-point Multiply extended.                                                          
+ arm64-fmulx-advsimd-elt     Floating-point Multiply extended (by element).                                             
+ arm64-fneg-float            Floating-point Negate (scalar).                                                            
+ arm64-fneg-advsimd          Floating-point Negate (vector).                                                            
+ arm64-fnmadd-float          Floating-point Negated fused Multiply-Add (scalar).                                        
+ arm64-fnmsub-float          Floating-point Negated fused Multiply-Subtract (scalar).                                   
+ arm64-fnmul-float           Floating-point Multiply-Negate (scalar).                                                   
+ arm64-frecpe-advsimd        Floating-point Reciprocal Estimate.                                                        
+ arm64-frecps-advsimd        Floating-point Reciprocal Step.                                                            
+ arm64-frecpx-advsimd        Floating-point Reciprocal exponent (scalar).                                               
+ arm64-frint32x-float        Floating-point Round to 32-bit Integer, using current rounding mode (scalar).              
+ arm64-frint32x-advsimd      Floating-point Round to 32-bit Integer, using current rounding mode (vector).              
+ arm64-frint32z-float        Floating-point Round to 32-bit Integer toward Zero (scalar).                               
+ arm64-frint32z-advsimd      Floating-point Round to 32-bit Integer toward Zero (vector).                               
+ arm64-frint64x-float        Floating-point Round to 64-bit Integer, using current rounding mode (scalar).              
+ arm64-frint64x-advsimd      Floating-point Round to 64-bit Integer, using current rounding mode (vector).              
+ arm64-frint64z-float        Floating-point Round to 64-bit Integer toward Zero (scalar).                               
+ arm64-frint64z-advsimd      Floating-point Round to 64-bit Integer toward Zero (vector).                               
+ arm64-frinta-float          Floating-point Round to Integral, to nearest with ties to Away (scalar).                   
+ arm64-frinta-advsimd        Floating-point Round to Integral, to nearest with ties to Away (vector).                   
+ arm64-frinti-float          Floating-point Round to Integral, using current rounding mode (scalar).                    
+ arm64-frinti-advsimd        Floating-point Round to Integral, using current rounding mode (vector).                    
+ arm64-frintm-float          Floating-point Round to Integral, toward Minus infinity (scalar).                          
+ arm64-frintm-advsimd        Floating-point Round to Integral, toward Minus infinity (vector).                          
+ arm64-frintn-float          Floating-point Round to Integral, to nearest with ties to even (scalar).                   
+ arm64-frintn-advsimd        Floating-point Round to Integral, to nearest with ties to even (vector).                   
+ arm64-frintp-float          Floating-point Round to Integral, toward Plus infinity (scalar).                           
+ arm64-frintp-advsimd        Floating-point Round to Integral, toward Plus infinity (vector).                           
+ arm64-frintx-float          Floating-point Round to Integral exact, using current rounding mode (scalar).              
+ arm64-frintx-advsimd        Floating-point Round to Integral exact, using current rounding mode (vector).              
+ arm64-frintz-float          Floating-point Round to Integral, toward Zero (scalar).                                    
+ arm64-frintz-advsimd        Floating-point Round to Integral, toward Zero (vector).                                    
+ arm64-frsqrte-advsimd       Floating-point Reciprocal Square Root Estimate.                                            
+ arm64-frsqrts-advsimd       Floating-point Reciprocal Square Root Step.                                                
+ arm64-fsqrt-float           Floating-point Square Root (scalar).                                                       
+ arm64-fsqrt-advsimd         Floating-point Square Root (vector).                                                       
+ arm64-fsub-float            Floating-point Subtract (scalar).                                                          
+ arm64-fsub-advsimd          Floating-point Subtract (vector).                                                          
+ arm64-ins-advsimd-elt       Insert vector element from another vector element.                                         
+ arm64-ins-advsimd-gen       Insert vector element from general-purpose register.                                       
+ arm64-ld1-advsimd-mult      Load multiple single-element structures to one, two, three, or four registers.             
+ arm64-ld1-advsimd-sngl      Load one single-element structure to one lane of one register.                             
+ arm64-ld1r-advsimd          Load one single-element structure and Replicate to all lanes (of one register).            
+ arm64-ld2-advsimd-mult      Load multiple 2-element structures to two registers.                                       
+ arm64-ld2-advsimd-sngl      Load single 2-element structure to one lane of two registers.                              
+ arm64-ld2r-advsimd          Load single 2-element structure and Replicate to all lanes of two registers.               
+ arm64-ld3-advsimd-mult      Load multiple 3-element structures to three registers.                                     
+ arm64-ld3-advsimd-sngl      Load single 3-element structure to one lane of three registers).                           
+ arm64-ld3r-advsimd          Load single 3-element structure and Replicate to all lanes of three registers.             
+ arm64-ld4-advsimd-mult      Load multiple 4-element structures to four registers.                                      
+ arm64-ld4-advsimd-sngl      Load single 4-element structure to one lane of four registers.                             
+ arm64-ld4r-advsimd          Load single 4-element structure and Replicate to all lanes of four registers.              
+ arm64-ldnp-fpsimd           Load Pair of SIMD&FP registers, with Non-temporal hint.                                    
+ arm64-ldp-fpsimd            Load Pair of SIMD&FP registers.                                                            
+ arm64-ldr-imm-fpsimd        Load SIMD&FP Register (immediate offset).                                                  
+ arm64-ldr-lit-fpsimd        Load SIMD&FP Register (PC-relative literal).                                               
+ arm64-ldr-reg-fpsimd        Load SIMD&FP Register (register offset).                                                   
+ arm64-ldur-fpsimd           Load SIMD&FP Register (unscaled offset).                                                   
+ arm64-mla-advsimd-elt       Multiply-Add to accumulator (vector, by element).                                          
+ arm64-mla-advsimd-vec       Multiply-Add to accumulator (vector).                                                      
+ arm64-mls-advsimd-elt       Multiply-Subtract from accumulator (vector, by element).                                   
+ arm64-mls-advsimd-vec       Multiply-Subtract from accumulator (vector).                                               
+ arm64-mov-ins-advsimd-elt   Move vector element to another vector element: an alias of INS (element).                  
+ arm64-mov-ins-advsimd-gen   Move general-purpose register to a vector element: an alias of INS (general).              
+ arm64-mov-dup-advsimd-elt   Move vector element to scalar: an alias of DUP (element).                                  
+ arm64-mov-umov-advsimd      Move vector element to general-purpose register: an alias of UMOV.                         
+ arm64-mov-orr-advsimd-reg   Move vector: an alias of ORR (vector, register).                                           
+ arm64-movi-advsimd          Move Immediate (vector).                                                                   
+ arm64-mul-advsimd-elt       Multiply (vector, by element).                                                             
+ arm64-mul-advsimd-vec       Multiply (vector).                                                                         
+ arm64-mvn-not-advsimd       Bitwise NOT (vector): an alias of NOT.                                                     
+ arm64-mvni-advsimd          Move inverted Immediate (vector).                                                          
+ arm64-neg-advsimd           Negate (vector).                                                                           
+ arm64-not-advsimd           Bitwise NOT (vector).                                                                      
+ arm64-orn-advsimd           Bitwise inclusive OR NOT (vector).                                                         
+ arm64-orr-advsimd-imm       Bitwise inclusive OR (vector, immediate).                                                  
+ arm64-orr-advsimd-reg       Bitwise inclusive OR (vector, register).                                                   
+ arm64-pmul-advsimd          Polynomial Multiply.                                                                       
+ arm64-pmull-advsimd         Polynomial Multiply Long.                                                                  
+ arm64-raddhn-advsimd        Rounding Add returning High Narrow.                                                        
+ arm64-rax1-advsimd          Rotate and Exclusive OR.                                                                   
+ arm64-rbit-advsimd          Reverse Bit order (vector).                                                                
+ arm64-rev16-advsimd         Reverse elements in 16-bit halfwords (vector).                                             
+ arm64-rev32-advsimd         Reverse elements in 32-bit words (vector).                                                 
+ arm64-rev64-advsimd         Reverse elements in 64-bit doublewords (vector).                                           
+ arm64-rshrn-advsimd         Rounding Shift Right Narrow (immediate).                                                   
+ arm64-rsubhn-advsimd        Rounding Subtract returning High Narrow.                                                   
+ arm64-saba-advsimd          Signed Absolute difference and Accumulate.                                                 
+ arm64-sabal-advsimd         Signed Absolute difference and Accumulate Long.                                            
+ arm64-sabd-advsimd          Signed Absolute Difference.                                                                
+ arm64-sabdl-advsimd         Signed Absolute Difference Long.                                                           
+ arm64-sadalp-advsimd        Signed Add and Accumulate Long Pairwise.                                                   
+ arm64-saddl-advsimd         Signed Add Long (vector).                                                                  
+ arm64-saddlp-advsimd        Signed Add Long Pairwise.                                                                  
+ arm64-saddlv-advsimd        Signed Add Long across Vector.                                                             
+ arm64-saddw-advsimd         Signed Add Wide.                                                                           
+ arm64-scvtf-float-fix       Signed fixed-point Convert to Floating-point (scalar).                                     
+ arm64-scvtf-float-int       Signed integer Convert to Floating-point (scalar).                                         
+ arm64-scvtf-advsimd-fix     Signed fixed-point Convert to Floating-point (vector).                                     
+ arm64-scvtf-advsimd-int     Signed integer Convert to Floating-point (vector).                                         
+ arm64-sdot-advsimd-elt      Dot Product signed arithmetic (vector, by element).                                        
+ arm64-sdot-advsimd-vec      Dot Product signed arithmetic (vector).                                                    
+ arm64-sha1c-advsimd         SHA1 hash update (choose).                                                                 
+ arm64-sha1h-advsimd         SHA1 fixed rotate.                                                                         
+ arm64-sha1m-advsimd         SHA1 hash update (majority).                                                               
+ arm64-sha1p-advsimd         SHA1 hash update (parity).                                                                 
+ arm64-sha1su0-advsimd       SHA1 schedule update 0.                                                                    
+ arm64-sha1su1-advsimd       SHA1 schedule update 1.                                                                    
+ arm64-sha256h-advsimd       SHA256 hash update (part 1).                                                               
+ arm64-sha256h2-advsimd      SHA256 hash update (part 2).                                                               
+ arm64-sha256su0-advsimd     SHA256 schedule update 0.                                                                  
+ arm64-sha256su1-advsimd     SHA256 schedule update 1.                                                                  
+ arm64-sha512h-advsimd       SHA512 Hash update part 1.                                                                 
+ arm64-sha512h2-advsimd      SHA512 Hash update part 2.                                                                 
+ arm64-sha512su0-advsimd     SHA512 Schedule Update 0.                                                                  
+ arm64-sha512su1-advsimd     SHA512 Schedule Update 1.                                                                  
+ arm64-shadd-advsimd         Signed Halving Add.                                                                        
+ arm64-shl-advsimd           Shift Left (immediate).                                                                    
+ arm64-shll-advsimd          Shift Left Long (by element size).                                                         
+ arm64-shrn-advsimd          Shift Right Narrow (immediate).                                                            
+ arm64-shsub-advsimd         Signed Halving Subtract.                                                                   
+ arm64-sli-advsimd           Shift Left and Insert (immediate).                                                         
+ arm64-sm3partw1-advsimd     SM3PARTW1.                                                                                 
+ arm64-sm3partw2-advsimd     SM3PARTW2.                                                                                 
+ arm64-sm3ss1-advsimd        SM3SS1.                                                                                    
+ arm64-sm3tt1a-advsimd       SM3TT1A.                                                                                   
+ arm64-sm3tt1b-advsimd       SM3TT1B.                                                                                   
+ arm64-sm3tt2a-advsimd       SM3TT2A.                                                                                   
+ arm64-sm3tt2b-advsimd       SM3TT2B.                                                                                   
+ arm64-sm4e-advsimd          SM4 Encode.                                                                                
+ arm64-sm4ekey-advsimd       SM4 Key.                                                                                   
+ arm64-smax-advsimd          Signed Maximum (vector).                                                                   
+ arm64-smaxp-advsimd         Signed Maximum Pairwise.                                                                   
+ arm64-smaxv-advsimd         Signed Maximum across Vector.                                                              
+ arm64-smin-advsimd          Signed Minimum (vector).                                                                   
+ arm64-sminp-advsimd         Signed Minimum Pairwise.                                                                   
+ arm64-sminv-advsimd         Signed Minimum across Vector.                                                              
+ arm64-smlal-advsimd-elt     Signed Multiply-Add Long (vector, by element).                                             
+ arm64-smlal-advsimd-vec     Signed Multiply-Add Long (vector).                                                         
+ arm64-smlsl-advsimd-elt     Signed Multiply-Subtract Long (vector, by element).                                        
+ arm64-smlsl-advsimd-vec     Signed Multiply-Subtract Long (vector).                                                    
+ arm64-smmla-advsimd-vec     Signed 8-bit integer matrix multiply-accumulate (vector).                                  
+ arm64-smov-advsimd          Signed Move vector element to general-purpose register.                                    
+ arm64-smull-advsimd-elt     Signed Multiply Long (vector, by element).                                                 
+ arm64-smull-advsimd-vec     Signed Multiply Long (vector).                                                             
+ arm64-sqabs-advsimd         Signed saturating Absolute value.                                                          
+ arm64-sqadd-advsimd         Signed saturating Add.                                                                     
+ arm64-sqdmlal-advsimd-elt   Signed saturating Doubling Multiply-Add Long (by element).                                 
+ arm64-sqdmlal-advsimd-vec   Signed saturating Doubling Multiply-Add Long.                                              
+ arm64-sqdmlsl-advsimd-elt   Signed saturating Doubling Multiply-Subtract Long (by element).                            
+ arm64-sqdmlsl-advsimd-vec   Signed saturating Doubling Multiply-Subtract Long.                                         
+ arm64-sqdmulh-advsimd-elt   Signed saturating Doubling Multiply returning High half (by element).                      
+ arm64-sqdmulh-advsimd-vec   Signed saturating Doubling Multiply returning High half.                                   
+ arm64-sqdmull-advsimd-elt   Signed saturating Doubling Multiply Long (by element).                                     
+ arm64-sqdmull-advsimd-vec   Signed saturating Doubling Multiply Long.                                                  
+ arm64-sqneg-advsimd         Signed saturating Negate.                                                                  
+ arm64-sqrdmlah-advsimd-elt  Signed Saturating Rounding Doubling Multiply Accumulate returning High Half (by element).  
+ arm64-sqrdmlah-advsimd-vec  Signed Saturating Rounding Doubling Multiply Accumulate returning High Half (vector).      
+ arm64-sqrdmlsh-advsimd-elt  Signed Saturating Rounding Doubling Multiply Subtract returning High Half (by element).    
+ arm64-sqrdmlsh-advsimd-vec  Signed Saturating Rounding Doubling Multiply Subtract returning High Half (vector).        
+ arm64-sqrdmulh-advsimd-elt  Signed saturating Rounding Doubling Multiply returning High half (by element).             
+ arm64-sqrdmulh-advsimd-vec  Signed saturating Rounding Doubling Multiply returning High half.                          
+ arm64-sqrshl-advsimd        Signed saturating Rounding Shift Left (register).                                          
+ arm64-sqrshrn-advsimd       Signed saturating Rounded Shift Right Narrow (immediate).                                  
+ arm64-sqrshrun-advsimd      Signed saturating Rounded Shift Right Unsigned Narrow (immediate).                         
+ arm64-sqshl-advsimd-imm     Signed saturating Shift Left (immediate).                                                  
+ arm64-sqshl-advsimd-reg     Signed saturating Shift Left (register).                                                   
+ arm64-sqshlu-advsimd        Signed saturating Shift Left Unsigned (immediate).                                         
+ arm64-sqshrn-advsimd        Signed saturating Shift Right Narrow (immediate).                                          
+ arm64-sqshrun-advsimd       Signed saturating Shift Right Unsigned Narrow (immediate).                                 
+ arm64-sqsub-advsimd         Signed saturating Subtract.                                                                
+ arm64-sqxtn-advsimd         Signed saturating extract Narrow.                                                          
+ arm64-sqxtun-advsimd        Signed saturating extract Unsigned Narrow.                                                 
+ arm64-srhadd-advsimd        Signed Rounding Halving Add.                                                               
+ arm64-sri-advsimd           Shift Right and Insert (immediate).                                                        
+ arm64-srshl-advsimd         Signed Rounding Shift Left (register).                                                     
+ arm64-srshr-advsimd         Signed Rounding Shift Right (immediate).                                                   
+ arm64-srsra-advsimd         Signed Rounding Shift Right and Accumulate (immediate).                                    
+ arm64-sshl-advsimd          Signed Shift Left (register).                                                              
+ arm64-sshll-advsimd         Signed Shift Left Long (immediate).                                                        
+ arm64-sshr-advsimd          Signed Shift Right (immediate).                                                            
+ arm64-ssra-advsimd          Signed Shift Right and Accumulate (immediate).                                             
+ arm64-ssubl-advsimd         Signed Subtract Long.                                                                      
+ arm64-ssubw-advsimd         Signed Subtract Wide.                                                                      
+ arm64-st1-advsimd-mult      Store multiple single-element structures from one, two, three, or four registers.          
+ arm64-st1-advsimd-sngl      Store a single-element structure from one lane of one register.                            
+ arm64-st2-advsimd-mult      Store multiple 2-element structures from two registers.                                    
+ arm64-st2-advsimd-sngl      Store single 2-element structure from one lane of two registers.                           
+ arm64-st3-advsimd-mult      Store multiple 3-element structures from three registers.                                  
+ arm64-st3-advsimd-sngl      Store single 3-element structure from one lane of three registers.                         
+ arm64-st4-advsimd-mult      Store multiple 4-element structures from four registers.                                   
+ arm64-st4-advsimd-sngl      Store single 4-element structure from one lane of four registers.                          
+ arm64-stnp-fpsimd           Store Pair of SIMD&FP registers, with Non-temporal hint.                                   
+ arm64-stp-fpsimd            Store Pair of SIMD&FP registers.                                                           
+ arm64-str-imm-fpsimd        Store SIMD&FP register (immediate offset).                                                 
+ arm64-str-reg-fpsimd        Store SIMD&FP register (register offset).                                                  
+ arm64-stur-fpsimd           Store SIMD&FP register (unscaled offset).                                                  
+ arm64-sub-advsimd           Subtract (vector).                                                                         
+ arm64-subhn-advsimd         Subtract returning High Narrow.                                                            
+ arm64-sudot-advsimd-elt     Dot product with signed and unsigned integers (vector, by element).                        
+ arm64-suqadd-advsimd        Signed saturating Accumulate of Unsigned value.                                            
+ arm64-sxtl-sshll-advsimd    Signed extend Long: an alias of SSHLL, SSHLL2.                                             
+ arm64-tbl-advsimd           Table vector Lookup.                                                                       
+ arm64-tbx-advsimd           Table vector lookup extension.                                                             
+ arm64-trn1-advsimd          Transpose vectors (primary).                                                               
+ arm64-trn2-advsimd          Transpose vectors (secondary).                                                             
+ arm64-uaba-advsimd          Unsigned Absolute difference and Accumulate.                                               
+ arm64-uabal-advsimd         Unsigned Absolute difference and Accumulate Long.                                          
+ arm64-uabd-advsimd          Unsigned Absolute Difference (vector).                                                     
+ arm64-uabdl-advsimd         Unsigned Absolute Difference Long.                                                         
+ arm64-uadalp-advsimd        Unsigned Add and Accumulate Long Pairwise.                                                 
+ arm64-uaddl-advsimd         Unsigned Add Long (vector).                                                                
+ arm64-uaddlp-advsimd        Unsigned Add Long Pairwise.                                                                
+ arm64-uaddlv-advsimd        Unsigned sum Long across Vector.                                                           
+ arm64-uaddw-advsimd         Unsigned Add Wide.                                                                         
+ arm64-ucvtf-float-fix       Unsigned fixed-point Convert to Floating-point (scalar).                                   
+ arm64-ucvtf-float-int       Unsigned integer Convert to Floating-point (scalar).                                       
+ arm64-ucvtf-advsimd-fix     Unsigned fixed-point Convert to Floating-point (vector).                                   
+ arm64-ucvtf-advsimd-int     Unsigned integer Convert to Floating-point (vector).                                       
+ arm64-udot-advsimd-elt      Dot Product unsigned arithmetic (vector, by element).                                      
+ arm64-udot-advsimd-vec      Dot Product unsigned arithmetic (vector).                                                  
+ arm64-uhadd-advsimd         Unsigned Halving Add.                                                                      
+ arm64-uhsub-advsimd         Unsigned Halving Subtract.                                                                 
+ arm64-umax-advsimd          Unsigned Maximum (vector).                                                                 
+ arm64-umaxp-advsimd         Unsigned Maximum Pairwise.                                                                 
+ arm64-umaxv-advsimd         Unsigned Maximum across Vector.                                                            
+ arm64-umin-advsimd          Unsigned Minimum (vector).                                                                 
+ arm64-uminp-advsimd         Unsigned Minimum Pairwise.                                                                 
+ arm64-uminv-advsimd         Unsigned Minimum across Vector.                                                            
+ arm64-umlal-advsimd-elt     Unsigned Multiply-Add Long (vector, by element).                                           
+ arm64-umlal-advsimd-vec     Unsigned Multiply-Add Long (vector).                                                       
+ arm64-umlsl-advsimd-elt     Unsigned Multiply-Subtract Long (vector, by element).                                      
+ arm64-umlsl-advsimd-vec     Unsigned Multiply-Subtract Long (vector).                                                  
+ arm64-ummla-advsimd-vec     Unsigned 8-bit integer matrix multiply-accumulate (vector).                                
+ arm64-umov-advsimd          Unsigned Move vector element to general-purpose register.                                  
+ arm64-umull-advsimd-elt     Unsigned Multiply Long (vector, by element).                                               
+ arm64-umull-advsimd-vec     Unsigned Multiply long (vector).                                                           
+ arm64-uqadd-advsimd         Unsigned saturating Add.                                                                   
+ arm64-uqrshl-advsimd        Unsigned saturating Rounding Shift Left (register).                                        
+ arm64-uqrshrn-advsimd       Unsigned saturating Rounded Shift Right Narrow (immediate).                                
+ arm64-uqshl-advsimd-imm     Unsigned saturating Shift Left (immediate).                                                
+ arm64-uqshl-advsimd-reg     Unsigned saturating Shift Left (register).                                                 
+ arm64-uqshrn-advsimd        Unsigned saturating Shift Right Narrow (immediate).                                        
+ arm64-uqsub-advsimd         Unsigned saturating Subtract.                                                              
+ arm64-uqxtn-advsimd         Unsigned saturating extract Narrow.                                                        
+ arm64-urecpe-advsimd        Unsigned Reciprocal Estimate.                                                              
+ arm64-urhadd-advsimd        Unsigned Rounding Halving Add.                                                             
+ arm64-urshl-advsimd         Unsigned Rounding Shift Left (register).                                                   
+ arm64-urshr-advsimd         Unsigned Rounding Shift Right (immediate).                                                 
+ arm64-ursqrte-advsimd       Unsigned Reciprocal Square Root Estimate.                                                  
+ arm64-ursra-advsimd         Unsigned Rounding Shift Right and Accumulate (immediate).                                  
+ arm64-usdot-advsimd-elt     Dot Product with unsigned and signed integers (vector, by element).                        
+ arm64-usdot-advsimd-vec     Dot Product with unsigned and signed integers (vector).                                    
+ arm64-ushl-advsimd          Unsigned Shift Left (register).                                                            
+ arm64-ushll-advsimd         Unsigned Shift Left Long (immediate).                                                      
+ arm64-ushr-advsimd          Unsigned Shift Right (immediate).                                                          
+ arm64-usmmla-advsimd-vec    Unsigned and signed 8-bit integer matrix multiply-accumulate (vector).                     
+ arm64-usqadd-advsimd        Unsigned saturating Accumulate of Signed value.                                            
+ arm64-usra-advsimd          Unsigned Shift Right and Accumulate (immediate).                                           
+ arm64-usubl-advsimd         Unsigned Subtract Long.                                                                    
+ arm64-usubw-advsimd         Unsigned Subtract Wide.                                                                    
+ arm64-uxtl-ushll-advsimd    Unsigned extend Long: an alias of USHLL, USHLL2.                                           
+ arm64-uzp1-advsimd          Unzip vectors (primary).                                                                   
+ arm64-uzp2-advsimd          Unzip vectors (secondary).                                                                 
+ arm64-xar-advsimd           Exclusive OR and Rotate.                                                                   
+ arm64-xtn-advsimd           Extract Narrow.                                                                            
+ arm64-zip1-advsimd          Zip vectors (primary).                                                                     
+ arm64-zip2-advsimd          Zip vectors (secondary).                                                                   
+ 
+.SS A64 -- SVE Instructions (alphabetic order)
+ arm64-abs-z-p-z           Absolute value (predicated).                                                                                     
+ arm64-add-z-zi            Add immediate (unpredicated).                                                                                    
+ arm64-add-z-p-zz          Add vectors (predicated).                                                                                        
+ arm64-add-z-zz            Add vectors (unpredicated).                                                                                      
+ arm64-addpl-r-ri          Add multiple of predicate register size to scalar register.                                                      
+ arm64-addvl-r-ri          Add multiple of vector register size to scalar register.                                                         
+ arm64-adr-z-az            Compute vector address.                                                                                          
+ arm64-and-z-zi            Bitwise AND with immediate (unpredicated).                                                                       
+ arm64-and-z-p-zz          Bitwise AND vectors (predicated).                                                                                
+ arm64-and-z-zz            Bitwise AND vectors (unpredicated).                                                                              
+ arm64-and-p-p-pp          Bitwise AND predicates.                                                                                          
+ arm64-andv-r-p-z          Bitwise AND reduction to scalar.                                                                                 
+ arm64-asr-z-p-zi          Arithmetic shift right by immediate (predicated).                                                                
+ arm64-asr-z-zi            Arithmetic shift right by immediate (unpredicated).                                                              
+ arm64-asr-z-p-zz          Arithmetic shift right by vector (predicated).                                                                   
+ arm64-asr-z-p-zw          Arithmetic shift right by 64-bit wide elements (predicated).                                                     
+ arm64-asr-z-zw            Arithmetic shift right by 64-bit wide elements (unpredicated).                                                   
+ arm64-asrd-z-p-zi         Arithmetic shift right for divide by immediate (predicated).                                                     
+ arm64-asrr-z-p-zz         Reversed arithmetic shift right by vector (predicated).                                                          
+ arm64-bfcvt-z-p-z         Floating-point down convert to BFloat16 format (predicated).                                                     
+ arm64-bfcvtnt-z-p-z       Floating-point down convert and narrow to BFloat16 (top, predicated).                                            
+ arm64-bfdot-z-zzzi        BFloat16 floating-point indexed dot product.                                                                     
+ arm64-bfdot-z-zzz         BFloat16 floating-point dot product.                                                                             
+ arm64-bfmlalb-z-zzzi      BFloat16 floating-point multiply-add long to single-precision (bottom, indexed).                                 
+ arm64-bfmlalb-z-zzz       BFloat16 floating-point multiply-add long to single-precision (bottom).                                          
+ arm64-bfmlalt-z-zzzi      BFloat16 floating-point multiply-add long to single-precision (top, indexed).                                    
+ arm64-bfmlalt-z-zzz       BFloat16 floating-point multiply-add long to single-precision (top).                                             
+ arm64-bfmmla-z-zzz        BFloat16 floating-point matrix multiply-accumulate.                                                              
+ arm64-bic-and-z-zi        Bitwise clear bits using immediate (unpredicated): an alias of AND (immediate).                                  
+ arm64-bic-z-p-zz          Bitwise clear vectors (predicated).                                                                              
+ arm64-bic-z-zz            Bitwise clear vectors (unpredicated).                                                                            
+ arm64-bic-p-p-pp          Bitwise clear predicates.                                                                                        
+ arm64-brka-p-p-p          Break after first true condition.                                                                                
+ arm64-brkb-p-p-p          Break before first true condition.                                                                               
+ arm64-brkn-p-p-pp         Propagate break to next partition.                                                                               
+ arm64-brkpa-p-p-pp        Break after first true condition, propagating from previous partition.                                           
+ arm64-brkpb-p-p-pp        Break before first true condition, propagating from previous partition.                                          
+ arm64-clasta-r-p-z        Conditionally extract element after last to general-purpose register.                                            
+ arm64-clasta-v-p-z        Conditionally extract element after last to SIMD&FP scalar register.                                             
+ arm64-clasta-z-p-zz       Conditionally extract element after last to vector register.                                                     
+ arm64-clastb-r-p-z        Conditionally extract last element to general-purpose register.                                                  
+ arm64-clastb-v-p-z        Conditionally extract last element to SIMD&FP scalar register.                                                   
+ arm64-clastb-z-p-zz       Conditionally extract last element to vector register.                                                           
+ arm64-cls-z-p-z           Count leading sign bits (predicated).                                                                            
+ arm64-clz-z-p-z           Count leading zero bits (predicated).                                                                            
+ arm64-cmpeq-p-p-zi        Compare vector to immediate.                                                                                     
+ arm64-cmpeq-p-p-zz        Compare vectors.                                                                                                 
+ arm64-cmpeq-p-p-zw        Compare vector to 64-bit wide elements.                                                                          
+ arm64-cmple-cmpeq-p-p-zz  Compare signed less than or equal to vector, setting the condition flags: an alias of CMP<cc> (vectors).         
+ arm64-cmplo-cmpeq-p-p-zz  Compare unsigned lower than vector, setting the condition flags: an alias of CMP<cc> (vectors).                  
+ arm64-cmpls-cmpeq-p-p-zz  Compare unsigned lower or same as vector, setting the condition flags: an alias of CMP<cc> (vectors).            
+ arm64-cmplt-cmpeq-p-p-zz  Compare signed less than vector, setting the condition flags: an alias of CMP<cc> (vectors).                     
+ arm64-cnot-z-p-z          Logically invert boolean condition in vector (predicated).                                                       
+ arm64-cnt-z-p-z           Count non-zero bits (predicated).                                                                                
+ arm64-cntb-r-s            Set scalar to multiple of predicate constraint element count.                                                    
+ arm64-cntp-r-p-p          Set scalar to count of true predicate elements.                                                                  
+ arm64-compact-z-p-z       Shuffle active elements of vector to the right and fill with zero.                                               
+ arm64-cpy-z-p-i           Copy signed integer immediate to vector elements (merging).                                                      
+ arm64-cpy-z-o-i           Copy signed integer immediate to vector elements (zeroing).                                                      
+ arm64-cpy-z-p-r           Copy general-purpose register to vector elements (predicated).                                                   
+ arm64-cpy-z-p-v           Copy SIMD&FP scalar register to vector elements (predicated).                                                    
+ arm64-ctermeq-rr          Compare and terminate loop.                                                                                      
+ arm64-decb-r-rs           Decrement scalar by multiple of predicate constraint element count.                                              
+ arm64-decd-z-zs           Decrement vector by multiple of predicate constraint element count.                                              
+ arm64-decp-r-p-r          Decrement scalar by count of true predicate elements.                                                            
+ arm64-decp-z-p-z          Decrement vector by count of true predicate elements.                                                            
+ arm64-dup-z-i             Broadcast signed immediate to vector elements (unpredicated).                                                    
+ arm64-dup-z-zi            Broadcast indexed element to vector (unpredicated).                                                              
+ arm64-dup-z-r             Broadcast general-purpose register to vector elements (unpredicated).                                            
+ arm64-dupm-z-i            Broadcast logical bitmask immediate to vector (unpredicated).                                                    
+ arm64-eon-eor-z-zi        Bitwise exclusive OR with inverted immediate (unpredicated): an alias of EOR (immediate).                        
+ arm64-eor-z-zi            Bitwise exclusive OR with immediate (unpredicated).                                                              
+ arm64-eor-z-p-zz          Bitwise exclusive OR vectors (predicated).                                                                       
+ arm64-eor-z-zz            Bitwise exclusive OR vectors (unpredicated).                                                                     
+ arm64-eor-p-p-pp          Bitwise exclusive OR predicates.                                                                                 
+ arm64-eorv-r-p-z          Bitwise exclusive OR reduction to scalar.                                                                        
+ arm64-ext-z-zi            Extract vector from pair of vectors.                                                                             
+ arm64-fabd-z-p-zz         Floating-point absolute difference (predicated).                                                                 
+ arm64-fabs-z-p-z          Floating-point absolute value (predicated).                                                                      
+ arm64-facge-p-p-zz        Floating-point absolute compare vectors.                                                                         
+ arm64-facle-facge-p-p-zz  Floating-point absolute compare less than or equal: an alias of FAC<cc>.                                         
+ arm64-faclt-facge-p-p-zz  Floating-point absolute compare less than: an alias of FAC<cc>.                                                  
+ arm64-fadd-z-p-zs         Floating-point add immediate (predicated).                                                                       
+ arm64-fadd-z-p-zz         Floating-point add vector (predicated).                                                                          
+ arm64-fadd-z-zz           Floating-point add vector (unpredicated).                                                                        
+ arm64-fadda-v-p-z         Floating-point add strictly-ordered reduction, accumulating in scalar.                                           
+ arm64-faddv-v-p-z         Floating-point add recursive reduction to scalar.                                                                
+ arm64-fcadd-z-p-zz        Floating-point complex add with rotate (predicated).                                                             
+ arm64-fcmeq-p-p-zz        Floating-point compare vectors.                                                                                  
+ arm64-fcmeq-p-p-z0        Floating-point compare vector with zero.                                                                         
+ arm64-fcmla-z-zzzi        Floating-point complex multiply-add by indexed values with rotate.                                               
+ arm64-fcmla-z-p-zzz       Floating-point complex multiply-add with rotate (predicated).                                                    
+ arm64-fcmle-fcmeq-p-p-zz  Floating-point compare less than or equal to vector: an alias of FCM<cc> (vectors).                              
+ arm64-fcmlt-fcmeq-p-p-zz  Floating-point compare less than vector: an alias of FCM<cc> (vectors).                                          
+ arm64-fcpy-z-p-i          Copy 8-bit floating-point immediate to vector elements (predicated).                                             
+ arm64-fcvt-z-p-z          Floating-point convert precision (predicated).                                                                   
+ arm64-fcvtzs-z-p-z        Floating-point convert to signed integer, rounding toward zero (predicated).                                     
+ arm64-fcvtzu-z-p-z        Floating-point convert to unsigned integer, rounding toward zero (predicated).                                   
+ arm64-fdiv-z-p-zz         Floating-point divide by vector (predicated).                                                                    
+ arm64-fdivr-z-p-zz        Floating-point reversed divide by vector (predicated).                                                           
+ arm64-fdup-z-i            Broadcast 8-bit floating-point immediate to vector elements (unpredicated).                                      
+ arm64-fexpa-z-z           Floating-point exponential accelerator.                                                                          
+ arm64-fmad-z-p-zzz        Floating-point fused multiply-add vectors (predicated), writing multiplicand [Zdn = Za + Zdn * Zm].              
+ arm64-fmax-z-p-zs         Floating-point maximum with immediate (predicated).                                                              
+ arm64-fmax-z-p-zz         Floating-point maximum (predicated).                                                                             
+ arm64-fmaxnm-z-p-zs       Floating-point maximum number with immediate (predicated).                                                       
+ arm64-fmaxnm-z-p-zz       Floating-point maximum number (predicated).                                                                      
+ arm64-fmaxnmv-v-p-z       Floating-point maximum number recursive reduction to scalar.                                                     
+ arm64-fmaxv-v-p-z         Floating-point maximum recursive reduction to scalar.                                                            
+ arm64-fmin-z-p-zs         Floating-point minimum with immediate (predicated).                                                              
+ arm64-fmin-z-p-zz         Floating-point minimum (predicated).                                                                             
+ arm64-fminnm-z-p-zs       Floating-point minimum number with immediate (predicated).                                                       
+ arm64-fminnm-z-p-zz       Floating-point minimum number (predicated).                                                                      
+ arm64-fminnmv-v-p-z       Floating-point minimum number recursive reduction to scalar.                                                     
+ arm64-fminv-v-p-z         Floating-point minimum recursive reduction to scalar.                                                            
+ arm64-fmla-z-zzzi         Floating-point fused multiply-add by indexed elements (Zda = Zda + Zn * Zm[indexed]).                            
+ arm64-fmla-z-p-zzz        Floating-point fused multiply-add vectors (predicated), writing addend [Zda = Zda + Zn * Zm].                    
+ arm64-fmls-z-zzzi         Floating-point fused multiply-subtract by indexed elements (Zda = Zda + -Zn * Zm[indexed]).                      
+ arm64-fmls-z-p-zzz        Floating-point fused multiply-subtract vectors (predicated), writing addend [Zda = Zda + -Zn * Zm].              
+ arm64-fmmla-z-zzz         Floating-point matrix multiply-accumulate.                                                                       
+ arm64-fmov-fcpy-z-p-i     Move 8-bit floating-point immediate to vector elements (predicated): an alias of FCPY.                           
+ arm64-fmov-fdup-z-i       Move 8-bit floating-point immediate to vector elements (unpredicated): an alias of FDUP.                         
+ arm64-fmov-cpy-z-p-i      Move floating-point +0.0 to vector elements (predicated): an alias of CPY (immediate, merging).                  
+ arm64-fmov-dup-z-i        Move floating-point +0.0 to vector elements (unpredicated): an alias of DUP (immediate).                         
+ arm64-fmsb-z-p-zzz        Floating-point fused multiply-subtract vectors (predicated), writing multiplicand [Zdn = Za + -Zdn * Zm].        
+ arm64-fmul-z-p-zs         Floating-point multiply by immediate (predicated).                                                               
+ arm64-fmul-z-zzi          Floating-point multiply by indexed elements.                                                                     
+ arm64-fmul-z-p-zz         Floating-point multiply vectors (predicated).                                                                    
+ arm64-fmul-z-zz           Floating-point multiply vectors (unpredicated).                                                                  
+ arm64-fmulx-z-p-zz        Floating-point multiply-extended vectors (predicated).                                                           
+ arm64-fneg-z-p-z          Floating-point negate (predicated).                                                                              
+ arm64-fnmad-z-p-zzz       Floating-point negated fused multiply-add vectors (predicated), writing multiplicand [Zdn = -Za + -Zdn * Zm].    
+ arm64-fnmla-z-p-zzz       Floating-point negated fused multiply-add vectors (predicated), writing addend [Zda = -Zda + -Zn * Zm].          
+ arm64-fnmls-z-p-zzz       Floating-point negated fused multiply-subtract vectors (predicated), writing addend [Zda = -Zda + Zn * Zm].      
+ arm64-fnmsb-z-p-zzz       Floating-point negated fused multiply-subtract vectors (predicated), writing multiplicand [Zdn = -Za + Zdn * Zm].
+ arm64-frecpe-z-z          Floating-point reciprocal estimate (unpredicated).                                                               
+ arm64-frecps-z-zz         Floating-point reciprocal step (unpredicated).                                                                   
+ arm64-frecpx-z-p-z        Floating-point reciprocal exponent (predicated).                                                                 
+ arm64-frinta-z-p-z        Floating-point round to integral value (predicated).                                                             
+ arm64-frsqrte-z-z         Floating-point reciprocal square root estimate (unpredicated).                                                   
+ arm64-frsqrts-z-zz        Floating-point reciprocal square root step (unpredicated).                                                       
+ arm64-fscale-z-p-zz       Floating-point adjust exponent by vector (predicated).                                                           
+ arm64-fsqrt-z-p-z         Floating-point square root (predicated).                                                                         
+ arm64-fsub-z-p-zs         Floating-point subtract immediate (predicated).                                                                  
+ arm64-fsub-z-p-zz         Floating-point subtract vectors (predicated).                                                                    
+ arm64-fsub-z-zz           Floating-point subtract vectors (unpredicated).                                                                  
+ arm64-fsubr-z-p-zs        Floating-point reversed subtract from immediate (predicated).                                                    
+ arm64-fsubr-z-p-zz        Floating-point reversed subtract vectors (predicated).                                                           
+ arm64-ftmad-z-zzi         Floating-point trigonometric multiply-add coefficient.                                                           
+ arm64-ftsmul-z-zz         Floating-point trigonometric starting value.                                                                     
+ arm64-ftssel-z-zz         Floating-point trigonometric select coefficient.                                                                 
+ arm64-incb-r-rs           Increment scalar by multiple of predicate constraint element count.                                              
+ arm64-incd-z-zs           Increment vector by multiple of predicate constraint element count.                                              
+ arm64-incp-r-p-r          Increment scalar by count of true predicate elements.                                                            
+ arm64-incp-z-p-z          Increment vector by count of true predicate elements.                                                            
+ arm64-index-z-ir          Create index starting from immediate and incremented by general-purpose register.                                
+ arm64-index-z-ii          Create index starting from and incremented by immediate.                                                         
+ arm64-index-z-ri          Create index starting from general-purpose register and incremented by immediate.                                
+ arm64-index-z-rr          Create index starting from and incremented by general-purpose register.                                          
+ arm64-insr-z-r            Insert general-purpose register in shifted vector.                                                               
+ arm64-insr-z-v            Insert SIMD&FP scalar register in shifted vector.                                                                
+ arm64-lasta-r-p-z         Extract element after last to general-purpose register.                                                          
+ arm64-lasta-v-p-z         Extract element after last to SIMD&FP scalar register.                                                           
+ arm64-lastb-r-p-z         Extract last element to general-purpose register.                                                                
+ arm64-lastb-v-p-z         Extract last element to SIMD&FP scalar register.                                                                 
+ arm64-ld1b-z-p-bi         Contiguous load unsigned bytes to vector (immediate index).                                                      
+ arm64-ld1b-z-p-br         Contiguous load unsigned bytes to vector (scalar index).                                                         
+ arm64-ld1b-z-p-bz         Gather load unsigned bytes to vector (vector index).                                                             
+ arm64-ld1b-z-p-ai         Gather load unsigned bytes to vector (immediate index).                                                          
+ arm64-ld1d-z-p-bi         Contiguous load doublewords to vector (immediate index).                                                         
+ arm64-ld1d-z-p-br         Contiguous load doublewords to vector (scalar index).                                                            
+ arm64-ld1d-z-p-bz         Gather load doublewords to vector (vector index).                                                                
+ arm64-ld1d-z-p-ai         Gather load doublewords to vector (immediate index).                                                             
+ arm64-ld1h-z-p-bi         Contiguous load unsigned halfwords to vector (immediate index).                                                  
+ arm64-ld1h-z-p-br         Contiguous load unsigned halfwords to vector (scalar index).                                                     
+ arm64-ld1h-z-p-bz         Gather load unsigned halfwords to vector (vector index).                                                         
+ arm64-ld1h-z-p-ai         Gather load unsigned halfwords to vector (immediate index).                                                      
+ arm64-ld1rb-z-p-bi        Load and broadcast unsigned byte to vector.                                                                      
+ arm64-ld1rd-z-p-bi        Load and broadcast doubleword to vector.                                                                         
+ arm64-ld1rh-z-p-bi        Load and broadcast unsigned halfword to vector.                                                                  
+ arm64-ld1rob-z-p-bi       Contiguous load and replicate thirty-two bytes (immediate index).                                                
+ arm64-ld1rob-z-p-br       Contiguous load and replicate thirty-two bytes (scalar index).                                                   
+ arm64-ld1rod-z-p-bi       Contiguous load and replicate four doublewords (immediate index).                                                
+ arm64-ld1rod-z-p-br       Contiguous load and replicate four doublewords (scalar index).                                                   
+ arm64-ld1roh-z-p-bi       Contiguous load and replicate sixteen halfwords (immediate index).                                               
+ arm64-ld1roh-z-p-br       Contiguous load and replicate sixteen halfwords (scalar index).                                                  
+ arm64-ld1row-z-p-bi       Contiguous load and replicate eight words (immediate index).                                                     
+ arm64-ld1row-z-p-br       Contiguous load and replicate eight words (scalar index).                                                        
+ arm64-ld1rqb-z-p-bi       Contiguous load and replicate sixteen bytes (immediate index).                                                   
+ arm64-ld1rqb-z-p-br       Contiguous load and replicate sixteen bytes (scalar index).                                                      
+ arm64-ld1rqd-z-p-bi       Contiguous load and replicate two doublewords (immediate index).                                                 
+ arm64-ld1rqd-z-p-br       Contiguous load and replicate two doublewords (scalar index).                                                    
+ arm64-ld1rqh-z-p-bi       Contiguous load and replicate eight halfwords (immediate index).                                                 
+ arm64-ld1rqh-z-p-br       Contiguous load and replicate eight halfwords (scalar index).                                                    
+ arm64-ld1rqw-z-p-bi       Contiguous load and replicate four words (immediate index).                                                      
+ arm64-ld1rqw-z-p-br       Contiguous load and replicate four words (scalar index).                                                         
+ arm64-ld1rsb-z-p-bi       Load and broadcast signed byte to vector.                                                                        
+ arm64-ld1rsh-z-p-bi       Load and broadcast signed halfword to vector.                                                                    
+ arm64-ld1rsw-z-p-bi       Load and broadcast signed word to vector.                                                                        
+ arm64-ld1rw-z-p-bi        Load and broadcast unsigned word to vector.                                                                      
+ arm64-ld1sb-z-p-bi        Contiguous load signed bytes to vector (immediate index).                                                        
+ arm64-ld1sb-z-p-br        Contiguous load signed bytes to vector (scalar index).                                                           
+ arm64-ld1sb-z-p-bz        Gather load signed bytes to vector (vector index).                                                               
+ arm64-ld1sb-z-p-ai        Gather load signed bytes to vector (immediate index).                                                            
+ arm64-ld1sh-z-p-bi        Contiguous load signed halfwords to vector (immediate index).                                                    
+ arm64-ld1sh-z-p-br        Contiguous load signed halfwords to vector (scalar index).                                                       
+ arm64-ld1sh-z-p-bz        Gather load signed halfwords to vector (vector index).                                                           
+ arm64-ld1sh-z-p-ai        Gather load signed halfwords to vector (immediate index).                                                        
+ arm64-ld1sw-z-p-bi        Contiguous load signed words to vector (immediate index).                                                        
+ arm64-ld1sw-z-p-br        Contiguous load signed words to vector (scalar index).                                                           
+ arm64-ld1sw-z-p-bz        Gather load signed words to vector (vector index).                                                               
+ arm64-ld1sw-z-p-ai        Gather load signed words to vector (immediate index).                                                            
+ arm64-ld1w-z-p-bi         Contiguous load unsigned words to vector (immediate index).                                                      
+ arm64-ld1w-z-p-br         Contiguous load unsigned words to vector (scalar index).                                                         
+ arm64-ld1w-z-p-bz         Gather load unsigned words to vector (vector index).                                                             
+ arm64-ld1w-z-p-ai         Gather load unsigned words to vector (immediate index).                                                          
+ arm64-ld2b-z-p-bi         Contiguous load two-byte structures to two vectors (immediate index).                                            
+ arm64-ld2b-z-p-br         Contiguous load two-byte structures to two vectors (scalar index).                                               
+ arm64-ld2d-z-p-bi         Contiguous load two-doubleword structures to two vectors (immediate index).                                      
+ arm64-ld2d-z-p-br         Contiguous load two-doubleword structures to two vectors (scalar index).                                         
+ arm64-ld2h-z-p-bi         Contiguous load two-halfword structures to two vectors (immediate index).                                        
+ arm64-ld2h-z-p-br         Contiguous load two-halfword structures to two vectors (scalar index).                                           
+ arm64-ld2w-z-p-bi         Contiguous load two-word structures to two vectors (immediate index).                                            
+ arm64-ld2w-z-p-br         Contiguous load two-word structures to two vectors (scalar index).                                               
+ arm64-ld3b-z-p-bi         Contiguous load three-byte structures to three vectors (immediate index).                                        
+ arm64-ld3b-z-p-br         Contiguous load three-byte structures to three vectors (scalar index).                                           
+ arm64-ld3d-z-p-bi         Contiguous load three-doubleword structures to three vectors (immediate index).                                  
+ arm64-ld3d-z-p-br         Contiguous load three-doubleword structures to three vectors (scalar index).                                     
+ arm64-ld3h-z-p-bi         Contiguous load three-halfword structures to three vectors (immediate index).                                    
+ arm64-ld3h-z-p-br         Contiguous load three-halfword structures to three vectors (scalar index).                                       
+ arm64-ld3w-z-p-bi         Contiguous load three-word structures to three vectors (immediate index).                                        
+ arm64-ld3w-z-p-br         Contiguous load three-word structures to three vectors (scalar index).                                           
+ arm64-ld4b-z-p-bi         Contiguous load four-byte structures to four vectors (immediate index).                                          
+ arm64-ld4b-z-p-br         Contiguous load four-byte structures to four vectors (scalar index).                                             
+ arm64-ld4d-z-p-bi         Contiguous load four-doubleword structures to four vectors (immediate index).                                    
+ arm64-ld4d-z-p-br         Contiguous load four-doubleword structures to four vectors (scalar index).                                       
+ arm64-ld4h-z-p-bi         Contiguous load four-halfword structures to four vectors (immediate index).                                      
+ arm64-ld4h-z-p-br         Contiguous load four-halfword structures to four vectors (scalar index).                                         
+ arm64-ld4w-z-p-bi         Contiguous load four-word structures to four vectors (immediate index).                                          
+ arm64-ld4w-z-p-br         Contiguous load four-word structures to four vectors (scalar index).                                             
+ arm64-ldff1b-z-p-br       Contiguous load first-fault unsigned bytes to vector (scalar index).                                             
+ arm64-ldff1b-z-p-bz       Gather load first-fault unsigned bytes to vector (vector index).                                                 
+ arm64-ldff1b-z-p-ai       Gather load first-fault unsigned bytes to vector (immediate index).                                              
+ arm64-ldff1d-z-p-br       Contiguous load first-fault doublewords to vector (scalar index).                                                
+ arm64-ldff1d-z-p-bz       Gather load first-fault doublewords to vector (vector index).                                                    
+ arm64-ldff1d-z-p-ai       Gather load first-fault doublewords to vector (immediate index).                                                 
+ arm64-ldff1h-z-p-br       Contiguous load first-fault unsigned halfwords to vector (scalar index).                                         
+ arm64-ldff1h-z-p-bz       Gather load first-fault unsigned halfwords to vector (vector index).                                             
+ arm64-ldff1h-z-p-ai       Gather load first-fault unsigned halfwords to vector (immediate index).                                          
+ arm64-ldff1sb-z-p-br      Contiguous load first-fault signed bytes to vector (scalar index).                                               
+ arm64-ldff1sb-z-p-bz      Gather load first-fault signed bytes to vector (vector index).                                                   
+ arm64-ldff1sb-z-p-ai      Gather load first-fault signed bytes to vector (immediate index).                                                
+ arm64-ldff1sh-z-p-br      Contiguous load first-fault signed halfwords to vector (scalar index).                                           
+ arm64-ldff1sh-z-p-bz      Gather load first-fault signed halfwords to vector (vector index).                                               
+ arm64-ldff1sh-z-p-ai      Gather load first-fault signed halfwords to vector (immediate index).                                            
+ arm64-ldff1sw-z-p-br      Contiguous load first-fault signed words to vector (scalar index).                                               
+ arm64-ldff1sw-z-p-bz      Gather load first-fault signed words to vector (vector index).                                                   
+ arm64-ldff1sw-z-p-ai      Gather load first-fault signed words to vector (immediate index).                                                
+ arm64-ldff1w-z-p-br       Contiguous load first-fault unsigned words to vector (scalar index).                                             
+ arm64-ldff1w-z-p-bz       Gather load first-fault unsigned words to vector (vector index).                                                 
+ arm64-ldff1w-z-p-ai       Gather load first-fault unsigned words to vector (immediate index).                                              
+ arm64-ldnf1b-z-p-bi       Contiguous load non-fault unsigned bytes to vector (immediate index).                                            
+ arm64-ldnf1d-z-p-bi       Contiguous load non-fault doublewords to vector (immediate index).                                               
+ arm64-ldnf1h-z-p-bi       Contiguous load non-fault unsigned halfwords to vector (immediate index).                                        
+ arm64-ldnf1sb-z-p-bi      Contiguous load non-fault signed bytes to vector (immediate index).                                              
+ arm64-ldnf1sh-z-p-bi      Contiguous load non-fault signed halfwords to vector (immediate index).                                          
+ arm64-ldnf1sw-z-p-bi      Contiguous load non-fault signed words to vector (immediate index).                                              
+ arm64-ldnf1w-z-p-bi       Contiguous load non-fault unsigned words to vector (immediate index).                                            
+ arm64-ldnt1b-z-p-bi       Contiguous load non-temporal bytes to vector (immediate index).                                                  
+ arm64-ldnt1b-z-p-br       Contiguous load non-temporal bytes to vector (scalar index).                                                     
+ arm64-ldnt1d-z-p-bi       Contiguous load non-temporal doublewords to vector (immediate index).                                            
+ arm64-ldnt1d-z-p-br       Contiguous load non-temporal doublewords to vector (scalar index).                                               
+ arm64-ldnt1h-z-p-bi       Contiguous load non-temporal halfwords to vector (immediate index).                                              
+ arm64-ldnt1h-z-p-br       Contiguous load non-temporal halfwords to vector (scalar index).                                                 
+ arm64-ldnt1w-z-p-bi       Contiguous load non-temporal words to vector (immediate index).                                                  
+ arm64-ldnt1w-z-p-br       Contiguous load non-temporal words to vector (scalar index).                                                     
+ arm64-ldr-p-bi            Load predicate register.                                                                                         
+ arm64-ldr-z-bi            Load vector register.                                                                                            
+ arm64-lsl-z-p-zi          Logical shift left by immediate (predicated).                                                                    
+ arm64-lsl-z-zi            Logical shift left by immediate (unpredicated).                                                                  
+ arm64-lsl-z-p-zz          Logical shift left by vector (predicated).                                                                       
+ arm64-lsl-z-p-zw          Logical shift left by 64-bit wide elements (predicated).                                                         
+ arm64-lsl-z-zw            Logical shift left by 64-bit wide elements (unpredicated).                                                       
+ arm64-lslr-z-p-zz         Reversed logical shift left by vector (predicated).                                                              
+ arm64-lsr-z-p-zi          Logical shift right by immediate (predicated).                                                                   
+ arm64-lsr-z-zi            Logical shift right by immediate (unpredicated).                                                                 
+ arm64-lsr-z-p-zz          Logical shift right by vector (predicated).                                                                      
+ arm64-lsr-z-p-zw          Logical shift right by 64-bit wide elements (predicated).                                                        
+ arm64-lsr-z-zw            Logical shift right by 64-bit wide elements (unpredicated).                                                      
+ arm64-lsrr-z-p-zz         Reversed logical shift right by vector (predicated).                                                             
+ arm64-mad-z-p-zzz         Multiply-add vectors (predicated), writing multiplicand [Zdn = Za + Zdn * Zm].                                   
+ arm64-mla-z-p-zzz         Multiply-add vectors (predicated), writing addend [Zda = Zda + Zn * Zm].                                         
+ arm64-mls-z-p-zzz         Multiply-subtract vectors (predicated), writing addend [Zda = Zda - Zn * Zm].                                    
+ arm64-mov-dupm-z-i        Move logical bitmask immediate to vector (unpredicated): an alias of DUPM.                                       
+ arm64-mov-cpy-z-p-i       Move signed integer immediate to vector elements (merging): an alias of CPY (immediate, merging).                
+ arm64-mov-cpy-z-o-i       Move signed integer immediate to vector elements (zeroing): an alias of CPY (immediate, zeroing).                
+ arm64-mov-dup-z-i         Move signed immediate to vector elements (unpredicated): an alias of DUP (immediate).                            
+ arm64-mov-sel-p-p-pp      Move predicates (merging): an alias of SEL (predicates).                                                         
+ arm64-mov-and-p-p-pp      Move predicates (zeroing): an alias of AND, ANDS (predicates).                                                   
+ arm64-mov-orr-p-p-pp      Move predicate (unpredicated): an alias of ORR, ORRS (predicates).                                               
+ arm64-mov-cpy-z-p-r       Move general-purpose register to vector elements (predicated): an alias of CPY (scalar).                         
+ arm64-mov-dup-z-r         Move general-purpose register to vector elements (unpredicated): an alias of DUP (scalar).                       
+ arm64-mov-cpy-z-p-v       Move SIMD&FP scalar register to vector elements (predicated): an alias of CPY (SIMD&FP scalar).                  
+ arm64-mov-dup-z-zi        Move indexed element or SIMD&FP scalar to vector (unpredicated): an alias of DUP (indexed).                      
+ arm64-mov-sel-z-p-zz      Move vector elements (predicated): an alias of SEL (vectors).                                                    
+ arm64-mov-orr-z-zz        Move vector register (unpredicated): an alias of ORR (vectors, unpredicated).                                    
+ arm64-movprfx-z-p-z       Move prefix (predicated).                                                                                        
+ arm64-movprfx-z-z         Move prefix (unpredicated).                                                                                      
+ arm64-movs-and-p-p-pp     Move predicates (zeroing), setting the condition flags: an alias of AND, ANDS (predicates).                      
+ arm64-movs-orr-p-p-pp     Move predicate (unpredicated), setting the condition flags: an alias of ORR, ORRS (predicates).                  
+ arm64-msb-z-p-zzz         Multiply-subtract vectors (predicated), writing multiplicand [Zdn = Za - Zdn * Zm].                              
+ arm64-mul-z-zi            Multiply by immediate (unpredicated).                                                                            
+ arm64-mul-z-p-zz          Multiply vectors (predicated).                                                                                   
+ arm64-nand-p-p-pp         Bitwise NAND predicates.                                                                                         
+ arm64-neg-z-p-z           Negate (predicated).                                                                                             
+ arm64-nor-p-p-pp          Bitwise NOR predicates.                                                                                          
+ arm64-not-eor-p-p-pp      Bitwise invert predicate: an alias of EOR, EORS (predicates).                                                    
+ arm64-not-z-p-z           Bitwise invert vector (predicated).                                                                              
+ arm64-nots-eor-p-p-pp     Bitwise invert predicate, setting the condition flags: an alias of EOR, EORS (predicates).                       
+ arm64-orn-orr-z-zi        Bitwise inclusive OR with inverted immediate (unpredicated): an alias of ORR (immediate).                        
+ arm64-orn-p-p-pp          Bitwise inclusive OR inverted predicate.                                                                         
+ arm64-orr-z-zi            Bitwise inclusive OR with immediate (unpredicated).                                                              
+ arm64-orr-z-p-zz          Bitwise inclusive OR vectors (predicated).                                                                       
+ arm64-orr-z-zz            Bitwise inclusive OR vectors (unpredicated).                                                                     
+ arm64-orr-p-p-pp          Bitwise inclusive OR predicate.                                                                                  
+ arm64-orv-r-p-z           Bitwise inclusive OR reduction to scalar.                                                                        
+ arm64-pfalse-p            Set all predicate elements to false.                                                                             
+ arm64-pfirst-p-p-p        Set the first active predicate element to true.                                                                  
+ arm64-pnext-p-p-p         Find next active predicate.                                                                                      
+ arm64-prfb-i-p-bi         Contiguous prefetch bytes (immediate index).                                                                     
+ arm64-prfb-i-p-br         Contiguous prefetch bytes (scalar index).                                                                        
+ arm64-prfb-i-p-bz         Gather prefetch bytes (scalar plus vector).                                                                      
+ arm64-prfb-i-p-ai         Gather prefetch bytes (vector plus immediate).                                                                   
+ arm64-prfd-i-p-bi         Contiguous prefetch doublewords (immediate index).                                                               
+ arm64-prfd-i-p-br         Contiguous prefetch doublewords (scalar index).                                                                  
+ arm64-prfd-i-p-bz         Gather prefetch doublewords (scalar plus vector).                                                                
+ arm64-prfd-i-p-ai         Gather prefetch doublewords (vector plus immediate).                                                             
+ arm64-prfh-i-p-bi         Contiguous prefetch halfwords (immediate index).                                                                 
+ arm64-prfh-i-p-br         Contiguous prefetch halfwords (scalar index).                                                                    
+ arm64-prfh-i-p-bz         Gather prefetch halfwords (scalar plus vector).                                                                  
+ arm64-prfh-i-p-ai         Gather prefetch halfwords (vector plus immediate).                                                               
+ arm64-prfw-i-p-bi         Contiguous prefetch words (immediate index).                                                                     
+ arm64-prfw-i-p-br         Contiguous prefetch words (scalar index).                                                                        
+ arm64-prfw-i-p-bz         Gather prefetch words (scalar plus vector).                                                                      
+ arm64-prfw-i-p-ai         Gather prefetch words (vector plus immediate).                                                                   
+ arm64-ptest-p-p           Set condition flags for predicate.                                                                               
+ arm64-ptrue-p-s           Initialise predicate from named constraint.                                                                      
+ arm64-punpkhi-p-p         Unpack and widen half of predicate.                                                                              
+ arm64-rbit-z-p-z          Reverse bits (predicated).                                                                                       
+ arm64-rdffr-p-f           Read the first-fault register.                                                                                   
+ arm64-rdffr-p-p-f         Return predicate of succesfully loaded elements.                                                                 
+ arm64-rdvl-r-i            Read multiple of vector register size to scalar register.                                                        
+ arm64-rev-p-p             Reverse all elements in a predicate.                                                                             
+ arm64-rev-z-z             Reverse all elements in a vector (unpredicated).                                                                 
+ arm64-revb-z-z            Reverse bytes / halfwords / words within elements (predicated).                                                  
+ arm64-sabd-z-p-zz         Signed absolute difference (predicated).                                                                         
+ arm64-saddv-r-p-z         Signed add reduction to scalar.                                                                                  
+ arm64-scvtf-z-p-z         Signed integer convert to floating-point (predicated).                                                           
+ arm64-sdiv-z-p-zz         Signed divide (predicated).                                                                                      
+ arm64-sdivr-z-p-zz        Signed reversed divide (predicated).                                                                             
+ arm64-sdot-z-zzzi         Signed integer indexed dot product.                                                                              
+ arm64-sdot-z-zzz          Signed integer dot product.                                                                                      
+ arm64-sel-p-p-pp          Conditionally select elements from two predicates.                                                               
+ arm64-sel-z-p-zz          Conditionally select elements from two vectors.                                                                  
+ arm64-setffr-f            Initialise the first-fault register to all true.                                                                 
+ arm64-smax-z-zi           Signed maximum with immediate (unpredicated).                                                                    
+ arm64-smax-z-p-zz         Signed maximum vectors (predicated).                                                                             
+ arm64-smaxv-r-p-z         Signed maximum reduction to scalar.                                                                              
+ arm64-smin-z-zi           Signed minimum with immediate (unpredicated).                                                                    
+ arm64-smin-z-p-zz         Signed minimum vectors (predicated).                                                                             
+ arm64-sminv-r-p-z         Signed minimum reduction to scalar.                                                                              
+ arm64-smmla-z-zzz         Signed integer matrix multiply-accumulate.                                                                       
+ arm64-smulh-z-p-zz        Signed multiply returning high half (predicated).                                                                
+ arm64-splice-z-p-zz       Splice two vectors under predicate control.                                                                      
+ arm64-sqadd-z-zi          Signed saturating add immediate (unpredicated).                                                                  
+ arm64-sqadd-z-zz          Signed saturating add vectors (unpredicated).                                                                    
+ arm64-sqdecb-r-rs         Signed saturating decrement scalar by multiple of 8-bit predicate constraint element count.                      
+ arm64-sqdecd-r-rs         Signed saturating decrement scalar by multiple of 64-bit predicate constraint element count.                     
+ arm64-sqdecd-z-zs         Signed saturating decrement vector by multiple of 64-bit predicate constraint element count.                     
+ arm64-sqdech-r-rs         Signed saturating decrement scalar by multiple of 16-bit predicate constraint element count.                     
+ arm64-sqdech-z-zs         Signed saturating decrement vector by multiple of 16-bit predicate constraint element count.                     
+ arm64-sqdecp-r-p-r        Signed saturating decrement scalar by count of true predicate elements.                                          
+ arm64-sqdecp-z-p-z        Signed saturating decrement vector by count of true predicate elements.                                          
+ arm64-sqdecw-r-rs         Signed saturating decrement scalar by multiple of 32-bit predicate constraint element count.                     
+ arm64-sqdecw-z-zs         Signed saturating decrement vector by multiple of 32-bit predicate constraint element count.                     
+ arm64-sqincb-r-rs         Signed saturating increment scalar by multiple of 8-bit predicate constraint element count.                      
+ arm64-sqincd-r-rs         Signed saturating increment scalar by multiple of 64-bit predicate constraint element count.                     
+ arm64-sqincd-z-zs         Signed saturating increment vector by multiple of 64-bit predicate constraint element count.                     
+ arm64-sqinch-r-rs         Signed saturating increment scalar by multiple of 16-bit predicate constraint element count.                     
+ arm64-sqinch-z-zs         Signed saturating increment vector by multiple of 16-bit predicate constraint element count.                     
+ arm64-sqincp-r-p-r        Signed saturating increment scalar by count of true predicate elements.                                          
+ arm64-sqincp-z-p-z        Signed saturating increment vector by count of true predicate elements.                                          
+ arm64-sqincw-r-rs         Signed saturating increment scalar by multiple of 32-bit predicate constraint element count.                     
+ arm64-sqincw-z-zs         Signed saturating increment vector by multiple of 32-bit predicate constraint element count.                     
+ arm64-sqsub-z-zi          Signed saturating subtract immediate (unpredicated).                                                             
+ arm64-sqsub-z-zz          Signed saturating subtract vectors (unpredicated).                                                               
+ arm64-st1b-z-p-bi         Contiguous store bytes from vector (immediate index).                                                            
+ arm64-st1b-z-p-br         Contiguous store bytes from vector (scalar index).                                                               
+ arm64-st1b-z-p-bz         Scatter store bytes from a vector (vector index).                                                                
+ arm64-st1b-z-p-ai         Scatter store bytes from a vector (immediate index).                                                             
+ arm64-st1d-z-p-bi         Contiguous store doublewords from vector (immediate index).                                                      
+ arm64-st1d-z-p-br         Contiguous store doublewords from vector (scalar index).                                                         
+ arm64-st1d-z-p-bz         Scatter store doublewords from a vector (vector index).                                                          
+ arm64-st1d-z-p-ai         Scatter store doublewords from a vector (immediate index).                                                       
+ arm64-st1h-z-p-bi         Contiguous store halfwords from vector (immediate index).                                                        
+ arm64-st1h-z-p-br         Contiguous store halfwords from vector (scalar index).                                                           
+ arm64-st1h-z-p-bz         Scatter store halfwords from a vector (vector index).                                                            
+ arm64-st1h-z-p-ai         Scatter store halfwords from a vector (immediate index).                                                         
+ arm64-st1w-z-p-bi         Contiguous store words from vector (immediate index).                                                            
+ arm64-st1w-z-p-br         Contiguous store words from vector (scalar index).                                                               
+ arm64-st1w-z-p-bz         Scatter store words from a vector (vector index).                                                                
+ arm64-st1w-z-p-ai         Scatter store words from a vector (immediate index).                                                             
+ arm64-st2b-z-p-bi         Contiguous store two-byte structures from two vectors (immediate index).                                         
+ arm64-st2b-z-p-br         Contiguous store two-byte structures from two vectors (scalar index).                                            
+ arm64-st2d-z-p-bi         Contiguous store two-doubleword structures from two vectors (immediate index).                                   
+ arm64-st2d-z-p-br         Contiguous store two-doubleword structures from two vectors (scalar index).                                      
+ arm64-st2h-z-p-bi         Contiguous store two-halfword structures from two vectors (immediate index).                                     
+ arm64-st2h-z-p-br         Contiguous store two-halfword structures from two vectors (scalar index).                                        
+ arm64-st2w-z-p-bi         Contiguous store two-word structures from two vectors (immediate index).                                         
+ arm64-st2w-z-p-br         Contiguous store two-word structures from two vectors (scalar index).                                            
+ arm64-st3b-z-p-bi         Contiguous store three-byte structures from three vectors (immediate index).                                     
+ arm64-st3b-z-p-br         Contiguous store three-byte structures from three vectors (scalar index).                                        
+ arm64-st3d-z-p-bi         Contiguous store three-doubleword structures from three vectors (immediate index).                               
+ arm64-st3d-z-p-br         Contiguous store three-doubleword structures from three vectors (scalar index).                                  
+ arm64-st3h-z-p-bi         Contiguous store three-halfword structures from three vectors (immediate index).                                 
+ arm64-st3h-z-p-br         Contiguous store three-halfword structures from three vectors (scalar index).                                    
+ arm64-st3w-z-p-bi         Contiguous store three-word structures from three vectors (immediate index).                                     
+ arm64-st3w-z-p-br         Contiguous store three-word structures from three vectors (scalar index).                                        
+ arm64-st4b-z-p-bi         Contiguous store four-byte structures from four vectors (immediate index).                                       
+ arm64-st4b-z-p-br         Contiguous store four-byte structures from four vectors (scalar index).                                          
+ arm64-st4d-z-p-bi         Contiguous store four-doubleword structures from four vectors (immediate index).                                 
+ arm64-st4d-z-p-br         Contiguous store four-doubleword structures from four vectors (scalar index).                                    
+ arm64-st4h-z-p-bi         Contiguous store four-halfword structures from four vectors (immediate index).                                   
+ arm64-st4h-z-p-br         Contiguous store four-halfword structures from four vectors (scalar index).                                      
+ arm64-st4w-z-p-bi         Contiguous store four-word structures from four vectors (immediate index).                                       
+ arm64-st4w-z-p-br         Contiguous store four-word structures from four vectors (scalar index).                                          
+ arm64-stnt1b-z-p-bi       Contiguous store non-temporal bytes from vector (immediate index).                                               
+ arm64-stnt1b-z-p-br       Contiguous store non-temporal bytes from vector (scalar index).                                                  
+ arm64-stnt1d-z-p-bi       Contiguous store non-temporal doublewords from vector (immediate index).                                         
+ arm64-stnt1d-z-p-br       Contiguous store non-temporal doublewords from vector (scalar index).                                            
+ arm64-stnt1h-z-p-bi       Contiguous store non-temporal halfwords from vector (immediate index).                                           
+ arm64-stnt1h-z-p-br       Contiguous store non-temporal halfwords from vector (scalar index).                                              
+ arm64-stnt1w-z-p-bi       Contiguous store non-temporal words from vector (immediate index).                                               
+ arm64-stnt1w-z-p-br       Contiguous store non-temporal words from vector (scalar index).                                                  
+ arm64-str-p-bi            Store predicate register.                                                                                        
+ arm64-str-z-bi            Store vector register.                                                                                           
+ arm64-sub-z-zi            Subtract immediate (unpredicated).                                                                               
+ arm64-sub-z-p-zz          Subtract vectors (predicated).                                                                                   
+ arm64-sub-z-zz            Subtract vectors (unpredicated).                                                                                 
+ arm64-subr-z-zi           Reversed subtract from immediate (unpredicated).                                                                 
+ arm64-subr-z-p-zz         Reversed subtract vectors (predicated).                                                                          
+ arm64-sudot-z-zzzi        Signed by unsigned integer indexed dot product.                                                                  
+ arm64-sunpkhi-z-z         Signed unpack and extend half of vector.                                                                         
+ arm64-sxtb-z-p-z          Signed byte / halfword / word extend (predicated).                                                               
+ arm64-tbl-z-zz            Programmable table lookup in single vector table.                                                                
+ arm64-trn1-p-pp           Interleave even or odd elements from two predicates.                                                             
+ arm64-trn1-z-zz           Interleave even or odd elements from two vectors.                                                                
+ arm64-uabd-z-p-zz         Unsigned absolute difference (predicated).                                                                       
+ arm64-uaddv-r-p-z         Unsigned add reduction to scalar.                                                                                
+ arm64-ucvtf-z-p-z         Unsigned integer convert to floating-point (predicated).                                                         
+ arm64-udiv-z-p-zz         Unsigned divide (predicated).                                                                                    
+ arm64-udivr-z-p-zz        Unsigned reversed divide (predicated).                                                                           
+ arm64-udot-z-zzzi         Unsigned integer indexed dot product.                                                                            
+ arm64-udot-z-zzz          Unsigned integer dot product.                                                                                    
+ arm64-umax-z-zi           Unsigned maximum with immediate (unpredicated).                                                                  
+ arm64-umax-z-p-zz         Unsigned maximum vectors (predicated).                                                                           
+ arm64-umaxv-r-p-z         Unsigned maximum reduction to scalar.                                                                            
+ arm64-umin-z-zi           Unsigned minimum with immediate (unpredicated).                                                                  
+ arm64-umin-z-p-zz         Unsigned minimum vectors (predicated).                                                                           
+ arm64-uminv-r-p-z         Unsigned minimum reduction to scalar.                                                                            
+ arm64-ummla-z-zzz         Unsigned integer matrix multiply-accumulate.                                                                     
+ arm64-umulh-z-p-zz        Unsigned multiply returning high half (predicated).                                                              
+ arm64-uqadd-z-zi          Unsigned saturating add immediate (unpredicated).                                                                
+ arm64-uqadd-z-zz          Unsigned saturating add vectors (unpredicated).                                                                  
+ arm64-uqdecb-r-rs         Unsigned saturating decrement scalar by multiple of 8-bit predicate constraint element count.                    
+ arm64-uqdecd-r-rs         Unsigned saturating decrement scalar by multiple of 64-bit predicate constraint element count.                   
+ arm64-uqdecd-z-zs         Unsigned saturating decrement vector by multiple of 64-bit predicate constraint element count.                   
+ arm64-uqdech-r-rs         Unsigned saturating decrement scalar by multiple of 16-bit predicate constraint element count.                   
+ arm64-uqdech-z-zs         Unsigned saturating decrement vector by multiple of 16-bit predicate constraint element count.                   
+ arm64-uqdecp-r-p-r        Unsigned saturating decrement scalar by count of true predicate elements.                                        
+ arm64-uqdecp-z-p-z        Unsigned saturating decrement vector by count of true predicate elements.                                        
+ arm64-uqdecw-r-rs         Unsigned saturating decrement scalar by multiple of 32-bit predicate constraint element count.                   
+ arm64-uqdecw-z-zs         Unsigned saturating decrement vector by multiple of 32-bit predicate constraint element count.                   
+ arm64-uqincb-r-rs         Unsigned saturating increment scalar by multiple of 8-bit predicate constraint element count.                    
+ arm64-uqincd-r-rs         Unsigned saturating increment scalar by multiple of 64-bit predicate constraint element count.                   
+ arm64-uqincd-z-zs         Unsigned saturating increment vector by multiple of 64-bit predicate constraint element count.                   
+ arm64-uqinch-r-rs         Unsigned saturating increment scalar by multiple of 16-bit predicate constraint element count.                   
+ arm64-uqinch-z-zs         Unsigned saturating increment vector by multiple of 16-bit predicate constraint element count.                   
+ arm64-uqincp-r-p-r        Unsigned saturating increment scalar by count of true predicate elements.                                        
+ arm64-uqincp-z-p-z        Unsigned saturating increment vector by count of true predicate elements.                                        
+ arm64-uqincw-r-rs         Unsigned saturating increment scalar by multiple of 32-bit predicate constraint element count.                   
+ arm64-uqincw-z-zs         Unsigned saturating increment vector by multiple of 32-bit predicate constraint element count.                   
+ arm64-uqsub-z-zi          Unsigned saturating subtract immediate (unpredicated).                                                           
+ arm64-uqsub-z-zz          Unsigned saturating subtract vectors (unpredicated).                                                             
+ arm64-usdot-z-zzzi        Unsigned by signed integer indexed dot product.                                                                  
+ arm64-usdot-z-zzz         Unsigned by signed integer dot product.                                                                          
+ arm64-usmmla-z-zzz        Unsigned by signed integer matrix multiply-accumulate.                                                           
+ arm64-uunpkhi-z-z         Unsigned unpack and extend half of vector.                                                                       
+ arm64-uxtb-z-p-z          Unsigned byte / halfword / word extend (predicated).                                                             
+ arm64-uzp1-p-pp           Concatenate even or odd elements from two predicates.                                                            
+ arm64-uzp1-z-zz           Concatenate even or odd elements from two vectors.                                                               
+ arm64-whilele-p-p-rr      While incrementing signed scalar less than or equal to scalar.                                                   
+ arm64-whilelo-p-p-rr      While incrementing unsigned scalar lower than scalar.                                                            
+ arm64-whilels-p-p-rr      While incrementing unsigned scalar lower or same as scalar.                                                      
+ arm64-whilelt-p-p-rr      While incrementing signed scalar less than scalar.                                                               
+ arm64-wrffr-f-p           Write the first-fault register.                                                                                  
+ arm64-zip1-p-pp           Interleave elements from two half predicates.                                                                    
+ arm64-zip1-z-zz           Interleave elements from two half vectors.                                                                       
+ 

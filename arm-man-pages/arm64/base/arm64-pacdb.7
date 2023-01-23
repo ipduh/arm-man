@@ -1,0 +1,87 @@
+.nh
+.TH "PACDB, PACDZB -- A64" "7" " "  "instruction" "general"
+.SS PACDB, PACDZB
+ Pointer Authentication Code for Data address, using key B
+
+ Pointer Authentication Code for Data address, using key B. This instruction
+ computes and inserts a pointer authentication code for a data address, using a
+ modifier and key B.
+
+ The address is in the general-purpose register that is specified by <Xd>.
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACDB.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for PACDB.
+
+ The value zero, for PACDZB.
+
+
+
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|0 1 1|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS PACDB(Z == 0)
+ 
+ PACDB  <Xd>, <Xn|SP>
+.SS PACDZB(Z == 1 && Rn == 11111)
+ 
+ PACDZB  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // PACDB
+     if n == 31 then source_is_sp = TRUE;
+ else // PACDZB
+     if n != 31 then UNDEFINED;
+ 
+ if source_is_sp then
+     X[d] = AddPACDB(X[d], SP[]);
+ else
+     X[d] = AddPACDB(X[d], X[n]);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ if source_is_sp then
+     X[d] = AddPACDB(X[d], SP[]);
+ else
+     X[d] = AddPACDB(X[d], X[n]);
+

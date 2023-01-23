@@ -1,0 +1,71 @@
+.nh
+.TH "CBNZ -- A64" "7" " "  "instruction" "general"
+.SS CBNZ
+ Compare and Branch on Nonzero
+
+ Compare and Branch on Nonzero compares the value in a register with zero, and
+ conditionally branches to a label at a PC-relative offset if the comparison is
+ not equal. It provides a hint that this is not a subroutine call or return.
+ This instruction does not affect the condition flags.
+
+
+
+.SS 19-bit signed PC-relative branch offset - A64 - br19
+ 
+                                                                   
+                                                                   
+                 24                                                
+   31          25 |                                     5         0
+    |           | |                                     |         |
+  |.|0 1 1 0 1 0|1|. . . . . . . . . . . . . . . . . . .|. . . . .|
+  |             | |                                     |
+  `-sf          | `-imm19                               `-Rt
+                `-op
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CBNZ  <Wt>, <label>
+.SS 64-bit(sf == 1)
+ 
+ CBNZ  <Xt>, <label>
+ 
+ integer t = UInt(Rt);
+ integer datasize = if sf == '1' then 64 else 32;
+ boolean iszero = (op == '0');
+ bits(64) offset = SignExtend(imm19:'00', 64);
+ 
+ bits(datasize) operand1 = X[t];
+ 
+ if IsZero(operand1) == iszero then
+     BranchTo(PC[] + offset, BranchType_DIR);
+ 
+
+.SS Assembler Symbols
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be tested, encoded in
+  the "Rt" field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be tested, encoded in
+  the "Rt" field.
+
+ <label>
+  Encoded in imm19
+  Is the program label to be conditionally branched to. Its offset from the
+  address of this instruction, in the range +/-1MB, is encoded as "imm19" times
+  4.
+
+
+
+.SS Operation
+
+ bits(datasize) operand1 = X[t];
+ 
+ if IsZero(operand1) == iszero then
+     BranchTo(PC[] + offset, BranchType_DIR);
+

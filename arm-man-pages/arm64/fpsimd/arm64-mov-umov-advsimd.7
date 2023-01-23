@@ -1,0 +1,87 @@
+.nh
+.TH "MOV (to general) -- A64" "7" " "  "alias" "advsimd"
+.SS MOV (to general)
+ MOV is an alias of UMOV
+
+ Move vector element to general-purpose register
+
+ Move vector element to general-purpose register. This instruction reads the
+ unsigned integer from the source SIMD&FP register, zero-extends it to form a
+ 32-bit or 64-bit value, and writes the result to the destination general-
+ purpose register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - advsimd
+ 
+                                             10                    
+       29                                  11 |                    
+     30 |                          15    12 | |                    
+   31 | |              21        16 |  13 | | |         5         0
+    | | |               |         | |   | | | |         |         |
+   0|.|0|0 1 1 1 0 0 0 0|x x x 0 0|0|0 1|1|1|1|. . . . .|. . . . .|
+    | |                 |           |   | |   |         |
+    | `-op              `-imm5      |   | |   `-Rn      `-Rd
+    `-Q                             |   | `-imm4<0>
+                                    |   `-imm4<1>
+                                    `-imm4<3:2>
+  
+  
+ 
+.SS 32-bit(Q == 0 && imm5 == xx100)
+ 
+ MOV  <Wd>, <Vn>.S[<index>]
+ 
+ UMOV <Wd>, <Vn>.S[<index>]
+.SS 64-reg,UMOV-64-reg(Q == 1 && imm5 == x1000)
+ 
+ MOV  <Xd>, <Vn>.D[<index>]
+ 
+ UMOV <Xd>, <Vn>.D[<index>]
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <index>
+  Encoded in imm5
+  For the 32-bit variant: is the element index encoded in "imm5<4:3>".
+
+ <index>
+  Encoded in imm5
+  For the 64-reg,UMOV-64-reg variant: is the element index encoded in "imm5<4>".
+
+
+
+.SS Operation
+
+ The manual of UMOV gives pseudocode for MOV.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

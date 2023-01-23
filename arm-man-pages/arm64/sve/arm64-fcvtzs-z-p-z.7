@@ -1,0 +1,285 @@
+.nh
+.TH "FCVTZS" "7" " "  "instruction" "sve"
+.SS FCVTZS
+ Floating-point convert to signed integer, rounding toward zero (predicated)
+
+ Convert to the signed integer nearer to zero from each active floating-point
+ element of the source vector, and place the results in the corresponding
+ elements of the destination vector. Inactive elements in the destination vector
+ register remain unmodified.
+
+ If the input and result types have a different size the smaller type is held
+ unpacked in the least significant bits of elements of the larger size. When the
+ input is the smaller type the upper bits of each source element are ignored.
+ When the result is the smaller type the results are sign-extended to fill each
+ destination element.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+It has encodings from 7 classes: Half-precision to 16-bit, Half-precision to 32-bit, Half-precision to 64-bit, Single-precision to 32-bit, Single-precision to 64-bit, Double-precision to 32-bit and Double-precision to 64-bit
+
+.SS Half-precision to 16-bit - A64 - fcvtzs_z_p_z_fp162h
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|0|1|0 1 1|0|1|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Half-precision to 16-bit
+ 
+ FCVTZS  <Zd>.H, <Pg>/M, <Zn>.H
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 16;
+ integer d_esize = 16;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Half-precision to 32-bit - A64 - fcvtzs_z_p_z_fp162w
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|0|1|0 1 1|1|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Half-precision to 32-bit
+ 
+ FCVTZS  <Zd>.S, <Pg>/M, <Zn>.H
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 16;
+ integer d_esize = 32;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Half-precision to 64-bit - A64 - fcvtzs_z_p_z_fp162x
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|0|1|0 1 1|1|1|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Half-precision to 64-bit
+ 
+ FCVTZS  <Zd>.D, <Pg>/M, <Zn>.H
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 16;
+ integer d_esize = 64;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Single-precision to 32-bit - A64 - fcvtzs_z_p_z_s2w
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|0|0 1 1|1|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Single-precision to 32-bit
+ 
+ FCVTZS  <Zd>.S, <Pg>/M, <Zn>.S
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 32;
+ integer d_esize = 32;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Single-precision to 64-bit - A64 - fcvtzs_z_p_z_s2x
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 1 1|1|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Single-precision to 64-bit
+ 
+ FCVTZS  <Zd>.D, <Pg>/M, <Zn>.S
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 32;
+ integer d_esize = 64;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Double-precision to 32-bit - A64 - fcvtzs_z_p_z_d2w
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 1 1|0|0|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Double-precision to 32-bit
+ 
+ FCVTZS  <Zd>.S, <Pg>/M, <Zn>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 64;
+ integer d_esize = 32;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+.SS Double-precision to 64-bit - A64 - fcvtzs_z_p_z_d2x
+ 
+                                 16                                
+                     22        17 |                                
+                   23 |      18 | |                                
+                 24 | |    19 | | |    13    10         5         0
+                  | | |     | | | |     |     |         |         |
+   0 1 1 0 0 1 0 1|1|1|0 1 1|1|1|0|1 0 1|. . .|. . . . .|. . . . .|
+                  | |       | | |       |     |         |
+                  | |       | | `-int_U `-Pg  `-Zn      `-Zd
+                  | |       | `-opc2<0>
+                  | |       `-opc2<1>
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS Double-precision to 64-bit
+ 
+ FCVTZS  <Zd>.D, <Pg>/M, <Zn>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ integer s_esize = 64;
+ integer d_esize = 64;
+ boolean unsigned = FALSE;
+ FPRounding rounding = FPRounding_ZERO;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         bits(d_esize) res = FPToFixed(element<s_esize-1:0>, 0, unsigned, FPCR, rounding);
+         Elem[result, e, esize] = Extend(res, unsigned);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand  = Z[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         bits(d_esize) res = FPToFixed(element<s_esize-1:0>, 0, unsigned, FPCR, rounding);
+         Elem[result, e, esize] = Extend(res, unsigned);
+ 
+ Z[d] = result;
+

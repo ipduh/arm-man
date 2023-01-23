@@ -1,0 +1,147 @@
+.nh
+.TH "VMLAL (integer) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMLAL (integer)
+ Vector Multiply Accumulate Long (integer)
+
+ Vector Multiply Accumulate Long multiplies corresponding elements in two
+ vectors, and add the products to the corresponding element of the destination
+ vector. The destination vector element is twice as long as the elements that
+ are multiplied.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ Related encodings: See Advanced SIMD data-processing for the T32 instruction
+ set, or Advanced SIMD data-processing for the A32 instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12  10 9 8 7 6 5 4       0
+                | | | |   |       |       |   | | | | | | |       |
+   1 1 1 1 0 0 1|.|1|.|. .|. . . .|. . . .|1 0|0|0|.|0|.|0|. . . .|
+                |   | |   |       |           |   |   |   |
+                `-U | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS A1
+ 
+ VMLAL{<c>}{<q>}.<type><size> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ if Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');  long_destination = TRUE;  unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = 1;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12  10 9 8 7 6 5 4       0
+        | |         | |   |       |       |   | | | | | | |       |
+   1 1 1|.|1 1 1 1 1|.|. .|. . . .|. . . .|1 0|0|0|.|0|.|0|. . . .|
+        |           | |   |       |           |   |   |   |
+        `-U         | |   `-Vn    `-Vd        |   `-N `-M `-Vm
+                    | `-size(!= 11)           `-op
+                    `-D
+  
+  
+ 
+.SS T1
+ 
+ VMLAL{<c>}{<q>}.<type><size> <Qd>, <Dn>, <Dm>
+ 
+ if size == '11' then SEE "Related encodings";
+ if Vd<0> == '1' then UNDEFINED;
+ add = (op == '0');  long_destination = TRUE;  unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = 1;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             product = Int(Elem[Din[n+r],e,esize],unsigned) * Int(Elem[Din[m+r],e,esize],unsigned);
+             addend = if add then product else -product;
+             if long_destination then
+                 Elem[Q[d>>1],e,2*esize] = Elem[Qin[d>>1],e,2*esize] + addend;
+             else
+                 Elem[D[d+r],e,esize] = Elem[Din[d+r],e,esize] + addend;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <type>
+  The data type for the elements of the operands. It must be one of:
+  SOptional in encoding T1/A1. Encoded as U = 0 in encoding T2/A2.
+  UOptional in encoding T1/A1. Encoded as U = 1 in encoding T2/A2.
+  IAvailable only in encoding T1/A1.
+
+ <size>
+  The data size for the elements of the operands. It must be one of:
+  8Encoded as size = 0b00.                                         16Encoded as
+  size = 0b01.                                         32Encoded as size = 0b10.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             product = Int(Elem[Din[n+r],e,esize],unsigned) * Int(Elem[Din[m+r],e,esize],unsigned);
+             addend = if add then product else -product;
+             if long_destination then
+                 Elem[Q[d>>1],e,2*esize] = Elem[Qin[d>>1],e,2*esize] + addend;
+             else
+                 Elem[D[d+r],e,esize] = Elem[Din[d+r],e,esize] + addend;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

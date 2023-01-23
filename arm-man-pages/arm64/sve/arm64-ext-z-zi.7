@@ -1,0 +1,97 @@
+.nh
+.TH "EXT" "7" " "  "instruction" "sve"
+.SS EXT
+ Extract vector from pair of vectors
+
+ Copy the indexed byte up to the last byte of the first source vector to the
+ bottom of the result vector, then fill the remainder of the result starting
+ from the first byte of the second source vector. The result is placed
+ destructively in the first source vector. This instruction is unpredicated.
+
+ An index that is greater than or equal to the vector length in bytes is treated
+ as zero, leaving the destination and first source vector unmodified.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - ext_z_zi_des
+ 
+                                                                   
+                                                                   
+                                                                   
+                       21        16    13    10         5         0
+                        |         |     |     |         |         |
+   0 0 0 0 0 1 0 1 0 0 1|. . . . .|0 0 0|. . .|. . . . .|. . . . .|
+                        |               |     |         |
+                        `-imm8h         |     `-Zm      `-Zdn
+                                        `-imm8l
+  
+  
+ 
+.SS SVE
+ 
+ EXT     <Zdn>.B, <Zdn>.B, <Zm>.B, #<imm>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8;
+ integer dn = UInt(Zdn);
+ integer m = UInt(Zm);
+ integer position = UInt(imm8h:imm8l);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ if position >= elements then
+     position = 0;
+ 
+ position = position << 3;
+ bits(VL*2) concat = operand2 : operand1;
+ result = concat<position+VL-1:position>;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the first source and destination scalable vector register,
+  encoded in the "Zdn" field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+ <imm>
+  Encoded in imm8h:imm8l
+  Is the unsigned immediate operand, in the range 0 to 255, encoded in the
+  "imm8h:imm8l" fields.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ if position >= elements then
+     position = 0;
+ 
+ position = position << 3;
+ bits(VL*2) concat = operand2 : operand1;
+ result = concat<position+VL-1:position>;
+ 
+ Z[dn] = result;
+

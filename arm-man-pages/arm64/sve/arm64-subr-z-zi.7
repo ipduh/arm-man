@@ -1,0 +1,110 @@
+.nh
+.TH "SUBR (immediate)" "7" " "  "instruction" "sve"
+.SS SUBR (immediate)
+ Reversed subtract from immediate (unpredicated)
+
+ Reversed subtract from an unsigned immediate each element of the source vector,
+ and destructively place the results in the corresponding elements of the source
+ vector. This instruction is unpredicated.
+
+ The immediate is an unsigned value in the range 0 to 255, and for element
+ widths of 16 bits or higher it may also be a positive multiple of 256 in the
+ range 256 to 65280.
+
+ The immediate is encoded in 8 bits with an optional left shift by 8. The
+ preferred disassembly when the shift option is specified is "#<uimm8>, LSL #8".
+ However an assembler and disassembler may also allow use of the shifted 16-bit
+ value unless the immediate is 0 and the shift amount is 8, which must be
+ unambiguously described as "#0, LSL #8".
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - subr_z_zi_
+ 
+                                                                   
+                                                                   
+                                 16    13                          
+                 24  22    19  17 |  14 |               5         0
+                  |   |     |   | |   | |               |         |
+   0 0 1 0 0 1 0 1|. .|1 0 0|0 1|1|1 1|.|. . . . . . . .|. . . . .|
+                  |         |   |     | |               |
+                  `-size    |   |     | `-imm8          `-Zdn
+                            |   |     `-sh
+                            |   `-opc<0>
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ SUBR    <Zdn>.<T>, <Zdn>.<T>, #<imm>{, <shift>}
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size:sh == '001' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer dn = UInt(Zdn);
+ integer imm = UInt(imm8);
+ if sh == '1' then imm = imm << 8;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = UInt(Elem[operand1, e, esize]);
+     Elem[result, e, esize] = (imm - element1)<esize-1:0>;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <imm>
+  Encoded in imm8
+  Is an unsigned immediate in the range 0 to 255, encoded in the "imm8" field.
+
+ <shift>
+  Encoded in sh
+  Is the optional left shift to apply to the immediate, defaulting to LSL #0 and
+
+  sh <shift> 
+  0  LSL #0  
+  1  LSL #8  
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = UInt(Elem[operand1, e, esize]);
+     Elem[result, e, esize] = (imm - element1)<esize-1:0>;
+ 
+ Z[dn] = result;
+

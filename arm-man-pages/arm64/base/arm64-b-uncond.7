@@ -1,0 +1,51 @@
+.nh
+.TH "B -- A64" "7" " "  "instruction" "general"
+.SS B
+ Branch
+
+ Branch causes an unconditional branch to a label at a PC-relative offset, with
+ a hint that this is not a subroutine call or return.
+
+
+
+.SS 26-bit signed PC-relative branch offset - A64 - B_only_branch_imm
+ 
+                                                                   
+                                                                   
+                                                                   
+   31        26                                                   0
+    |         |                                                   |
+  |0|0 0 1 0 1|. . . . . . . . . . . . . . . . . . . . . . . . . .|
+  |           |
+  `-op        `-imm26
+  
+  
+ 
+.SS 26-bit signed PC-relative branch offset
+ 
+ B  <label>
+ 
+ BranchType branch_type = if op == '1' then BranchType_DIRCALL else BranchType_DIR;
+ bits(64) offset = SignExtend(imm26:'00', 64);
+ 
+ if branch_type == BranchType_DIRCALL then X[30] = PC[] + 4;
+ 
+ BranchTo(PC[] + offset, branch_type);
+ 
+
+.SS Assembler Symbols
+
+ <label>
+  Encoded in imm26
+  Is the program label to be unconditionally branched to. Its offset from the
+  address of this instruction, in the range +/-128MB, is encoded as "imm26"
+  times 4.
+
+
+
+.SS Operation
+
+ if branch_type == BranchType_DIRCALL then X[30] = PC[] + 4;
+ 
+ BranchTo(PC[] + offset, branch_type);
+

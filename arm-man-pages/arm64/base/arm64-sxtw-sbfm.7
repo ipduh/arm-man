@@ -1,0 +1,67 @@
+.nh
+.TH "SXTW -- A64" "7" " "  "alias" "general"
+.SS SXTW
+ SXTW is an alias of SBFM
+
+ Sign Extend Word
+
+ Sign Extend Word sign-extends a word to the size of the register, and writes
+ the result to the destination register.
+
+
+
+.SS With sign replication to left and zeros to right - A64 - signed_fill
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |1|0 0|1 0 0 1 1 0|1|0 0 0 0 0 0|0 1 1 1 1 1|. . . . .|. . . . .|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      `-imms      `-Rn      `-Rd
+  `-sf              `-N
+  
+  
+ 
+.SS 64-bit
+ 
+ SXTW  <Xd>, <Wn>
+ 
+ SBFM <Xd>, <Xn>, #0, #31
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SBFM gives pseudocode for SXTW.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

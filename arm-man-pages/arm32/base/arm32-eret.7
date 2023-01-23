@@ -1,0 +1,126 @@
+.nh
+.TH "ERET -- AArch32" "7" " "  "instruction" "general"
+.SS ERET
+ Exception Return
+
+ Exception Return.
+
+ The PE branches to the address held in the register holding the preferred
+ return address, and restores PSTATE from SPSR_<current_mode>.
+
+ The register holding the preferred return address is:
+
+ ELR_hyp, when executing in Hyp mode.
+
+
+ The PE checks SPSR_<current_mode> for an illegal return event. See Illegal
+ return events from AArch32 state.
+
+ Exception Return is constrained unpredictable in User mode and System mode.
+
+ In Debug state, the T1 encoding of ERET executes the DRPS operation.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+         28              20 | | |16 | | |12 | | 9 8       4 3 2 1 0
+          |               | | | | | | | | | | | | |       | | | | |
+  |. . . .|0 0 0 1 0 1 1 0|0|0|0|0|0|0|0|0|0|0|0|0|0 1 1 0|1|1|1|0|
+  |
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ ERET{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                                           11                      
+                                         12 |                      
+                                       13 | |                      
+                         05      01  14 | | |10 9 8               0
+                          |       |   | | | | | | |               |
+   1 1 1 1 0 0 1 1 1 1 0 1|1 1 1 0|1 0|0|0|1|1|1|1|0 0 0 0 0 0 0 0|
+                          |                       |
+                          `-Rn                    `-imm8
+  
+  
+ 
+.SS T1
+ 
+ ERET{<c>}{<q>}
+ 
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if !Halted() then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;                        // UNDEFINED or NOP
+         else
+             new_pc_value = if PSTATE.EL == EL2 then ELR_hyp else R[14];
+             AArch32.ExceptionReturn(new_pc_value, SPSR[]);
+     else                                          // Perform DRPS operation in Debug state
+         if PSTATE.M == M32_User then
+             UNDEFINED;
+         elsif PSTATE.M == M32_System then
+             UNPREDICTABLE;                        // UNDEFINED or NOP
+         else
+             SynchronizeContext();
+             SetPSTATEFromPSR(SPSR[]);
+             // PSTATE.{N,Z,C,V,Q,GE,SS,A,I,F} are not observable and ignored in Debug state, so
+             // behave as if UNKNOWN.
+             PSTATE.<N,Z,C,V,Q,GE,SS,A,I,F> = bits(13) UNKNOWN;
+             // In AArch32 Debug state, all instructions are T32 and unconditional.
+             PSTATE.IT = '00000000';  PSTATE.T = '1';        // PSTATE.J is RES0
+             DLR = bits(32) UNKNOWN;  DSPSR = bits(32) UNKNOWN;
+             UpdateEDSCRFields();                  // Update EDSCR PE state flags
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if !Halted() then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;                        // UNDEFINED or NOP
+         else
+             new_pc_value = if PSTATE.EL == EL2 then ELR_hyp else R[14];
+             AArch32.ExceptionReturn(new_pc_value, SPSR[]);
+     else                                          // Perform DRPS operation in Debug state
+         if PSTATE.M == M32_User then
+             UNDEFINED;
+         elsif PSTATE.M == M32_System then
+             UNPREDICTABLE;                        // UNDEFINED or NOP
+         else
+             SynchronizeContext();
+             SetPSTATEFromPSR(SPSR[]);
+             // PSTATE.{N,Z,C,V,Q,GE,SS,A,I,F} are not observable and ignored in Debug state, so
+             // behave as if UNKNOWN.
+             PSTATE.<N,Z,C,V,Q,GE,SS,A,I,F> = bits(13) UNKNOWN;
+             // In AArch32 Debug state, all instructions are T32 and unconditional.
+             PSTATE.IT = '00000000';  PSTATE.T = '1';        // PSTATE.J is RES0
+             DLR = bits(32) UNKNOWN;  DSPSR = bits(32) UNKNOWN;
+             UpdateEDSCRFields();                  // Update EDSCR PE state flags
+

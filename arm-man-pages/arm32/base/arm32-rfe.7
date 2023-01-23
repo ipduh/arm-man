@@ -1,0 +1,167 @@
+.nh
+.TH "RFE, RFEDA, RFEDB, RFEIA, RFEIB -- AArch32" "7" " "  "instruction" "general"
+.SS RFE, RFEDA, RFEDB, RFEIA, RFEIB
+ Return From Exception
+
+ Return From Exception loads two consecutive memory locations using an address
+ in a base register:
+
+ The word loaded from the higher address is used to restore PSTATE.  This word
+ must be in the format of an SPSR.
+
+
+ An address adjusted by the size of the data loaded can optionally be written
+ back to the base register.
+
+ The PE checks the value of the word loaded from the higher address for an
+ illegal return event. See Illegal return events from AArch32 state.
+
+ RFE is undefined in Hyp mode and constrained unpredictable in User mode.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16                     5         0
+                | | | | | |       |                     |         |
+   1 1 1 1 1 0 0|.|.|0|.|1|. . . .|0 0 0 0 1 0 1 0 0 0 0|0 0 0 0 0|
+                | | | | | |       |                     |
+                | | | | | `-Rn    `-op                  `-mode
+                | | | | `-L
+                | | | `-W
+                | | `-S
+                | `-U
+                `-P
+  
+  
+ 
+.SS Decrement After(P == 0 && U == 0)
+ 
+ RFEDA{<c>}{<q>} <Rn>{!}
+.SS Decrement Before(P == 1 && U == 0)
+ 
+ RFEDB{<c>}{<q>} <Rn>{!}
+.SS Increment After(P == 0 && U == 1)
+ 
+ RFE{IA}{<c>}{<q>} <Rn>{!}
+.SS Increment Before(P == 1 && U == 1)
+ 
+ RFEIB{<c>}{<q>} <Rn>{!}
+ 
+ n = UInt(Rn);
+ wback = (W == '1');  increment = (U == '1');  wordhigher = (P == U);
+ if n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                           0
+                |   | | | |       | | |                           |
+   1 1 1 0 1 0 0|0 0|0|.|1|. . . .|1|1|0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+                |     | | |       | | |
+                `-opc | | `-Rn    | | `-register_list
+                      | `-L       | `-M
+                      `-W         `-P
+  
+  
+ 
+.SS T1
+ 
+ RFEDB{<c>}{<q>} <Rn>{!}
+ 
+ n = UInt(Rn);  wback = (W == '1');  increment = FALSE;  wordhigher = FALSE;
+ if n == 15 then UNPREDICTABLE;
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                           0
+                |   | | | |       | | |                           |
+   1 1 1 0 1 0 0|1 1|0|.|1|. . . .|1|1|0 0 0 0 0 0 0 0 0 0 0 0 0 0|
+                |     | | |       | | |
+                `-opc | | `-Rn    | | `-register_list
+                      | `-L       | `-M
+                      `-W         `-P
+  
+  
+ 
+.SS T2
+ 
+ RFE{IA}{<c>}{<q>} <Rn>{!}
+ 
+ n = UInt(Rn);  wback = (W == '1');  increment = TRUE;  wordhigher = FALSE;
+ if n == 15 then UNPREDICTABLE;
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.EL == EL0 then
+         UNPREDICTABLE;                        // UNDEFINED or NOP
+     else
+         address = if increment then R[n] else R[n]-8;
+         if wordhigher then address = address+4;
+         new_pc_value = MemA[address,4];
+         spsr = MemA[address+4,4];
+         if wback then R[n] = if increment then R[n]+8 else R[n]-8;
+         AArch32.ExceptionReturn(new_pc_value, spsr);
+ 
+
+.SS Assembler Symbols
+
+ IA
+  For encoding A1: is an optional suffix to indicate the Increment After
+  variant.
+
+ IA
+  For encoding T2: is an optional suffix for the Increment After form.
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. <c> must be AL or
+  omitted.
+
+ <c>
+  For encoding T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ !
+  Encoded in W
+  The address adjusted by the size of the data loaded is written back to the
+  base register. If specified, it is encoded in the "W" field as 1, otherwise
+  this field defaults to 0.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if PSTATE.EL == EL2 then
+         UNDEFINED;
+     elsif PSTATE.EL == EL0 then
+         UNPREDICTABLE;                        // UNDEFINED or NOP
+     else
+         address = if increment then R[n] else R[n]-8;
+         if wordhigher then address = address+4;
+         new_pc_value = MemA[address,4];
+         spsr = MemA[address+4,4];
+         if wback then R[n] = if increment then R[n]+8 else R[n]-8;
+         AArch32.ExceptionReturn(new_pc_value, spsr);
+

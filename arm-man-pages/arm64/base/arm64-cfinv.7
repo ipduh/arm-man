@@ -1,0 +1,51 @@
+.nh
+.TH "CFINV -- A64" "7" " "  "instruction" "system"
+.SS CFINV
+ Invert Carry Flag
+
+ Invert Carry Flag. This instruction inverts the value of the PSTATE.C flag.
+
+
+
+.SS System - A64 - CFINV_M_pstate
+ 
+                           19                                      
+                         20 |                                      
+                       21 | |                                      
+                     22 | | |    16      12       8     5         0
+                      | | | |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0|0|0 0 0|0 1 0 0|0 0 0 0|0 0 0|1 1 1 1 1|
+                      | | | |     |       |       |     |
+                      | | | `-op1 `-CRn   `-CRm   `-op2 `-Rt 
+                      | | `-op0<0>
+                      | `-op0<1>
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ CFINV
+ 
+ if !HaveFlagManipulateExt() then UNDEFINED;
+ 
+ PSTATE.C = NOT(PSTATE.C);
+ 
+
+
+.SS Operation
+
+ PSTATE.C = NOT(PSTATE.C);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

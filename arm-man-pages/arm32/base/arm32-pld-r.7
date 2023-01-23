@@ -1,0 +1,164 @@
+.nh
+.TH "PLD, PLDW (register) -- AArch32" "7" " "  "instruction" "general"
+.SS PLD, PLDW (register)
+ Preload Data (register)
+
+ Preload Data (register) signals the memory system that data memory accesses
+ from a specified address are likely in the near future. The memory system can
+ respond by taking actions that are expected to speed up the memory accesses
+ when they do occur, such as preloading the cache line containing the specified
+ address into the data cache.
+
+ The PLD instruction signals that the likely memory access is a read, and the
+ PLDW instruction signals that it is a write.
+
+ The effect of a PLD or PLDW instruction is implementation defined.  For more
+ information, see Preloading caches.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                13                          
+                   23 |              14 |                          
+                 24 | |            15 | |                          
+               25 | | |  20      16 | | |12         7   5 4       0
+                | | | |   |       | | | | |         |   | |       |
+   1 1 1 1 0 1 1|1|.|.|0 1|. . . .|1|1|1|1|. . . . .|. .|0|. . . .|
+                | | |     |               |         |     |
+                | | `-R   `-Rn            `-imm5    |     `-Rm
+                | `-U                               `-stype
+                `-D
+  
+  
+ 
+.SS Preload read, optional shift or rotate(R == 1 && !(imm5 == 00000 && stype == 11))
+ 
+ PLD{<c>}{<q>} [<Rn>, {+/-}<Rm> {, <shift> #<amount>}]
+.SS Preload read, rotate right with extend(R == 1 && imm5 == 00000 && stype == 11)
+ 
+ PLD{<c>}{<q>} [<Rn>, {+/-}<Rm> , RRX]
+.SS Preload write, optional shift or rotate(R == 0 && !(imm5 == 00000 && stype == 11))
+ 
+ PLDW{<c>}{<q>} [<Rn>, {+/-}<Rm> {, <shift> #<amount>}]
+.SS Preload write, rotate right with extend(R == 0 && imm5 == 00000 && stype == 11)
+ 
+ PLDW{<c>}{<q>} [<Rn>, {+/-}<Rm> , RRX]
+ 
+ n = UInt(Rn);  m = UInt(Rm);  add = (U == '1');  is_pldw = (R == '0');
+ (shift_t, shift_n) = DecodeImmShift(stype, imm5);
+ if m == 15 || (n == 15 && is_pldw) then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+                     07 | |                                        
+                   08 | | |      01      12           6   4       0
+                    | | | |       |       |           |   |       |
+   1 1 1 1 1 0 0 0 0|0|.|1|. . . .|1 1 1 1|0 0 0 0 0 0|. .|. . . .|
+                      | | |       |                   |   |
+                      | | |       `-Rt                |   `-Rm
+                      | | `-Rn(!= 1111)               `-imm2
+                      | `-L
+                      `-W
+  
+  
+ 
+.SS Preload read(W == 0)
+ 
+ PLD{<c>}{<q>} [<Rn>, {+}<Rm> {, LSL #<amount>}]
+.SS Preload write(W == 1)
+ 
+ PLDW{<c>}{<q>} [<Rn>, {+}<Rm> {, LSL #<amount>}]
+ 
+ if Rn == '1111' then SEE "PLD (literal)";
+ n = UInt(Rn);  m = UInt(Rm);  add = TRUE;  is_pldw = (W == '1');
+ (shift_t, shift_n) = (SRType_LSL, UInt(imm2));
+ if m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+     address = if add then (R[n] + offset) else (R[n] - offset);
+     if is_pldw then
+         Hint_PreloadDataForWrite(address);
+     else
+         Hint_PreloadData(address);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. <c> must be AL or
+  omitted.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the general-purpose base register, encoded in the "Rn"
+  field. The PC can be used.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the general-purpose base register, encoded in the "Rn"
+  field.
+
+ +/-
+  Encoded in U
+  Specifies the index register is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ +
+  Specifies the index register is added to the base register.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose index register, encoded in the "Rm" field.
+
+ <shift>
+  Encoded in stype
+  Is the type of shift to be applied to the index register,
+
+  stype <shift> 
+  00    LSL     
+  01    LSR     
+  10    ASR     
+  11    ROR     
+
+ <amount>
+  Encoded in imm5
+  For encoding A1: is the shift amount, in the range 1 to 31 (when <shift> = LSL
+  or ROR) or 1 to 32 (when <shift> = LSR or ASR) encoded in the "imm5" field as
+  <amount> modulo 32.
+
+ <amount>
+  Encoded in imm2
+  For encoding T1: is the shift amount, in the range 0 to 3, defaulting to 0 and
+  encoded in the "imm2" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+     address = if add then (R[n] + offset) else (R[n] - offset);
+     if is_pldw then
+         Hint_PreloadDataForWrite(address);
+     else
+         Hint_PreloadData(address);
+

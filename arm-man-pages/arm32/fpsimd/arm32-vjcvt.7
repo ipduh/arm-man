@@ -1,0 +1,108 @@
+.nh
+.TH "VJCVT -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VJCVT
+ Javascript Convert to signed fixed-point, rounding toward Zero
+
+ Javascript Convert to signed fixed-point, rounding toward Zero. This
+ instruction converts the double-precision floating-point value in the SIMD&FP
+ source register to a 32-bit signed integer using the Round towards Zero
+ rounding mode, and writes the result to the SIMD&FP destination register. If
+ the result is too large to be accommodated as a signed 32-bit integer, then the
+ result is the integer modulo 232, as held in a 32-bit signed integer.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPSCR, the exception results in either a flag being set or a
+ synchronous exception being generated. For more information, see Floating-point
+ exceptions and exception traps.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|1|0 0 1|. . . .|1 0|1 1|1|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS A1
+ 
+ VJCVT{<q>}.S32.F64 <Sd>, <Dm>
+ 
+ if !HaveFJCVTZSExt() then UNDEFINED;
+ if cond != '1110' then UNPREDICTABLE;
+ d = UInt(Vd:D);  m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|1|0 0 1|. . . .|1 0|1 1|1|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS T1
+ 
+ VJCVT{<q>}.S32.F64 <Sd>, <Dm>
+ 
+ if !HaveFJCVTZSExt() then UNDEFINED;
+ if InITBlock() then UNPREDICTABLE;
+ d = UInt(Vd:D);  m = UInt(M:Vm);
+ 
+ EncodingSpecificOperations();
+ CheckVFPEnabled(TRUE);
+ bits(64) fltval = D[m];
+ bits(32) intval;
+ bit      Z;
+ (intval, Z) = FPToFixedJS(fltval, FPSCR, FALSE);
+ FPSCR<31:28> = '0':Z:'00';
+ S[d] = intval;
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();
+ CheckVFPEnabled(TRUE);
+ bits(64) fltval = D[m];
+ bits(32) intval;
+ bit      Z;
+ (intval, Z) = FPToFixedJS(fltval, FPSCR, FALSE);
+ FPSCR<31:28> = '0':Z:'00';
+ S[d] = intval;
+

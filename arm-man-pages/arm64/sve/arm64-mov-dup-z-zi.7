@@ -1,0 +1,100 @@
+.nh
+.TH "MOV (SIMD&FP scalar, unpredicated)" "7" " "  "alias" "sve"
+.SS MOV (SIMD&FP scalar, unpredicated)
+ MOV is an alias of DUP
+
+ Move indexed element or SIMD&FP scalar to vector (unpredicated)
+
+ Unconditionally broadcast the SIMD&FP scalar into each element of the
+ destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dup_z_zi_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|0 0 1 0 0 0|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-tsz                 `-Zn      `-Zd
+                  `-imm2
+  
+  
+ 
+ 
+ 
+ MOV     <Zd>.<T>, <V><n>
+ 
+ DUP <Zd>.<T>, <Zn>.<T>[0]
+ 
+ 
+ MOV     <Zd>.<T>, <Zn>.<T>[<imm>]
+ 
+ DUP     <Zd>.<T>, <Zn>.<T>[<imm>]
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in tsz
+  Is the size specifier,
+
+  tsz   <T>      
+  00000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+  10000 Q        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <imm>
+  Encoded in imm2:tsz
+  Is the immediate index, in the range 0 to one less than the number of elements
+  in 512 bits, encoded in "imm2:tsz".
+
+ <V>
+  Encoded in tsz
+  Is a width specifier,
+
+  tsz   <V>      
+  00000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+  10000 Q        
+
+ <n>
+  Encoded in Zn
+  Is the number [0-31] of the source SIMD&FP register, encoded in the "Zn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of DUP gives pseudocode for MOV.

@@ -1,0 +1,141 @@
+.nh
+.TH "CASB, CASAB, CASALB, CASLB -- A64" "7" " "  "instruction" "general"
+.SS CASB, CASAB, CASALB, CASLB
+ Compare and Swap byte in memory
+
+ Compare and Swap byte in memory reads an 8-bit byte from memory, and compares
+ it against the value held in a first register. If the comparison is equal, the
+ value in a second register is written to memory. If the write is performed, the
+ read and write occur atomically such that no other modification of the memory
+ location can take place between the read and write.
+
+ CASAB and CASALB load from memory with acquire semantics.
+
+ CASAB and CASALB load from memory with acquire semantics.
+
+ CASLB and CASALB store to memory with release semantics.
+
+ CASLB and CASALB store to memory with release semantics.
+
+ CASB has no memory ordering requirements.
+
+
+ For more information about memory ordering semantics see Load-Acquire, Store-
+ Release.
+
+ For information about memory accesses see Load/Store addressing modes.
+
+ The architecture permits that the data read clears any exclusive monitors
+ associated with that location, even if the compare subsequently fails.
+
+ If the instruction generates a synchronous Data Abort, the register which is
+ compared and loaded, that is <Ws>, is restored to the values held in the
+ register before the instruction was executed.
+
+
+
+.SS No offset - A64 - base_register
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |          15                              
+     30          24 | | |        16 |        10         5         0
+      |           | | | |         | |         |         |         |
+  |0 0|0 0 1 0 0 0|1|.|1|. . . . .|.|1 1 1 1 1|. . . . .|. . . . .|
+  |               | | | |         | |         |         |
+  `-size          | | | `-Rs      | `-Rt2     `-Rn      `-Rt
+                  | | `-o1        `-o0
+                  | `-L
+                  `-o2
+  
+  
+ 
+.SS CASAB(L == 1 && o0 == 0)
+ 
+ CASAB  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS CASALB(L == 1 && o0 == 1)
+ 
+ CASALB  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS CASB(L == 0 && o0 == 0)
+ 
+ CASB  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS CASLB(L == 0 && o0 == 1)
+ 
+ CASLB  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+ 
+ if !HaveAtomicExt() then UNDEFINED;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer s = UInt(Rs);
+ 
+ integer datasize = 8 << UInt(size);
+ integer regsize = if datasize == 64 then 64 else 32;
+ AccType ldacctype = if L == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ AccType stacctype = if o0 == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) comparevalue;
+ bits(datasize) newvalue;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ comparevalue = X[s];
+ newvalue = X[t];
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ X[s] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register to be compared and loaded,
+  encoded in the "Rs" field.
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be conditionally stored,
+  encoded in the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) comparevalue;
+ bits(datasize) newvalue;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ comparevalue = X[s];
+ newvalue = X[t];
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ X[s] = ZeroExtend(data, regsize);
+

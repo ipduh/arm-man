@@ -1,0 +1,297 @@
+.nh
+.TH "ADD, ADDS (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS ADD, ADDS (immediate)
+ Add (immediate)
+
+ Add (immediate) adds an immediate value to a register value, and writes the
+ result to the destination register.
+
+ If the destination register is not the PC, the ADDS variant of the instruction
+ updates the condition flags based on the result.
+
+ The field descriptions for <Rd> identify the encodings where the PC is
+ permitted as the destination register. If the destination register is the PC:
+
+ The ADD variant of the instruction is an interworking branch, see Pseudocode
+ description of operations on the AArch32 general-purpose registers and the PC.
+
+ The ADDS variant of the instruction performs an exception return without the
+ use of the stack. Arm deprecates use of this instruction. However, in this
+ case:
+ The PE branches to the address written to the PC, and restores PSTATE from
+ SPSR_<current_mode>.
+
+ The PE checks SPSR_<current_mode> for an illegal return event.  See Illegal
+ return events from AArch32 state.
+
+ The instruction is undefined in Hyp mode.
+
+ The instruction is constrained unpredictable in User mode and System mode.
+
+
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1, T2, T3 and T4).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12                       0
+          |       |     | |       |       |                       |
+  |. . . .|0 0 1 0|1 0 0|.|. . . .|. . . .|. . . . . . . . . . . .|
+  |               |     | |       |       |
+  `-cond(!= 1111) `-opc | `-Rn    `-Rd    `-imm12
+                        `-S
+  
+  
+ 
+.SS ADD(S == 0 && Rn != 11x1)
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+.SS ADDS(S == 1 && Rn != 1101)
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+ 
+ if Rn == '1111' && S == '0' then SEE "ADR";
+ if Rn == '1101' then SEE "ADD (SP plus immediate)";
+ d = UInt(Rd);  n = UInt(Rn);  setflags = (S == '1');  imm32 = A32ExpandImm(imm12);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                9                                                  
+             10 |     6     3     0                                
+              | |     |     |     |                                
+   0 0 0 1 1 1|0|. . .|. . .|. . .|                                
+              | |     |     |
+              | |     `-Rn  `-Rd
+              | `-imm3
+              `-S
+  
+  
+ 
+.SS T1
+ 
+ ADD<c>{<q>} <Rd>, <Rn>, #<imm3>
+ 
+ ADDS{<q>} <Rd>, <Rn>, #<imm3>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  setflags = !InITBlock();  imm32 = ZeroExtend(imm3, 32);
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+       13  11     8               0                                
+        |   |     |               |                                
+   0 0 1|1 0|. . .|. . . . . . . .|                                
+        |   |     |
+        |   `-Rdn `-imm8
+        `-op
+  
+  
+ 
+.SS T2
+ 
+ ADD<c>{<q>} <Rdn>, #<imm8>
+ 
+ ADD<c>{<q>} {<Rdn>,} <Rdn>, #<imm8>
+ 
+ ADDS{<q>} <Rdn>, #<imm8>
+ 
+ ADDS{<q>} {<Rdn>,} <Rdn>, #<imm8>
+ 
+ d = UInt(Rdn);  n = UInt(Rdn);  setflags = !InITBlock();  imm32 = ZeroExtend(imm8, 32);
+.SS T3 - T32
+ 
+                                                                   
+               10                                                  
+             11 |        05        15                              
+           12 | |      06 |      01 |    12       8               0
+            | | |       | |       | |     |       |               |
+   1 1 1 1 0|.|0|1 0 0 0|.|. . . .|0|. . .|. . . .|. . . . . . . .|
+            |   |       | |         |     |       |
+            `-i `-op1   | |         |     `-Rd    `-imm8
+                        | |         `-imm3
+                        | `-Rn(!= 1101)
+                        `-S
+  
+  
+ 
+.SS ADD(S == 0)
+ 
+ ADD<c>.W {<Rd>,} <Rn>, #<const>
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+.SS ADDS(S == 1 && Rd != 1111)
+ 
+ ADDS.W {<Rd>,} <Rn>, #<const>
+ 
+ ADDS{<c>}{<q>} {<Rd>,} <Rn>, #<const>
+ 
+ if Rd == '1111' && S == '1' then SEE "CMN (immediate)";
+ if Rn == '1101' then SEE "ADD (SP plus immediate)";
+ d = UInt(Rd);  n = UInt(Rn);  setflags = (S == '1');  imm32 = T32ExpandImm(i:imm3:imm8);
+ if (d == 15 && !setflags) || n == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T4 - T32
+ 
+                       06                                          
+                     07 |                                          
+             11    08 | |          15                              
+           12 |  09 | | |05      01 |    12       8               0
+            | |   | | | | |       | |     |       |               |
+   1 1 1 1 0|.|1 0|0|0|0|0|. . . .|0|. . .|. . . .|. . . . . . . .|
+            |     |   |   |         |     |       |
+            `-i   |   |   |         |     `-Rd    `-imm8
+                  |   |   |         `-imm3
+                  |   |   `-Rn(!= 11x1)
+                  |   `-o2
+                  `-o1
+  
+  
+ 
+.SS T4
+ 
+ ADD{<c>}{<q>} {<Rd>,} <Rn>, #<imm12>
+ 
+ ADDW{<c>}{<q>} {<Rd>,} <Rn>, #<imm12>
+ 
+ if Rn == '1111' then SEE "ADR";
+ if Rn == '1101' then SEE "ADD (SP plus immediate)";
+ d = UInt(Rd);  n = UInt(Rn);  setflags = FALSE;  imm32 = ZeroExtend(i:imm3:imm8, 32);
+ if d == 15 then UNPREDICTABLE;   // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+         if d == 15 then          // Can only occur for A32 encoding
+             if setflags then
+                 ALUExceptionReturn(result);
+             else
+                 ALUWritePC(result);
+         else
+             R[d] = result;
+             if setflags then
+                 PSTATE.<N,Z,C,V> = nzcv;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rdn>
+  Encoded in Rdn
+  Is the general-purpose source and destination register, encoded in the "Rdn"
+  field.
+
+ <imm8>
+  Encoded in imm8
+  Is a 8-bit unsigned immediate, in the range 0 to 255, encoded in the "imm8"
+  field.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the same as <Rn>. If the PC is used:
+  For the ADD variant, the instruction is a branch to the address calculated by
+  the operation. This is an interworking branch, see Pseudocode description of
+  operations on the AArch32 general-purpose registers and the PC.
+  For the ADDS variant, the instruction performs an exception return, that
+  restores PSTATE from SPSR_<current_mode>. Arm deprecates use of this
+  instruction.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T1, T3 and T4: is the general-purpose destination register,
+  encoded in the "Rd" field. If omitted, this register is the same as <Rn>.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1 and T4: is the general-purpose source register, encoded in the
+  "Rn" field. If the SP is used, see ADD (SP plus immediate). If the PC is used,
+  see ADR.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T3: is the general-purpose source register, encoded in the "Rn"
+  field. If the SP is used, see ADD (SP plus immediate).
+
+ <imm3>
+  Encoded in imm3
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "imm3"
+  field.
+
+ <imm12>
+  Encoded in i:imm3:imm8
+  Is a 12-bit unsigned immediate, in the range 0 to 4095, encoded in the
+  "i:imm3:imm8" field.
+
+ <const>
+  Encoded in imm12
+  For encoding A1: an immediate value. See Modified immediate constants in A32
+  instructions for the range of values.
+
+ <const>
+  Encoded in i:imm3:imm8
+  For encoding T3: an immediate value. See Modified immediate constants in T32
+  instructions for the range of values.
+
+
+
+.SS Operation
+
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+         if d == 15 then          // Can only occur for A32 encoding
+             if setflags then
+                 ALUExceptionReturn(result);
+             else
+                 ALUWritePC(result);
+         else
+             R[d] = result;
+             if setflags then
+                 PSTATE.<N,Z,C,V> = nzcv;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

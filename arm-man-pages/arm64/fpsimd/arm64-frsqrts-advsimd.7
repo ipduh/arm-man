@@ -1,0 +1,227 @@
+.nh
+.TH "FRSQRTS -- A64" "7" " "  "instruction" "advsimd"
+.SS FRSQRTS
+ Floating-point Reciprocal Square Root Step
+
+ Floating-point Reciprocal Square Root Step. This instruction multiplies
+ corresponding floating-point values in the vectors of the two source SIMD&FP
+ registers, subtracts each of the products from 3.0, divides these results by
+ 2.0, places the results into a vector, and writes the vector to the destination
+ SIMD&FP register.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR, or
+ a synchronous exception being generated. For more information, see Floating-
+ point exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 4 classes: Scalar half precision, Scalar single-precision and double-precision, Vector half precision and Vector single-precision and double-precision
+
+.SS Scalar half precision - A64 - FRSQRTS_asisdsamefp16_only
+ 
+                                                                   
+                                                                   
+       29          23                        10                    
+     30 |        24 |  21        16  14    11 |         5         0
+      | |         | |   |         |   |     | |         |         |
+   0 1|0|1 1 1 1 0|1|1 0|. . . . .|0 0|1 1 1|1|. . . . .|. . . . .|
+      |           |     |             |       |         |
+      `-U         `-a   `-Rm          |       `-Rn      `-Rd
+                                      `-opcode
+  
+  
+ 
+.SS Scalar half precision
+ 
+ FRSQRTS  <Hd>, <Hn>, <Hm>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 16;
+ integer datasize = esize;
+ integer elements = 1;
+.SS Scalar single-precision and double-precision - A64 - FRSQRTS_asisdsame_only
+ 
+                       21                                          
+                     22 |                                          
+       29          23 | |                    10                    
+     30 |        24 | | |        16        11 |         5         0
+      | |         | | | |         |         | |         |         |
+   0 1|0|1 1 1 1 0|1|.|1|. . . . .|1 1 1 1 1|1|. . . . .|. . . . .|
+      |             |   |         |           |         |
+      `-U           |   `-Rm      `-opcode    `-Rn      `-Rd
+                    `-sz
+  
+  
+ 
+.SS Scalar single-precision and double-precision
+ 
+ FRSQRTS  <V><d>, <V><n>, <V><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 32 << UInt(sz);
+ integer datasize = esize;
+ integer elements = 1;
+.SS Vector half precision - A64 - FRSQRTS_asimdsamefp16_only
+ 
+                                                                   
+       29                                                          
+     30 |          23                        10                    
+   31 | |        24 |  21        16  14    11 |         5         0
+    | | |         | |   |         |   |     | |         |         |
+   0|.|0|0 1 1 1 0|1|1 0|. . . . .|0 0|1 1 1|1|. . . . .|. . . . .|
+    | |           |     |             |       |         |
+    | `-U         `-a   `-Rm          |       `-Rn      `-Rd
+    `-Q                               `-opcode
+  
+  
+ 
+.SS Vector half precision
+ 
+ FRSQRTS  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 16;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+.SS Vector single-precision and double-precision - A64 - FRSQRTS_asimdsame_only
+ 
+                       21                                          
+       29            22 |                                          
+     30 |          23 | |                    10                    
+   31 | |        24 | | |        16        11 |         5         0
+    | | |         | | | |         |         | |         |         |
+   0|.|0|0 1 1 1 0|1|.|1|. . . . .|1 1 1 1 1|1|. . . . .|. . . . .|
+    | |             |   |         |           |         |
+    | `-U           |   `-Rm      `-opcode    `-Rn      `-Rd
+    `-Q             `-sz
+  
+  
+ 
+.SS Vector single-precision and double-precision
+ 
+ FRSQRTS  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if sz:Q == '10' then UNDEFINED;
+ integer esize = 32 << UInt(sz);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPRSqrtStepFused(element1, element2);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Hm>
+  Encoded in Rm
+  Is the 16-bit name of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <V>
+  Encoded in sz
+  Is a width specifier,
+
+  sz <V> 
+  0  S   
+  1  D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in Q
+  For the vector half precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in sz:Q
+  For the vector single-precision and double-precision variant: is an
+  arrangement specifier,
+
+  sz Q <T>      
+  0  0 2S       
+  0  1 4S       
+  1  0 RESERVED 
+  1  1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2;
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPRSqrtStepFused(element1, element2);
+ 
+ V[d] = result;
+

@@ -1,0 +1,111 @@
+.nh
+.TH "DUP (indexed)" "7" " "  "instruction" "sve"
+.SS DUP (indexed)
+ Broadcast indexed element to vector (unpredicated)
+
+ Unconditionally broadcast the indexed source vector element into each element
+ of the destination vector. This instruction is unpredicated.
+
+ The immediate element index is in the range of 0 to 63 (bytes), 31 (halfwords),
+ 15 (words), 7 (doublewords) or 3 (quadwords). Selecting an element beyond the
+ accessible vector length causes the destination vector to be set to zero.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dup_z_zi_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16          10         5         0
+                  |   | |         |           |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|0 0 1 0 0 0|. . . . .|. . . . .|
+                  |     |                     |         |
+                  |     `-tsz                 `-Zn      `-Zd
+                  `-imm2
+  
+  
+ 
+.SS SVE
+ 
+ DUP     <Zd>.<T>, <Zn>.<T>[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ bits(7) imm = imm2:tsz;
+ case tsz of
+     when '00000' UNDEFINED;
+     when '10000' esize = 128; index = UInt(imm<6:5>);
+     when 'x1000' esize = 64;  index = UInt(imm<6:4>);
+     when 'xx100' esize = 32;  index = UInt(imm<6:3>);
+     when 'xxx10' esize = 16;  index = UInt(imm<6:2>);
+     when 'xxxx1' esize = 8;   index = UInt(imm<6:1>);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) result;
+ bits(esize) element;
+ 
+ if index >= elements then
+     element = Zeros();
+ else
+     element = Elem[operand1, index, esize];
+ result = Replicate(element);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in tsz
+  Is the size specifier,
+
+  tsz   <T>      
+  00000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+  x1000 D        
+  10000 Q        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <imm>
+  Encoded in imm2:tsz
+  Is the immediate index, in the range 0 to one less than the number of elements
+  in 512 bits, encoded in "imm2:tsz".
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) result;
+ bits(esize) element;
+ 
+ if index >= elements then
+     element = Zeros();
+ else
+     element = Elem[operand1, index, esize];
+ result = Replicate(element);
+ 
+ Z[d] = result;
+

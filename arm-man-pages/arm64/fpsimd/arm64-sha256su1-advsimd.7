@@ -1,0 +1,116 @@
+.nh
+.TH "SHA256SU1 -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA256SU1
+ SHA256 schedule update 1
+
+ SHA256 schedule update 1.
+
+
+
+.SS Advanced SIMD - A64 - SHA256SU1_VVV_cryptosha3
+ 
+                                                                   
+                                                                   
+                       21          15                              
+                 24  22 |        16 |    12  10         5         0
+                  |   | |         | |     |   |         |         |
+   0 1 0 1 1 1 1 0|0 0|0|. . . . .|0|1 1 0|0 0|. . . . .|. . . . .|
+                  |     |           |         |         |
+                  |     `-Rm        `-opcode  `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA256SU1  <Vd>.4S, <Vn>.4S, <Vm>.4S
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if !HaveSHA256Ext() then UNDEFINED;
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) operand1 = V[d];
+ bits(128) operand2 = V[n];
+ bits(128) operand3 = V[m];
+ bits(128) result;
+ bits(128) T0 = operand3<31:0> : operand2<127:32>;
+ bits(64) T1;
+ bits(32) elt;
+ 
+ T1 = operand3<127:64>;
+ for e = 0 to 1
+     elt = Elem[T1, e, 32];
+     elt = ROR(elt, 17) EOR ROR(elt, 19) EOR LSR(elt, 10);
+     elt = elt + Elem[operand1, e, 32] + Elem[T0, e, 32];
+     Elem[result, e, 32] = elt;
+ 
+ T1 = result<63:0>;
+ for e = 2 to 3
+     elt = Elem[T1, e - 2, 32];
+     elt = ROR(elt, 17) EOR ROR(elt, 19) EOR LSR(elt, 10);
+     elt = elt + Elem[operand1, e, 32] + Elem[T0, e, 32];
+     Elem[result, e, 32] = elt;
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP source and destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the second SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the third SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) operand1 = V[d];
+ bits(128) operand2 = V[n];
+ bits(128) operand3 = V[m];
+ bits(128) result;
+ bits(128) T0 = operand3<31:0> : operand2<127:32>;
+ bits(64) T1;
+ bits(32) elt;
+ 
+ T1 = operand3<127:64>;
+ for e = 0 to 1
+     elt = Elem[T1, e, 32];
+     elt = ROR(elt, 17) EOR ROR(elt, 19) EOR LSR(elt, 10);
+     elt = elt + Elem[operand1, e, 32] + Elem[T0, e, 32];
+     Elem[result, e, 32] = elt;
+ 
+ T1 = result<63:0>;
+ for e = 2 to 3
+     elt = Elem[T1, e - 2, 32];
+     elt = ROR(elt, 17) EOR ROR(elt, 19) EOR LSR(elt, 10);
+     elt = elt + Elem[operand1, e, 32] + Elem[T0, e, 32];
+     Elem[result, e, 32] = elt;
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

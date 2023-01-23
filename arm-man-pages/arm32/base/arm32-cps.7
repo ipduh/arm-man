@@ -1,0 +1,215 @@
+.nh
+.TH "CPS, CPSID, CPSIE -- AArch32" "7" " "  "instruction" "general"
+.SS CPS, CPSID, CPSIE
+ Change PE State
+
+ Change PE State changes one or more of the PSTATE.{A, I, F} interrupt mask bits
+ and, optionally, the PSTATE.M mode field, without changing any other PSTATE
+ bits.
+
+ CPS is treated as NOP if executed in User mode unless it is defined as being
+ constrained unpredictable elsewhere in this section.
+
+ The PE checks whether the value being written to PSTATE.M is legal. See Illegal
+ changes to PSTATE.M.
+
+ Hint instructions: In encoding T2, if the imod field is 00 and the M bit is 0,
+ a hint instruction is encoded. To determine which hint instruction, see
+ Branches and miscellaneous control.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                   15      11                      
+                                 16 |    12 |                      
+                               17 | |  13 | |                      
+                         20  18 | | |14 | | |10 9 8 7 6 5         0
+                          |   | | | | | | | | | | | | | |         |
+   1 1 1 1 0 0 0 1 0 0 0 0|. .|.|0|0|0|0|0|0|0|0|.|.|.|0|. . . . .|
+                          |   | |             | | | |   |
+                          |   | `-op          | | | `-F `-mode
+                          |   `-M             | | `-I
+                          `-imod              | `-A
+                                              `-E
+  
+  
+ 
+.SS CPS(imod == 00 && M == 1)
+ 
+ CPS{<q>} #<mode>
+.SS CPSID(imod == 11 && M == 0)
+ 
+ CPSID{<q>} <iflags>
+.SS CPSID(imod == 11 && M == 1)
+ 
+ CPSID{<q>} <iflags> , #<mode>
+.SS CPSIE(imod == 10 && M == 0)
+ 
+ CPSIE{<q>} <iflags>
+.SS CPSIE(imod == 10 && M == 1)
+ 
+ CPSIE{<q>} <iflags> , #<mode>
+ 
+ if mode != '00000' && M == '0' then UNPREDICTABLE;
+ if (imod<1> == '1' && A:I:F == '000') || (imod<1> == '0' && A:I:F != '000') then UNPREDICTABLE;
+ enable = (imod == '10');  disable = (imod == '11');  changemode = (M == '1');
+ affectA = (A == '1');  affectI = (I == '1');  affectF = (F == '1');
+ if (imod == '00' && M == '0') || imod == '01' then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                            3                                      
+                          4 |     0                                
+                        5 | |   1 |                                
+                      6 | | | 2 | |                                
+                      | | | | | | |                                
+   1 0 1 1 0 1 1 0 0 1|1|.|0|.|.|.|                                
+                      | |   | | |
+                      | |   | | `-F
+                      | |   | `-I
+                      | |   `-A
+                      | `-im
+                      `-op
+  
+  
+ 
+.SS CPSID(im == 1)
+ 
+ CPSID{<q>} <iflags>
+.SS CPSIE(im == 0)
+ 
+ CPSIE{<q>} <iflags>
+ 
+ if A:I:F == '000' then UNPREDICTABLE;
+ enable = (im == '0');  disable = (im == '1');  changemode = FALSE;
+ affectA = (A == '1');  affectI = (I == '1');  affectF = (F == '1');
+ if InITBlock() then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |   9 8 7 6 5         0
+                          | | | | |   | | | |   | | | | |         |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|. .|.|.|.|.|. . . . .|
+                                            |   | | | | |
+                                            |   | | | | `-mode
+                                            |   | | | `-F
+                                            |   | | `-I
+                                            |   | `-A
+                                            |   `-M
+                                            `-imod
+  
+  
+ 
+.SS CPS(imod == 00 && M == 1)
+ 
+ CPS{<q>} #<mode>
+.SS CPSID(imod == 11 && M == 0)
+ 
+ CPSID.W <iflags>
+.SS CPSID(imod == 11 && M == 1)
+ 
+ CPSID{<q>} <iflags>, #<mode>
+.SS CPSIE(imod == 10 && M == 0)
+ 
+ CPSIE.W <iflags>
+.SS CPSIE(imod == 10 && M == 1)
+ 
+ CPSIE{<q>} <iflags>, #<mode>
+ 
+ if imod == '00' && M == '0' then SEE "Hint instructions";
+ if mode != '00000' && M == '0' then UNPREDICTABLE;
+ if (imod<1> == '1' && A:I:F == '000') || (imod<1> == '0' && A:I:F != '000') then UNPREDICTABLE;
+ enable = (imod == '10');  disable = (imod == '11');  changemode = (M == '1');
+ affectA = (A == '1');  affectI = (I == '1');  affectF = (F == '1');
+ if imod == '01' || InITBlock() then UNPREDICTABLE;
+ 
+ if CurrentInstrSet() == InstrSet_A32 then
+     EncodingSpecificOperations();
+     if PSTATE.EL != EL0 then
+         if enable then
+             if affectA then PSTATE.A = '0';
+             if affectI then PSTATE.I = '0';
+             if affectF then PSTATE.F = '0';
+         if disable then
+             if affectA then PSTATE.A = '1';
+             if affectI then PSTATE.I = '1';
+             if affectF then PSTATE.F = '1';
+         if changemode then
+             // AArch32.WriteModeByInstr() sets PSTATE.IL to 1 if this is an illegal mode change.
+             AArch32.WriteModeByInstr(mode);
+ else
+     EncodingSpecificOperations();
+     if PSTATE.EL != EL0 then
+         if enable then
+             if affectA then PSTATE.A = '0';
+             if affectI then PSTATE.I = '0';
+             if affectF then PSTATE.F = '0';
+         if disable then
+             if affectA then PSTATE.A = '1';
+             if affectI then PSTATE.I = '1';
+             if affectF then PSTATE.F = '1';
+         if changemode then
+             // AArch32.WriteModeByInstr() sets PSTATE.IL to 1 if this is an illegal mode change.
+             AArch32.WriteModeByInstr(mode);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <iflags>
+  Encoded in A:I:F
+  Is a sequence of one or more of the following, specifying which interrupt mask
+  bits are affected:                                       aSets the A bit in
+  the instruction, causing the specified effect on PSTATE.A, the SError
+  interrupt mask bit.                                         iSets the I bit in
+  the instruction, causing the specified effect on PSTATE.I, the IRQ interrupt
+  mask bit.                                         fSets the F bit in the
+  instruction, causing the specified effect on PSTATE.F, the FIQ interrupt mask
+  bit.
+
+ <mode>
+  Encoded in mode
+  Is the number of the mode to change to, in the range 0 to 31, encoded in the
+  "mode" field.
+
+
+
+.SS Operation
+
+ if CurrentInstrSet() == InstrSet_A32 then
+     EncodingSpecificOperations();
+     if PSTATE.EL != EL0 then
+         if enable then
+             if affectA then PSTATE.A = '0';
+             if affectI then PSTATE.I = '0';
+             if affectF then PSTATE.F = '0';
+         if disable then
+             if affectA then PSTATE.A = '1';
+             if affectI then PSTATE.I = '1';
+             if affectF then PSTATE.F = '1';
+         if changemode then
+             // AArch32.WriteModeByInstr() sets PSTATE.IL to 1 if this is an illegal mode change.
+             AArch32.WriteModeByInstr(mode);
+ else
+     EncodingSpecificOperations();
+     if PSTATE.EL != EL0 then
+         if enable then
+             if affectA then PSTATE.A = '0';
+             if affectI then PSTATE.I = '0';
+             if affectF then PSTATE.F = '0';
+         if disable then
+             if affectA then PSTATE.A = '1';
+             if affectI then PSTATE.I = '1';
+             if affectF then PSTATE.F = '1';
+         if changemode then
+             // AArch32.WriteModeByInstr() sets PSTATE.IL to 1 if this is an illegal mode change.
+             AArch32.WriteModeByInstr(mode);
+

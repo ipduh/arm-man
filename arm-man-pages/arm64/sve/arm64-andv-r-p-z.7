@@ -1,0 +1,107 @@
+.nh
+.TH "ANDV" "7" " "  "instruction" "sve"
+.SS ANDV
+ Bitwise AND reduction to scalar
+
+ Bitwise AND horizontally across all lanes of a vector, and place the result in
+ the SIMD&FP scalar destination register. Inactive elements in the source vector
+ are treated as all ones.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - andv_r_p_z_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |    13    10         5         0
+                  |   |     |   | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 1 1|0 1|0|0 0 1|. . .|. . . . .|. . . . .|
+                  |         |   |       |     |         |
+                  `-size    |   |       `-Pg  `-Zn      `-Vd
+                            |   `-opc<0>
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ ANDV    <V><d>, <Pg>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Vd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(esize) result = Ones(esize);
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         result = result AND Elem[operand, e, esize];
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <d>
+  Encoded in Vd
+  Is the number [0-31] of the destination SIMD&FP register, encoded in the "Vd"
+  field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ bits(esize) result = Ones(esize);
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         result = result AND Elem[operand, e, esize];
+ 
+ V[d] = result;
+

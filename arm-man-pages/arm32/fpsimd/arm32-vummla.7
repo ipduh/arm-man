@@ -1,0 +1,125 @@
+.nh
+.TH "VUMMLA -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VUMMLA
+ Widening 8-bit unsigned integer matrix multiply-accumulate into 2x2 matrix
+
+ The widening integer matrix multiply-accumulate instruction multiplies the 2x8
+ matrix of unsigned 8-bit integer values held in the first source vector by the
+ 8x2 matrix of unsigned 8-bit integer values in the second source vector. The
+ resulting 2x2 32-bit integer matrix product is destructively added to the
+ 32-bit integer matrix accumulator held in the destination vector. This is
+ equivalent to performing an 8-way dot product per destination element.
+
+ From Armv8.2, this is an optional instruction. ID_ISAR6.I8MM indicates whether
+ this instruction is supported in the T32 and A32 instruction sets.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                      10                    
+                 24 | |                    11 |                    
+               25 | | |  20      16      12 | | 9 8 7 6 5 4       0
+                | | | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 0|0|0|.|1 0|. . . .|. . . .|1|1|0|0|.|1|.|1|. . . .|
+                  | | |   |       |         |   | | | | | |
+                  | | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                  | | `-op2                 |   | | | | `-U
+                  | `-D                     |   | | | `-M
+                  `-B                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS A1
+ 
+ VUMMLA{<q>}.U8 <Qd>, <Qn>, <Qm>
+ 
+ if !HaveAArch32Int8MatMulExt() then UNDEFINED;
+ case B:U of
+     when '00' op1_unsigned = FALSE; op2_unsigned = FALSE;
+     when '01' op1_unsigned = TRUE;  op2_unsigned = TRUE;
+     when '10' op1_unsigned = TRUE;  op2_unsigned = FALSE;
+     when '11' UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer n = UInt(N:Vn);
+ integer m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                     07                                            
+                   08 |                      10                    
+                 09 | |                    11 |                    
+               10 | | |  05      01      12 | | 9 8 7 6 5 4       0
+                | | | |   |       |       | | | | | | | | |       |
+   1 1 1 1 1 1 0|0|0|.|1 0|. . . .|. . . .|1|1|0|0|.|1|.|1|. . . .|
+                  | | |   |       |         |   | | | | | |
+                  | | |   `-Vn    `-Vd      |   | | | | | `-Vm
+                  | | `-op2                 |   | | | | `-U
+                  | `-D                     |   | | | `-M
+                  `-B                       |   | | `-Q
+                                            |   | `-N
+                                            |   `-op4
+                                            `-op3
+  
+  
+ 
+.SS T1
+ 
+ VUMMLA{<q>}.U8 <Qd>, <Qn>, <Qm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveAArch32Int8MatMulExt() then UNDEFINED;
+ case B:U of
+     when '00' op1_unsigned = FALSE; op2_unsigned = FALSE;
+     when '01' op1_unsigned = TRUE;  op2_unsigned = TRUE;
+     when '10' op1_unsigned = TRUE;  op2_unsigned = FALSE;
+     when '11' UNDEFINED;
+ if Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer n = UInt(N:Vn);
+ integer m = UInt(M:Vm);
+ 
+ CheckAdvSIMDEnabled();
+ bits(128) operand1 = Q[n>>1];
+ bits(128) operand2 = Q[m>>1];
+ bits(128) addend   = Q[d>>1];
+ 
+ Q[d>>1] = MatMulAdd(addend, operand1, operand2, op1_unsigned, op2_unsigned);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP third source and destination register,
+  encoded in the "D:Vd" field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+
+
+.SS Operation
+
+ CheckAdvSIMDEnabled();
+ bits(128) operand1 = Q[n>>1];
+ bits(128) operand2 = Q[m>>1];
+ bits(128) addend   = Q[d>>1];
+ 
+ Q[d>>1] = MatMulAdd(addend, operand1, operand2, op1_unsigned, op2_unsigned);
+

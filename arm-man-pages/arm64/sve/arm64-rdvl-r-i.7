@@ -1,0 +1,65 @@
+.nh
+.TH "RDVL" "7" " "  "instruction" "sve"
+.SS RDVL
+ Read multiple of vector register size to scalar register
+
+ Multiply the current vector register size in bytes by an immediate in the range
+ -32 to 31 and place the result in the 64-bit destination general-purpose
+ register.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - rdvl_r_i_
+ 
+                                                                   
+                       21                                          
+                     22 |        16                                
+                   23 | |      17 |        11           5         0
+                    | | |       | |         |           |         |
+   0 0 0 0 0 1 0 0 1|0|1|1 1 1 1|1|0 1 0 1 0|. . . . . .|. . . . .|
+                    |   |       |           |           |
+                    |   |       `-opc2<0>   `-imm6      `-Rd
+                    |   `-opc2<4:1>
+                    `-op
+  
+  
+ 
+.SS SVE
+ 
+ RDVL    <Xd>, #<imm>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer imm = SInt(imm6);
+ 
+ CheckSVEEnabled();
+ integer len = imm * (VL DIV 8);
+ X[d] = len<63:0>;
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the destination general-purpose register, encoded in the
+  "Rd" field.
+
+ <imm>
+  Encoded in imm6
+  Is the signed immediate operand, in the range -32 to 31, encoded in the "imm6"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer len = imm * (VL DIV 8);
+ X[d] = len<63:0>;
+

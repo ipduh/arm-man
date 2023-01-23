@@ -1,0 +1,74 @@
+.nh
+.TH "GMI -- A64" "7" " "  "instruction" "general"
+.SS GMI
+ Tag Mask Insert
+
+ Tag Mask Insert inserts the tag in the first source register into the excluded
+ set specified in the second source register, writing the new excluded set to
+ the destination register.
+
+
+
+.SS Integer - A64 - GMI_64G_dp_2src
+ 
+                                       13                          
+       29                            14 |    10                    
+     30 |                          15 | |  11 |                    
+   31 | |              21        16 | | |12 | |         5         0
+    | | |               |         | | | | | | |         |         |
+  |1|0|0|1 1 0 1 0 1 1 0|. . . . .|0|0|0|1|0|1|. . . . .|. . . . .|
+  |   |                 |         | | | | | | |         |
+  |   `-S               `-Xm      | | | | | | `-Xn      `-Xd
+  `-sf                            | | | | | `-opcode<0>
+                                  | | | | `-opcode<1>
+                                  | | | `-opcode<2>
+                                  | | `-opcode<3>
+                                  | `-opcode<4>
+                                  `-opcode<5>
+  
+  
+ 
+.SS Integer
+ 
+ GMI  <Xd>, <Xn|SP>, <Xm>
+ 
+ integer d = UInt(Xd);
+ integer n = UInt(Xn);
+ integer m = UInt(Xm);
+ 
+ bits(64) address = if n == 31 then SP[] else X[n];
+ bits(64) mask = X[m];
+ bits(4) tag = AArch64.AllocationTagFromAddress(address);
+ 
+ mask<UInt(tag)> = '1';
+ X[d] = mask;
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Xd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Xd" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the first source general-purpose register or stack
+  pointer, encoded in the "Xn" field.
+
+ <Xm>
+  Encoded in Xm
+  Is the 64-bit name of the second general-purpose source register, encoded in
+  the "Xm" field.
+
+
+
+.SS Operation
+
+ bits(64) address = if n == 31 then SP[] else X[n];
+ bits(64) mask = X[m];
+ bits(4) tag = AArch64.AllocationTagFromAddress(address);
+ 
+ mask<UInt(tag)> = '1';
+ X[d] = mask;
+

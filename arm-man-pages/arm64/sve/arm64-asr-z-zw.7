@@ -1,0 +1,105 @@
+.nh
+.TH "ASR (wide elements, unpredicated)" "7" " "  "instruction" "sve"
+.SS ASR (wide elements, unpredicated)
+ Arithmetic shift right by 64-bit wide elements (unpredicated)
+
+ Shift right, preserving the sign bit, all elements of the first source vector
+ by corresponding overlapping 64-bit elements of the second source vector and
+ place the first in the corresponding elements of the destination vector. The
+ shift amount is a vector of unsigned 64-bit doubleword elements in which all
+ bits are significant, and not used modulo the destination element size. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - asr_z_zw_
+ 
+                                                                   
+                                             10                    
+                       21                  11 |                    
+                 24  22 |        16      12 | |         5         0
+                  |   | |         |       | | |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. . . . .|1 0 0 0|0|0|. . . . .|. . . . .|
+                  |     |                   | |         |
+                  |     `-Zm                | `-Zn      `-Zd
+                  `-size                    `-U
+  
+  
+ 
+.SS SVE
+ 
+ ASR     <Zd>.<T>, <Zn>.<T>, <Zm>.D
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(64) element2 = Elem[operand2, (e * esize) DIV 64, 64];
+     integer shift = Min(UInt(element2), esize);
+     Elem[result, e, esize] = ASR(element1, shift);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   B        
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(64) element2 = Elem[operand2, (e * esize) DIV 64, 64];
+     integer shift = Min(UInt(element2), esize);
+     Elem[result, e, esize] = ASR(element1, shift);
+ 
+ Z[d] = result;
+

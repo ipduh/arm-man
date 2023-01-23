@@ -1,0 +1,128 @@
+.nh
+.TH "VCVT (between half-precision and single-precision, Advanced SIMD) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVT (between half-precision and single-precision, Advanced SIMD)
+ Vector Convert between half-precision and single-precision
+
+ Vector Convert between half-precision and single-precision converts each
+ element in a vector from single-precision to half-precision floating-point, or
+ from half-precision to single-precision, and places the results in a second
+ vector.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |   9 8 7 6 5 4       0
+                    | |   |   |   |       | |   | | | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|1 1|.|0|0|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          |   | `-M `-Vm
+                          |   `-opc1            |   `-Q
+                          `-size                `-op
+  
+  
+ 
+.SS Half-precision to single-precision(op == 1)
+ 
+ VCVT{<c>}{<q>}.F32.F16 <Qd>, <Dm>
+.SS Single-precision to half-precision(op == 0)
+ 
+ VCVT{<c>}{<q>}.F16.F32 <Dd>, <Qm>
+ 
+ if size != '01' then UNDEFINED;
+ half_to_single = (op == '1');
+ if half_to_single && Vd<0> == '1' then UNDEFINED;
+ if !half_to_single && Vm<0> == '1' then UNDEFINED;
+ esize = 16;  elements = 4;
+ m = UInt(M:Vm);  d = UInt(D:Vd);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |   9 8 7 6 5 4       0
+                    | |   |   |   |       | |   | | | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|1 1|.|0|0|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          |   | `-M `-Vm
+                          |   `-opc1            |   `-Q
+                          `-size                `-op
+  
+  
+ 
+.SS Half-precision to single-precision(op == 1)
+ 
+ VCVT{<c>}{<q>}.F32.F16 <Qd>, <Dm>
+.SS Single-precision to half-precision(op == 0)
+ 
+ VCVT{<c>}{<q>}.F16.F32 <Dd>, <Qm>
+ 
+ if size != '01' then UNDEFINED;
+ half_to_single = (op == '1');
+ if half_to_single && Vd<0> == '1' then UNDEFINED;
+ if !half_to_single && Vm<0> == '1' then UNDEFINED;
+ esize = 16;  elements = 4;
+ m = UInt(M:Vm);  d = UInt(D:Vd);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         if half_to_single then
+             Elem[Q[d>>1],e,32] = FPConvert(Elem[Din[m],e,16], StandardFPSCRValue());
+         else
+             Elem[D[d],e,16] = FPConvert(Elem[Qin[m>>1],e,32], StandardFPSCRValue());
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for e = 0 to elements-1
+         if half_to_single then
+             Elem[Q[d>>1],e,32] = FPConvert(Elem[Din[m],e,16], StandardFPSCRValue());
+         else
+             Elem[D[d],e,16] = FPConvert(Elem[Qin[m>>1],e,32], StandardFPSCRValue());
+

@@ -1,0 +1,57 @@
+.nh
+.TH "SB -- A64" "7" " "  "instruction" "system"
+.SS SB
+ Speculation Barrier
+
+ Speculation Barrier is a barrier that controls speculation.
+
+ The semantics of the Speculation Barrier are that the execution, until the
+ barrier completes, of any instruction that appears later in the program order
+ than the barrier:
+
+
+ In particular, any instruction that appears later in the program order than the
+ barrier cannot cause a speculative allocation into any caching structure where
+ the allocation of that entry could be indicative of any data value present in
+ memory or in the registers.
+
+ The SB instruction:
+
+
+ When the prediction of the instruction stream is not informed by data taken
+ from the register outputs of the speculative execution of instructions
+ appearing in program order after an uncompleted SB instruction, the SB
+ instruction has no effect on the use of prediction resources to predict the
+ instruction stream that is being fetched.
+
+
+
+.SS System - A64 - SB_only_barriers
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8 7   5         0
+                      | |   |     |       |       | |   |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 1|0 0 0 0|1|1 1|1 1 1 1 1|
+                      | |   |     |       |         |   |
+                      | |   `-op1 `-CRn   `-CRm     |   `-Rt
+                      | `-op0                       `-opc
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ SB
+ 
+ if !HaveSBExt() then UNDEFINED;
+ 
+ SpeculationBarrier();
+ 
+
+
+.SS Operation
+
+ SpeculationBarrier();
+

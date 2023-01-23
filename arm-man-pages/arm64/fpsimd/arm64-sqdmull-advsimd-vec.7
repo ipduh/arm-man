@@ -1,0 +1,199 @@
+.nh
+.TH "SQDMULL, SQDMULL2 (vector) -- A64" "7" " "  "instruction" "advsimd"
+.SS SQDMULL, SQDMULL2 (vector)
+ Signed saturating Doubling Multiply Long
+
+ Signed saturating Doubling Multiply Long. This instruction multiplies
+ corresponding vector elements in the lower or upper half of the two source
+ SIMD&FP registers, doubles the results, places the final results in a vector,
+ and writes the vector to the destination SIMD&FP register.
+
+ If overflow occurs with any of the results, those results are saturated. If
+ saturation occurs, the cumulative saturation bit FPSR.QC is set.
+
+ The SQDMULL instruction extracts each source vector from the lower half of each
+ source register, while the SQDMULL2 instruction extracts each source vector
+ from the upper half of each source register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - SQDMULL_asisddiff_only
+ 
+                                                                   
+                                                                   
+       29              21                                          
+     30 |        24  22 |        16      12  10         5         0
+      | |         |   | |         |       |   |         |         |
+   0 1|0|1 1 1 1 0|. .|1|. . . . .|1 1 0 1|0 0|. . . . .|. . . . .|
+      |           |     |         |           |         |
+      `-U         |     `-Rm      `-opcode    `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Scalar
+ 
+ SQDMULL  <Va><d>, <Vb><n>, <Vb><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if size == '00' || size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ integer part = 0;
+.SS Vector - A64 - SQDMULL_asimddiff_L
+ 
+                                                                   
+       29                                                          
+     30 |              21                                          
+   31 | |        24  22 |        16      12  10         5         0
+    | | |         |   | |         |       |   |         |         |
+   0|.|0|0 1 1 1 0|. .|1|. . . . .|1 1 0 1|0 0|. . . . .|. . . . .|
+    | |           |     |         |           |         |
+    | `-U         |     `-Rm      `-opcode    `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ SQDMULL{2}  <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if size == '00' || size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = 64;
+ integer part = UInt(Q);
+ integer elements = datasize DIV esize;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize)   operand1 = Vpart[n, part];
+ bits(datasize)   operand2 = Vpart[m, part];
+ bits(2*datasize) result;
+ integer element1;
+ integer element2;
+ bits(2*esize) product;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     element2 = SInt(Elem[operand2, e, esize]);
+     (product, sat) = SignedSatQ(2 * element1 * element2, 2*esize);
+     Elem[result, e, 2*esize] = product;
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ta>
+  Encoded in size
+  Is an arrangement specifier,
+
+  size <Ta>     
+  00   RESERVED 
+  01   4S       
+  10   2D       
+  11   RESERVED 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Tb>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <Tb>     
+  00   x RESERVED 
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   x RESERVED 
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+ <Va>
+  Encoded in size
+  Is the destination width specifier,
+
+  size <Va>     
+  00   RESERVED 
+  01   S        
+  10   D        
+  11   RESERVED 
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vb>
+  Encoded in size
+  Is the source width specifier,
+
+  size <Vb>     
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize)   operand1 = Vpart[n, part];
+ bits(datasize)   operand2 = Vpart[m, part];
+ bits(2*datasize) result;
+ integer element1;
+ integer element2;
+ bits(2*esize) product;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     element2 = SInt(Elem[operand2, e, esize]);
+     (product, sat) = SignedSatQ(2 * element1 * element2, 2*esize);
+     Elem[result, e, 2*esize] = product;
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+

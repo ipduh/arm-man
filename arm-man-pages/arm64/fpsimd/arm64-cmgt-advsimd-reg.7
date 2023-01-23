@@ -1,0 +1,174 @@
+.nh
+.TH "CMGT (register) -- A64" "7" " "  "instruction" "advsimd"
+.SS CMGT (register)
+ Compare signed Greater than (vector)
+
+ Compare signed Greater than (vector). This instruction compares each vector
+ element in the first source SIMD&FP register with the corresponding vector
+ element in the second source SIMD&FP register and if the first signed integer
+ value is greater than the second signed integer value sets every bit of the
+ corresponding vector element in the destination SIMD&FP register to one,
+ otherwise sets every bit of the corresponding vector element in the destination
+ SIMD&FP register to zero.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - CMGT_asisdsame_only
+ 
+                                                                   
+                                             10                    
+       29              21                  11 |                    
+     30 |        24  22 |        16      12 | |         5         0
+      | |         |   | |         |       | | |         |         |
+   0 1|0|1 1 1 1 0|. .|1|. . . . .|0 0 1 1|0|1|. . . . .|. . . . .|
+      |           |     |                 |   |         |
+      `-U         |     `-Rm              |   `-Rn      `-Rd
+                  `-size                  `-eq
+  
+  
+ 
+.SS Scalar
+ 
+ CMGT  <V><d>, <V><n>, <V><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size != '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ boolean unsigned = (U == '1');
+ boolean cmp_eq = (eq == '1');
+.SS Vector - A64 - CMGT_asimdsame_only
+ 
+                                                                   
+       29                                    10                    
+     30 |              21                  11 |                    
+   31 | |        24  22 |        16      12 | |         5         0
+    | | |         |   | |         |       | | |         |         |
+   0|.|0|0 1 1 1 0|. .|1|. . . . .|0 0 1 1|0|1|. . . . .|. . . . .|
+    | |           |     |                 |   |         |
+    | `-U         |     `-Rm              |   `-Rn      `-Rd
+    `-Q           `-size                  `-eq
+  
+  
+ 
+.SS Vector
+ 
+ CMGT  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size:Q == '110' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ boolean unsigned = (U == '1');
+ boolean cmp_eq = (eq == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ boolean test_passed;
+ 
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     test_passed = if cmp_eq then element1 >= element2 else element1 > element2;
+     Elem[result, e, esize] = if test_passed then Ones() else Zeros();
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V>      
+  0x   RESERVED 
+  10   RESERVED 
+  11   D        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ boolean test_passed;
+ 
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     test_passed = if cmp_eq then element1 >= element2 else element1 > element2;
+     Elem[result, e, esize] = if test_passed then Ones() else Zeros();
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

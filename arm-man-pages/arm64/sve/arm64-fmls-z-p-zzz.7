@@ -1,0 +1,130 @@
+.nh
+.TH "FMLS (vectors)" "7" " "  "instruction" "sve"
+.SS FMLS (vectors)
+ Floating-point fused multiply-subtract vectors (predicated), writing addend
+ [Zda = Zda + -Zn * Zm]
+
+ Multiply the corresponding active floating-point elements of the first and
+ second source vectors and subtract from elements of the third source (addend)
+ vector without intermediate rounding. Destructively place the results in the
+ destination and third source (addend) vector. Inactive elements in the
+ destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - fmls_z_p_zzz_
+ 
+                                       13                          
+                                     14 |                          
+                       21          15 | |                          
+                 24  22 |        16 | | |    10         5         0
+                  |   | |         | | | |     |         |         |
+   0 1 1 0 0 1 0 1|. .|1|. . . . .|0|0|1|. . .|. . . . .|. . . . .|
+                  |     |           | | |     |         |
+                  |     `-Zm        | | `-Pg  `-Zn      `-Zda
+                  `-size            | `-op
+                                    `-N
+  
+  
+ 
+.SS SVE
+ 
+ FMLS    <Zda>.<T>, <Pg>/M, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ boolean op1_neg = TRUE;
+ boolean op3_neg = FALSE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     bits(esize) element3 = Elem[operand3, e, esize];
+     
+     if ElemP[mask, e, esize] == '1' then
+         if op1_neg then element1 = FPNeg(element1);
+         if op3_neg then element3 = FPNeg(element3);
+         Elem[result, e, esize] = FPMulAdd(element3, element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = element3;
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     bits(esize) element3 = Elem[operand3, e, esize];
+     
+     if ElemP[mask, e, esize] == '1' then
+         if op1_neg then element1 = FPNeg(element1);
+         if op3_neg then element3 = FPNeg(element3);
+         Elem[result, e, esize] = FPMulAdd(element3, element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = element3;
+ 
+ Z[da] = result;
+

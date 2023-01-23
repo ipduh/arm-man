@@ -1,0 +1,75 @@
+.nh
+.TH "REV (predicate)" "7" " "  "instruction" "sve"
+.SS REV (predicate)
+ Reverse all elements in a predicate
+
+ Reverse the order of all elements in the source predicate and place in the
+ destination predicate. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - rev_p_p_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                      10 9       5 4       0
+                  |   |                       | |       | |       |
+   0 0 0 0 0 1 0 1|. .|1 1 0 1 0 0 0 1 0 0 0 0|0|. . . .|0|. . . .|
+                  |                             |         |
+                  `-size                        `-Pn      `-Pd
+  
+  
+ 
+.SS SVE
+ 
+ REV     <Pd>.<T>, <Pn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Pn);
+ integer d = UInt(Pd);
+ 
+ CheckSVEEnabled();
+ bits(PL) operand = P[n];
+ bits(PL) result = Reverse(operand, esize DIV 8);
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the source scalable predicate register, encoded in the "Pn"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(PL) operand = P[n];
+ bits(PL) result = Reverse(operand, esize DIV 8);
+ P[d] = result;
+

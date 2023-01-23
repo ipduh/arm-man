@@ -1,0 +1,235 @@
+.nh
+.TH "VLDM, VLDMDB, VLDMIA -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VLDM, VLDMDB, VLDMIA
+ Load Multiple SIMD&FP registers
+
+ Load Multiple SIMD&FP registers loads multiple registers from consecutive
+ locations in the Advanced SIMD and floating-point register file using an
+ address from a general-purpose register.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors, and
+ particularly VLDM.
+
+ Related encodings: See Advanced SIMD and floating-point 64-bit move for the T32
+ instruction set, or Advanced SIMD and floating-point 64-bit move for the A32
+ instruction set.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12  10   8             1 0
+          |     | | | | | |       |       |   |   |             | |
+  |. . . .|1 1 0|.|.|.|.|1|. . . .|. . . .|1 0|1 1|. . . . . . .|0|
+  |             | | | | | |       |           |   |             |
+  |             | | | | | `-Rn    `-Vd        |   `-imm8<7:1>   `-imm8<0>
+  |             | | | | `-L                   `-size
+  |             | | | `-W
+  |             | | `-D
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Decrement Before(P == 1 && U == 0 && W == 1)
+ 
+ VLDMDB{<c>}{<q>}{.<size>} <Rn>!, <dreglist>
+.SS Increment After(P == 0 && U == 1)
+ 
+ VLDM{<c>}{<q>}{.<size>} <Rn>{!}, <dreglist>
+ 
+ VLDMIA{<c>}{<q>}{.<size>} <Rn>{!}, <dreglist>
+ 
+ if P == '0' && U == '0' && W == '0' then SEE "Related encodings";
+ if P == '1' && W == '0' then SEE "VLDR";
+ if P == U && W == '1' then UNDEFINED;
+ // Remaining combinations are PUW = 010 (IA without !), 011 (IA with !), 101 (DB with !)
+ single_regs = FALSE;  add = (U == '1');  wback = (W == '1');
+ d = UInt(D:Vd);  n = UInt(Rn);  imm32 = ZeroExtend(imm8:'00', 32);
+ regs = UInt(imm8) DIV 2;  // If UInt(imm8) is odd, see "FLDM*X".
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+ if regs == 0 || regs > 16 || (d+regs) > 32 then UNPREDICTABLE;
+ if imm8<0> == '1' && (d+regs) > 16 then UNPREDICTABLE;
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12  10   8               0
+          |     | | | | | |       |       |   |   |               |
+  |. . . .|1 1 0|.|.|.|.|1|. . . .|. . . .|1 0|1 0|. . . . . . . .|
+  |             | | | | | |       |           |   |
+  |             | | | | | `-Rn    `-Vd        |   `-imm8
+  |             | | | | `-L                   `-size
+  |             | | | `-W
+  |             | | `-D
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Decrement Before(P == 1 && U == 0 && W == 1)
+ 
+ VLDMDB{<c>}{<q>}{.<size>} <Rn>!, <sreglist>
+.SS Increment After(P == 0 && U == 1)
+ 
+ VLDM{<c>}{<q>}{.<size>} <Rn>{!}, <sreglist>
+ 
+ VLDMIA{<c>}{<q>}{.<size>} <Rn>{!}, <sreglist>
+ 
+ if P == '0' && U == '0' && W == '0' then SEE "Related encodings";
+ if P == '1' && W == '0' then SEE "VLDR";
+ if P == U && W == '1' then UNDEFINED;
+ // Remaining combinations are PUW = 010 (IA without !), 011 (IA with !), 101 (DB with !)
+ single_regs = TRUE;  add = (U == '1');  wback = (W == '1');  d = UInt(Vd:D);  n = UInt(Rn);
+ imm32 = ZeroExtend(imm8:'00', 32);  regs = UInt(imm8);
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+ if regs == 0 || (d+regs) > 32 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                     07                                            
+                   08 |                                            
+                 09 | |  05                                        
+               10 | | |06 |      01      12  10   8             1 0
+                | | | | | |       |       |   |   |             | |
+   1 1 1 0 1 1 0|.|.|.|.|1|. . . .|. . . .|1 0|1 1|. . . . . . .|0|
+                | | | | | |       |           |   |             |
+                | | | | | `-Rn    `-Vd        |   `-imm8<7:1>   `-imm8<0>
+                | | | | `-L                   `-size
+                | | | `-W
+                | | `-D
+                | `-U
+                `-P
+  
+  
+ 
+.SS Decrement Before(P == 1 && U == 0 && W == 1)
+ 
+ VLDMDB{<c>}{<q>}{.<size>} <Rn>!, <dreglist>
+.SS Increment After(P == 0 && U == 1)
+ 
+ VLDM{<c>}{<q>}{.<size>} <Rn>{!}, <dreglist>
+ 
+ VLDMIA{<c>}{<q>}{.<size>} <Rn>{!}, <dreglist>
+ 
+ if P == '0' && U == '0' && W == '0' then SEE "Related encodings";
+ if P == '1' && W == '0' then SEE "VLDR";
+ if P == U && W == '1' then UNDEFINED;
+ // Remaining combinations are PUW = 010 (IA without !), 011 (IA with !), 101 (DB with !)
+ single_regs = FALSE;  add = (U == '1');  wback = (W == '1');
+ d = UInt(D:Vd);  n = UInt(Rn);  imm32 = ZeroExtend(imm8:'00', 32);
+ regs = UInt(imm8) DIV 2;  // If UInt(imm8) is odd, see "FLDM*X".
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+ if regs == 0 || regs > 16 || (d+regs) > 32 then UNPREDICTABLE;
+ if imm8<0> == '1' && (d+regs) > 16 then UNPREDICTABLE;
+.SS T2 - T32
+ 
+                     07                                            
+                   08 |                                            
+                 09 | |  05                                        
+               10 | | |06 |      01      12  10   8               0
+                | | | | | |       |       |   |   |               |
+   1 1 1 0 1 1 0|.|.|.|.|1|. . . .|. . . .|1 0|1 0|. . . . . . . .|
+                | | | | | |       |           |   |
+                | | | | | `-Rn    `-Vd        |   `-imm8
+                | | | | `-L                   `-size
+                | | | `-W
+                | | `-D
+                | `-U
+                `-P
+  
+  
+ 
+.SS Decrement Before(P == 1 && U == 0 && W == 1)
+ 
+ VLDMDB{<c>}{<q>}{.<size>} <Rn>!, <sreglist>
+.SS Increment After(P == 0 && U == 1)
+ 
+ VLDM{<c>}{<q>}{.<size>} <Rn>{!}, <sreglist>
+ 
+ VLDMIA{<c>}{<q>}{.<size>} <Rn>{!}, <sreglist>
+ 
+ if P == '0' && U == '0' && W == '0' then SEE "Related encodings";
+ if P == '1' && W == '0' then SEE "VLDR";
+ if P == U && W == '1' then UNDEFINED;
+ // Remaining combinations are PUW = 010 (IA without !), 011 (IA with !), 101 (DB with !)
+ single_regs = TRUE;  add = (U == '1');  wback = (W == '1');  d = UInt(Vd:D);  n = UInt(Rn);
+ imm32 = ZeroExtend(imm8:'00', 32);  regs = UInt(imm8);
+ if n == 15 && (wback || CurrentInstrSet() != InstrSet_A32) then UNPREDICTABLE;
+ if regs == 0 || (d+regs) > 32 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     address = if add then R[n] else R[n]-imm32;
+     for r = 0 to regs-1
+         if single_regs then
+             S[d+r] = MemA[address,4];  address = address+4;
+         else
+             word1 = MemA[address,4];  word2 = MemA[address+4,4];  address = address+8;
+             // Combine the word-aligned words in the correct order for current endianness.
+             D[d+r] = if BigEndian() then word1:word2 else word2:word1;
+     if wback then R[n] = if add then R[n]+imm32 else R[n]-imm32;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  An optional data size specifier. If present, it must be equal to the size in
+  bits, 32 or 64, of the registers being transferred.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field. If writeback
+  is not specified, the PC can be used.
+
+ !
+  Encoded in W
+  Specifies base register writeback. Encoded in the "W" field as 1 if present,
+  otherwise 0.
+
+ <sreglist>
+  Is the list of consecutively numbered 32-bit SIMD&FP registers to be
+  transferred. The first register in the list is encoded in "Vd:D", and "imm8"
+  is set to the number of registers in the list. The list must contain at least
+  one register.
+
+ <dreglist>
+  Is the list of consecutively numbered 64-bit SIMD&FP registers to be
+  transferred. The first register in the list is encoded in "D:Vd", and "imm8"
+  is set to twice the number of registers in the list. The list must contain at
+  least one register, and must not contain more than 16 registers.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     address = if add then R[n] else R[n]-imm32;
+     for r = 0 to regs-1
+         if single_regs then
+             S[d+r] = MemA[address,4];  address = address+4;
+         else
+             word1 = MemA[address,4];  word2 = MemA[address+4,4];  address = address+8;
+             // Combine the word-aligned words in the correct order for current endianness.
+             D[d+r] = if BigEndian() then word1:word2 else word2:word1;
+     if wback then R[n] = if add then R[n]+imm32 else R[n]-imm32;
+

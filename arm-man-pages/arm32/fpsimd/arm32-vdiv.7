@@ -1,0 +1,146 @@
+.nh
+.TH "VDIV -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VDIV
+ Divide
+
+ Divide divides one floating-point value by another floating-point value and
+ writes the result to a third floating-point register.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+         28      24 | |  20      16      12  10   8 7 6 5 4       0
+          |       | | |   |       |       |   |   | | | | |       |
+  |. . . .|1 1 1 0|1|.|0 0|. . . .|. . . .|1 0|. .|.|0|.|0|. . . .|
+  |               | | |   |       |           |   | | |   |
+  `-cond(!= 1111) | | |   `-Vn    `-Vd        |   | | `-M `-Vm
+                  | | `-o1                    |   | `-o2
+                  | `-D                       |   `-N
+                  `-o0                        `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VDIV{<c>}{<q>}.F16 {<Sd>,} <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VDIV{<c>}{<q>}.F32 {<Sd>,} <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VDIV{<c>}{<q>}.F64 {<Dd>,} <Dn>, <Dm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                     07                                            
+                   08 |                                            
+                 09 | |  05      01      12  10   8 7 6 5 4       0
+                  | | |   |       |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0|1|.|0 0|. . . .|. . . .|1 0|. .|.|0|.|0|. . . .|
+                  | | |   |       |           |   | | |   |
+                  | | |   `-Vn    `-Vd        |   | | `-M `-Vm
+                  | | `-o1                    |   | `-o2
+                  | `-D                       |   `-N
+                  `-o0                        `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VDIV{<c>}{<q>}.F16 {<Sd>,} <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VDIV{<c>}{<q>}.F32 {<Sd>,} <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VDIV{<c>}{<q>}.F64 {<Dd>,} <Dn>, <Dm>
+ 
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     case esize of
+         when 16
+             S[d] = Zeros(16) : FPDiv(S[n]<15:0>, S[m]<15:0>, FPSCR);
+         when 32
+             S[d] = FPDiv(S[n], S[m], FPSCR);
+         when 64
+             D[d] = FPDiv(D[n], D[m], FPSCR);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sn>
+  Encoded in Vn:N
+  Is the 32-bit name of the first SIMD&FP source register, encoded in the "Vn:N"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the
+  "Vm:M" field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     case esize of
+         when 16
+             S[d] = Zeros(16) : FPDiv(S[n]<15:0>, S[m]<15:0>, FPSCR);
+         when 32
+             S[d] = FPDiv(S[n], S[m], FPSCR);
+         when 64
+             D[d] = FPDiv(D[n], D[m], FPSCR);
+

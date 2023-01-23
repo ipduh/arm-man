@@ -1,0 +1,91 @@
+.nh
+.TH "VMOVX -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOVX
+ Vector Move extraction
+
+ Vector Move extraction. This instruction copies the upper 16 bits of the 32-bit
+ source SIMD&FP register into the lower 16 bits of the 32-bit destination
+ SIMD&FP register, while clearing the remaining bits to zero.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+                   23 |          16      12  10   8 7 6 5 4       0
+                    | |           |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 1|.|1 1 0 0 0 0|. . . .|1 0|1 0|0|1|.|0|. . . .|
+                    |             |           |   |   |   |
+                    `-D           `-Vd        |   |   `-M `-Vm
+                                              |   `-op
+                                              `-size
+  
+  
+ 
+.SS A1
+ 
+ VMOVX{<q>}.F16 <Sd>, <Sm>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ d = UInt(Vd:D); m = UInt(Vm:M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                                            
+                   08 |          01      12  10   8 7 6 5 4       0
+                    | |           |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 1|.|1 1 0 0 0 0|. . . .|1 0|1 0|0|1|.|0|. . . .|
+                    |             |           |   |   |   |
+                    `-D           `-Vd        |   |   `-M `-Vm
+                                              |   `-op
+                                              `-size
+  
+  
+ 
+.SS T1
+ 
+ VMOVX{<q>}.F16 <Sd>, <Sm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if !HaveFP16Ext() then UNDEFINED;
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ d = UInt(Vd:D); m = UInt(Vm:M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     S[d] = Zeros(16) : S[m]<31:16>;
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     S[d] = Zeros(16) : S[m]<31:16>;
+

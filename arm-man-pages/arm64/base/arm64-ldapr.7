@@ -1,0 +1,109 @@
+.nh
+.TH "LDAPR -- A64" "7" " "  "instruction" "general"
+.SS LDAPR
+ Load-Acquire RCpc Register
+
+ Load-Acquire RCpc Register derives an address from a base register value, loads
+ a 32-bit word or 64-bit doubleword from the derived address in memory, and
+ writes it to a register.
+
+ The instruction has memory ordering semantics as described in Load-Acquire,
+ Load-AcquirePC, and Store-Release, except that:
+
+
+ This difference in memory ordering is not described in the pseudocode.
+
+ For information about memory accesses, see Load/Store addressing modes.
+
+
+
+.SS Integer - A64 - general
+ 
+                       21                                          
+                     22 |                                          
+             26    23 | |          15                              
+     30    27 |  24 | | |        16 |    12  10         5         0
+      |     | |   | | | |         | |     |   |         |         |
+  |1 x|1 1 1|0|0 0|1|0|1|1 1 1 1 1|1|1 0 0|0 0|. . . . .|. . . . .|
+  |         |     | |   |         | |         |         |
+  `-size    `-V   | `-R `-Rs      | `-opc     `-Rn      `-Rt
+                  `-A             `-o3
+  
+  
+ 
+.SS 32-bit(size == 10)
+ 
+ LDAPR  <Wt>, [<Xn|SP> {,#0}]
+.SS 64-bit(size == 11)
+ 
+ LDAPR  <Xt>, [<Xn|SP> {,#0}]
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer s = UInt(Rs);   // ignored by all loads and store-release
+ 
+ AccType acctype = AccType_ORDERED;
+ integer elsize = 8 << UInt(size);
+ integer regsize = if elsize == 64 then 64 else 32;
+ integer datasize = elsize;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) data;
+ constant integer dbytes = datasize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = Mem[address, dbytes, acctype];
+ X[t] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) data;
+ constant integer dbytes = datasize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = Mem[address, dbytes, acctype];
+ X[t] = ZeroExtend(data, regsize);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

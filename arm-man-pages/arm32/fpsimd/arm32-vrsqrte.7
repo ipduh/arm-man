@@ -1,0 +1,146 @@
+.nh
+.TH "VRSQRTE -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VRSQRTE
+ Vector Reciprocal Square Root Estimate
+
+ Vector Reciprocal Square Root Estimate finds an approximate reciprocal square
+ root of each element in a vector, and places the results in a second vector.
+
+ The operand and result elements are the same type, and can be floating-point
+ numbers or unsigned integers.
+
+ For details of the operation performed by this instruction see Floating-point
+ reciprocal estimate and step.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |   9 8 7 6 5 4       0
+                    | |   |   |   |       | |   | | | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 1|. . . .|0|1 0|.|1|.|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          `-F | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VRSQRTE{<c>}{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VRSQRTE{<c>}{<q>}.<dt> <Qd>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ floating_point = (F == '1');
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |   9 8 7 6 5 4       0
+                    | |   |   |   |       | |   | | | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 1|. . . .|0|1 0|.|1|.|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          `-F | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VRSQRTE{<c>}{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VRSQRTE{<c>}{<q>}.<dt> <Qd>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ floating_point = (F == '1');
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if floating_point then
+                 Elem[D[d+r],e,esize] = FPRSqrtEstimate(Elem[D[m+r],e,esize], StandardFPSCRValue());
+             else
+                 Elem[D[d+r],e,esize] = UnsignedRSqrtEstimate(Elem[D[m+r],e,esize]);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in F:size
+  Is the data type for the elements of the vectors,
+
+  F size <dt> 
+  0 10   U32  
+  1 01   F16  
+  1 10   F32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             if floating_point then
+                 Elem[D[d+r],e,esize] = FPRSqrtEstimate(Elem[D[m+r],e,esize], StandardFPSCRValue());
+             else
+                 Elem[D[d+r],e,esize] = UnsignedRSqrtEstimate(Elem[D[m+r],e,esize]);
+

@@ -1,0 +1,110 @@
+.nh
+.TH "SMINV" "7" " "  "instruction" "sve"
+.SS SMINV
+ Signed minimum reduction to scalar
+
+ Signed minimum horizontally across all lanes of a vector, and place the result
+ in the SIMD&FP scalar destination register. Inactive elements in the source
+ vector are treated as the maximum signed integer for the element size.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - sminv_r_p_z_
+ 
+                                 16                                
+                               17 |                                
+                             18 | |                                
+                 24  22    19 | | |    13    10         5         0
+                  |   |     | | | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 0 1|0|1|0|0 0 1|. . .|. . . . .|. . . . .|
+                  |         | | |       |     |         |
+                  `-size    | | `-U     `-Pg  `-Zn      `-Vd
+                            | `-opc<0>
+                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ SMINV   <V><d>, <Pg>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Vd);
+ boolean unsigned = FALSE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ integer minimum = if unsigned then (2^esize - 1) else (2^(esize-1) - 1);
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         integer element = Int(Elem[operand, e, esize], unsigned);
+         minimum = Min(minimum, element);
+ 
+ V[d] = minimum<esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <d>
+  Encoded in Vd
+  Is the number [0-31] of the destination SIMD&FP register, encoded in the "Vd"
+  field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand = Z[n];
+ integer minimum = if unsigned then (2^esize - 1) else (2^(esize-1) - 1);
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         integer element = Int(Elem[operand, e, esize], unsigned);
+         minimum = Min(minimum, element);
+ 
+ V[d] = minimum<esize-1:0>;
+

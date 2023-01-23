@@ -1,0 +1,119 @@
+.nh
+.TH "DCPS2 -- AArch32" "7" " "  "instruction" "general"
+.SS DCPS2
+ Debug Change PE State to EL2
+
+ Debug Change PE State to EL2 allows the debugger to move the PE into EL2 from a
+ lower Exception level.
+
+ DCPS2 is undefined if any of:
+
+ The PE is in Secure state and any of:
+
+
+ When the PE executes DCPS2:
+
+ If EL2 is using AArch32, the PE enters Hyp mode and ELR_hyp, HSR, SPSR_hyp, DLR
+ and DSPSR become UNKNOWN.
+
+ If EL2 is using AArch64, the PE enters EL2 using AArch64, selects SP_EL2, and
+ ELR_EL2, ESR_EL2, SPSR_EL2, DLR_EL0 and DSPSR_EL0 become UNKNOWN.
+
+
+ For more information on the operation of this instruction, see DCPS.
+
+
+
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                         05      01      12                   2   0
+                          |       |       |                   |   |
+   1 1 1 1 0 1 1 1 1 0 0 0|1 1 1 1|1 0 0 0|0 0 0 0 0 0 0 0 0 0|1 0|
+                          |               |                   |
+                          `-imm4          `-imm10             `-opt
+  
+  
+ 
+.SS T1
+ 
+ DCPS2
+ 
+ if !HaveEL(EL2) then UNDEFINED;
+ 
+ if !Halted() || IsSecure() then UNDEFINED;
+ 
+ if ELUsingAArch32(EL2) then
+     AArch32.WriteMode(M32_Hyp);
+     PSTATE.E = HSCTLR.EE;
+ 
+     ELR_hyp = bits(32) UNKNOWN;
+     HSR = bits(32) UNKNOWN;
+     SPSR_hyp = bits(32) UNKNOWN;
+ 
+     DLR = bits(32) UNKNOWN;
+     DSPSR = bits(32) UNKNOWN;
+ else                                        // Targeting EL2 using AArch64
+     AArch64.MaybeZeroRegisterUppers();
+     MaybeZeroSVEUppers(EL2);
+     PSTATE.nRW = '0';
+     PSTATE.SP = '1';
+     PSTATE.EL = EL2;
+     if HavePANExt() && SCTLR_EL2.SPAN == '0' && HCR_EL2.E2H == '1' && HCR_EL2.TGE == '1' then
+         PSTATE.PAN = '1';
+     if HaveUAOExt() then PSTATE.UAO = '0';
+ 
+     ELR_EL2 = bits(64) UNKNOWN;
+     ESR_EL2 = bits(32) UNKNOWN;
+     SPSR_EL2 = bits(32) UNKNOWN;
+ 
+     DLR_EL0 = bits(64) UNKNOWN;
+     DSPSR_EL0 = bits(32) UNKNOWN;
+ 
+     // SCTLR_EL2.IESB might be ignored in Debug state.
+     if HaveIESB() && SCTLR_EL2.IESB == '1' && !ConstrainUnpredictableBool(Unpredictable_IESBinDebug) then
+         SynchronizeErrors();
+ 
+ UpdateEDSCRFields();                        // Update EDSCR PE state flags
+ 
+
+
+.SS Operation
+
+ if !Halted() || IsSecure() then UNDEFINED;
+ 
+ if ELUsingAArch32(EL2) then
+     AArch32.WriteMode(M32_Hyp);
+     PSTATE.E = HSCTLR.EE;
+ 
+     ELR_hyp = bits(32) UNKNOWN;
+     HSR = bits(32) UNKNOWN;
+     SPSR_hyp = bits(32) UNKNOWN;
+ 
+     DLR = bits(32) UNKNOWN;
+     DSPSR = bits(32) UNKNOWN;
+ else                                        // Targeting EL2 using AArch64
+     AArch64.MaybeZeroRegisterUppers();
+     MaybeZeroSVEUppers(EL2);
+     PSTATE.nRW = '0';
+     PSTATE.SP = '1';
+     PSTATE.EL = EL2;
+     if HavePANExt() && SCTLR_EL2.SPAN == '0' && HCR_EL2.E2H == '1' && HCR_EL2.TGE == '1' then
+         PSTATE.PAN = '1';
+     if HaveUAOExt() then PSTATE.UAO = '0';
+ 
+     ELR_EL2 = bits(64) UNKNOWN;
+     ESR_EL2 = bits(32) UNKNOWN;
+     SPSR_EL2 = bits(32) UNKNOWN;
+ 
+     DLR_EL0 = bits(64) UNKNOWN;
+     DSPSR_EL0 = bits(32) UNKNOWN;
+ 
+     // SCTLR_EL2.IESB might be ignored in Debug state.
+     if HaveIESB() && SCTLR_EL2.IESB == '1' && !ConstrainUnpredictableBool(Unpredictable_IESBinDebug) then
+         SynchronizeErrors();
+ 
+ UpdateEDSCRFields();                        // Update EDSCR PE state flags
+

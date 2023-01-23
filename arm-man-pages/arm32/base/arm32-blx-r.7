@@ -1,0 +1,98 @@
+.nh
+.TH "BLX (register) -- AArch32" "7" " "  "instruction" "general"
+.SS BLX (register)
+ Branch with Link and Exchange (register)
+
+ Branch with Link and Exchange (register) calls a subroutine at an address
+ specified in the register, and if necessary changes to the instruction set
+ indicated by bit[0] of the register value. If the value in bit[0] is 0, the
+ instruction set after the branch will be A32. If the value in bit[0] is 1, the
+ instruction set after the branch will be T32.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                               17      13                          
+                             18 |    14 |    10                    
+                           19 | |  15 | |  11 |                    
+         28              20 | | |16 | | |12 | | 9 8       4       0
+          |               | | | | | | | | | | | | |       |       |
+  |. . . .|0 0 0 1 0 0 1 0|1|1|1|1|1|1|1|1|1|1|1|1|0 0 1 1|. . . .|
+  |                                                       |
+  `-cond(!= 1111)                                         `-Rm
+  
+  
+ 
+.SS A1
+ 
+ BLX{<c>}{<q>} <Rm>
+ 
+ m = UInt(Rm);
+ if m == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                  0                                
+                                1 |                                
+                    7         2 | |                                
+                  8 |       3 | | |                                
+                  | |       | | | |                                
+   0 1 0 0 0 1 1 1|1|. . . .|0|0|0|                                
+                  | |
+                  | `-Rm
+                  `-L
+  
+  
+ 
+.SS T1
+ 
+ BLX{<c>}{<q>} <Rm>
+ 
+ m = UInt(Rm);
+ if m == 15 then UNPREDICTABLE;
+ if InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     target = R[m];
+     if CurrentInstrSet() == InstrSet_A32 then
+         next_instr_addr = PC - 4;
+         LR = next_instr_addr;
+     else
+         next_instr_addr = PC - 2;
+         LR = next_instr_addr<31:1> : '1';
+     BXWritePC(target, BranchType_INDCALL);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose register holding the address to be branched to, encoded
+  in the "Rm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     target = R[m];
+     if CurrentInstrSet() == InstrSet_A32 then
+         next_instr_addr = PC - 4;
+         LR = next_instr_addr;
+     else
+         next_instr_addr = PC - 2;
+         LR = next_instr_addr<31:1> : '1';
+     BXWritePC(target, BranchType_INDCALL);
+

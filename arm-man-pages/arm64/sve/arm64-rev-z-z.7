@@ -1,0 +1,74 @@
+.nh
+.TH "REV (vector)" "7" " "  "instruction" "sve"
+.SS REV (vector)
+ Reverse all elements in a vector (unpredicated)
+
+ Reverse the order of all elements in the source vector and place in the
+ destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - rev_z_z_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                      10         5         0
+                  |   |                       |         |         |
+   0 0 0 0 0 1 0 1|. .|1 1 1 0 0 0 0 0 1 1 1 0|. . . . .|. . . . .|
+                  |                           |         |
+                  `-size                      `-Zn      `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ REV     <Zd>.<T>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ bits(VL) operand = Z[n];
+ bits(VL) result = Reverse(operand, esize);
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(VL) operand = Z[n];
+ bits(VL) result = Reverse(operand, esize);
+ Z[d] = result;
+

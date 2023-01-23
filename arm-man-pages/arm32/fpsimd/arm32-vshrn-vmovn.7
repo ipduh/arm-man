@@ -1,0 +1,89 @@
+.nh
+.TH "VSHRN (zero) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VSHRN (zero)
+ VSHRN is an alias of VMOVN
+
+ Vector Shift Right Narrow
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0 0|0|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS A1
+ 
+ VSHRN{<c>}{<q>}.<dt> <Dd>, <Qm>, #0
+ 
+ VMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 0|. . . .|0|0 1 0 0|0|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS T1
+ 
+ VSHRN{<c>}{<q>}.<dt> <Dd>, <Qm>, #0
+ 
+ VMOVN{<c>}{<q>}.<dt> <Dd>, <Qm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in size
+  Is the data type for the elements of the operand,
+
+  size <dt>     
+  00   I16      
+  01   I32      
+  10   I64      
+  11   RESERVED 
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ The manual of VMOVN gives pseudocode for VSHRN.

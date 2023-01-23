@@ -1,0 +1,74 @@
+.nh
+.TH "PACGA -- A64" "7" " "  "instruction" "general"
+.SS PACGA
+ Pointer Authentication Code, using Generic key
+
+ Pointer Authentication Code, using Generic key. This instruction computes the
+ pointer authentication code for an address in the first source register, using
+ a modifier in the second source register, and the Generic key. The computed
+ pointer authentication code is returned in the upper 32 bits of the destination
+ register.
+
+
+
+.SS Integer - A64 - PACGA_64P_dp_2src
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |              21        16          10         5         0
+    | | |               |         |           |         |         |
+  |1|0|0|1 1 0 1 0 1 1 0|. . . . .|0 0 1 1 0 0|. . . . .|. . . . .|
+  | | |                 |         |           |         |
+  | | `-S               `-Rm      `-opcode2   `-Rn      `-Rd
+  | `-op
+  `-sf
+  
+  
+ 
+.SS Integer
+ 
+ PACGA  <Xd>, <Xn>, <Xm|SP>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if m == 31 then source_is_sp = TRUE;
+ 
+ if source_is_sp then
+     X[d] = AddPACGA(X[n], SP[]);
+ else
+     X[d] = AddPACGA(X[n], X[m]);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the first general-purpose source register, encoded in
+  the "Rn" field.
+
+ <Xm|SP>
+  Encoded in Rm
+  Is the 64-bit name of the second general-purpose source register or stack
+  pointer, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ if source_is_sp then
+     X[d] = AddPACGA(X[n], SP[]);
+ else
+     X[d] = AddPACGA(X[n], X[m]);
+

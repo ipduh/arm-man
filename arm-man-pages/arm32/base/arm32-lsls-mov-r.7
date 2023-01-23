@@ -1,0 +1,146 @@
+.nh
+.TH "LSLS (immediate) -- AArch32" "7" " "  "alias" "general"
+.SS LSLS (immediate)
+ LSLS is an alias of MOVS
+
+ Logical Shift Left, setting flags (immediate)
+
+ Logical Shift Left, setting flags (immediate) shifts a register value left by
+ an immediate number of bits, shifting in zeros, and writes the result to the
+ destination register.
+
+ If the destination register is not the PC, this instruction updates the
+ condition flags based on the result.
+
+ The field descriptions for <Rd> identify the encodings where the PC is
+ permitted as the destination register. Arm deprecates any use of these
+ encodings. However, when the destination register is the PC:
+
+ The PE branches to the address written to the PC, and restores PSTATE from
+ SPSR_<current_mode>.
+
+ The PE checks SPSR_<current_mode> for an illegal return event.  See Illegal
+ return events from AArch32 state.
+
+ The instruction is undefined in Hyp mode.
+
+ The instruction is constrained unpredictable in User mode and System mode.
+
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T2 and T3).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |      16      12         7   5 4       0
+          |         |   | |       |       |         |   | |       |
+  |. . . .|0 0 0 1 1|0 1|1|0 0 0 0|. . . .|. . . . .|0 0|0|. . . .|
+  |                 |   | |       |       |         |     |
+  `-cond(!= 1111)   |   | `-Rn    `-Rd    |         |     `-Rm
+                    |   `-S               |         `-stype
+                    `-opc                 `-imm5(!= 00000)
+  
+  
+ 
+.SS MOVS, shift or rotate by value
+ 
+ LSLS{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+ 
+ MOVS{<c>}{<q>} <Rd>, <Rm>, LSL #<imm>
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+       13  11         6     3     0                                
+        |   |         |     |     |                                
+   0 0 0|0 0|. . . . .|. . .|. . .|                                
+        |   |         |     |
+        |   |         `-Rm  `-Rd
+        |   `-imm5(!= 00000)
+        `-op
+  
+  
+ 
+.SS T2
+ 
+ LSLS{<q>} {<Rd>,} <Rm>, #<imm>
+ 
+ MOVS{<q>} <Rd>, <Rm>, LSL #<imm>
+.SS T3 - T32
+ 
+                                                                   
+                                                                   
+                         05        15                              
+               10      06 |      01 |    12       8   6   4       0
+                |       | |       | |     |       |   |   |       |
+   1 1 1 0 1 0 1|0 0 1 0|1|1 1 1 1|0|. . .|. . . .|. .|0 0|. . . .|
+                |       | |         |     |       |   |   |
+                `-op1   | `-Rn      |     `-Rd    |   |   `-Rm
+                        `-S         `-imm3        |   `-stype
+                                                  `-imm2
+  
+  
+ 
+.SS MOVS, shift or rotate by value
+ 
+ LSLS.W {<Rd>,} <Rm>, #<imm>
+ 
+ LSLS{<c>}{<q>} {<Rd>,} <Rm>, #<imm>
+ 
+ MOVS{<c>}{<q>} <Rd>, <Rm>, LSL #<imm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. Arm deprecates using the PC as the destination register, but if
+  the PC is used, the instruction performs an exception return, that restores
+  PSTATE from SPSR_<current_mode>.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T2 and T3: is the general-purpose destination register, encoded
+  in the "Rd" field.
+
+ <Rm>
+  Encoded in Rm
+  For encoding A1: is the general-purpose source register, encoded in the "Rm"
+  field. The PC can be used, but this is deprecated.
+
+ <Rm>
+  Encoded in Rm
+  For encoding T2 and T3: is the general-purpose source register, encoded in the
+  "Rm" field.
+
+ <imm>
+  Encoded in imm5
+  For encoding A1: is the shift amount, in the range 0 to 31, encoded in the
+  "imm5" field as <imm> modulo 32.
+
+ <imm>
+  Encoded in imm5
+  For encoding T2: is the shift amount, in the range 1 to 31, encoded in the
+  "imm5" field as <amount> modulo 32.
+
+ <imm>
+  Encoded in imm3:imm2
+  For encoding T3: is the shift amount, in the range 0 to 31,  encoded in the
+  "imm3:imm2" field as <imm> modulo 32.
+
+
+
+.SS Operation
+
+ The manual of MOVS gives pseudocode for LSLS.

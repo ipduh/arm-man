@@ -1,0 +1,137 @@
+.nh
+.TH "MSR (register) -- AArch32" "7" " "  "instruction" "general"
+.SS MSR (register)
+ Move general-purpose register to Special register
+
+ Move general-purpose register to Special register moves selected bits of a
+ general-purpose register to the APSR, CPSR or SPSR_<current_mode>.
+
+ Because of the Do-Not-Modify nature of its reserved bits, a read-modify-write
+ sequence is normally required when the MSR instruction is being used at
+ Application level and its destination is not APSR_nzcvq (CPSR_f).
+
+ If an MSR (register) moves selected bits of an immediate value to the CPSR, the
+ PE checks whether the value being written to PSTATE.M is legal. See Illegal
+ changes to PSTATE.M.
+
+ An MSR (register) executed in User mode:
+
+ Is unpredictable if it attempts to update the SPSR.
+
+ Is unpredictable if it attempts to update the SPSR.
+
+ Otherwise, does not update any CPSR field that is accessible only at EL1 or
+ higher.
+
+
+ An MSR (register) executed in System mode is unpredictable if it attempts to
+ update the SPSR.
+
+ The CPSR.E bit is writable from any mode using an MSR instruction.  Arm
+ deprecates using this to change its value.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                         20                                        
+                       21 |                  10                    
+                     22 | |                11 |                    
+         28        23 | | |      16      12 | | 9 8       4       0
+          |         | | | |       |       | | | | |       |       |
+  |. . . .|0 0 0 1 0|.|1|0|. . . .|1 1 1 1|0|0|0|0|0 0 0 0|. . . .|
+  |                 |     |       |           | |         |
+  `-cond(!= 1111)   `-R   `-mask  `-Rd        | `-m       `-Rn
+                                              `-B
+  
+  
+ 
+.SS A1
+ 
+ MSR{<c>}{<q>} <spec_reg>, <Rn>
+ 
+ n = UInt(Rn);  write_spsr = (R == '1');
+ if mask == '0000' then UNPREDICTABLE;
+ if n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                         12                        
+                         05            13 |                        
+                       06 |      01  14 | |       8 7 6 5 4 3 2 1 0
+                        | |       |   | | |       | | | | | | | | |
+   1 1 1 1 0 0 1 1 1 0 0|.|. . . .|1 0|0|0|. . . .|0|0|0|0|0|0|0|0|
+                        | |               |
+                        | `-Rn            `-mask
+                        `-R
+  
+  
+ 
+.SS T1
+ 
+ MSR{<c>}{<q>} <spec_reg>, <Rn>
+ 
+ n = UInt(Rn);  write_spsr = (R == '1');
+ if mask == '0000' then UNPREDICTABLE;
+ if n == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if write_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             SPSRWriteByInstr(R[n], mask);
+     else
+         // Attempts to change to an illegal mode will invoke the Illegal Execution state mechanism
+         CPSRWriteByInstr(R[n], mask);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <spec_reg>
+  Encoded in mask
+  Is one of:                        APSR_<bits>.             CPSR_<fields>.
+  SPSR_<fields>.                      For CPSR and SPSR, <fields> is a sequence
+  of one or more of the following:
+  cmask<0> = '1' to enable writing of bits<7:0> of the destination PSR.
+  xmask<1> = '1' to enable writing of bits<15:8> of the destination PSR.
+  smask<2> = '1' to enable writing of bits<23:16> of the destination PSR.
+  fmask<3> = '1' to enable writing of bits<31:24> of the destination PSR.
+  For APSR, <bits> is one of nzcvq, g, or nzcvqg. These map to the following
+  CPSR_<fields> values:                        APSR_nzcvq is the same as CPSR_f
+  (mask== '1000').             APSR_g is the same as CPSR_s (mask == '0100').
+  APSR_nzcvqg is the same as CPSR_fs (mask == '1100').                      Arm
+  recommends the APSR_<bits> forms when only the N, Z, C, V, Q, and GE[3:0] bits
+  are being written. For more information, see The Application Program Status
+  Register, APSR.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose source register, encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if write_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             SPSRWriteByInstr(R[n], mask);
+     else
+         // Attempts to change to an illegal mode will invoke the Illegal Execution state mechanism
+         CPSRWriteByInstr(R[n], mask);
+

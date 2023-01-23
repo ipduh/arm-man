@@ -1,0 +1,60 @@
+.nh
+.TH "TST (immediate) -- A64" "7" " "  "alias" "general"
+.SS TST (immediate)
+ TST is an alias of ANDS
+
+ Test bits (immediate)
+
+
+
+.SS Setting the condition flags - A64 - s
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |.|1 1|1 0 0 1 0 0|.|. . . . . .|. . . . . .|. . . . .|1 1 1 1 1|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      `-imms      `-Rn      `-Rd
+  `-sf              `-N
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0)
+ 
+ TST  <Wn>, #<imm>
+ 
+ ANDS WZR, <Wn>, #<imm>
+.SS 64-bit(sf == 1)
+ 
+ TST  <Xn>, #<imm>
+ 
+ ANDS XZR, <Xn>, #<imm>
+ 
+
+.SS Assembler Symbols
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <imm>
+  Encoded in immr:imms
+  For the 32-bit variant: is the bitmask immediate, encoded in "imms:immr".
+
+ <imm>
+  Encoded in N:immr:imms
+  For the 64-bit variant: is the bitmask immediate, encoded in "N:imms:immr".
+
+
+
+.SS Operation
+
+ The manual of ANDS gives pseudocode for TST.

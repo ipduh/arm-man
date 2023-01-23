@@ -1,0 +1,72 @@
+.nh
+.TH "MOV (vector, predicated)" "7" " "  "alias" "sve"
+.SS MOV (vector, predicated)
+ MOV is an alias of SEL
+
+ Move vector elements (predicated)
+
+ Move elements from the source vector to the corresponding elements of the
+ destination vector. Inactive elements in the destination vector register remain
+ unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - sel_z_p_zz_
+ 
+                                                                   
+                                                                   
+                       21                                          
+                 24  22 |        16  14      10         5         0
+                  |   | |         |   |       |         |         |
+   0 0 0 0 0 1 0 1|. .|1|. . . . .|1 1|. . . .|. . . . .|. . . . .|
+                  |     |             |       |         |
+                  |     `-Zm          `-Pg    `-Zn      `-Zd
+                  `-size
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, <Pg>/M, <Zn>.<T>
+ 
+ SEL <Zd>.<T>, <Pg>, <Zn>.<T>, <Zd>.<T>
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SEL gives pseudocode for MOV.

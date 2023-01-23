@@ -1,0 +1,47 @@
+.nh
+.TH "HLT -- A64" "7" " "  "instruction" "system"
+.SS HLT
+ Halt instruction
+
+ Halt instruction. A HLTinstruction can generate a Halt Instruction debug event,
+ which causes entry into Debug state.
+
+
+
+.SS System - A64 - HLT_EX_exception
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24    21                               5     2   0
+                  |     |                               |     |   |
+   1 1 0 1 0 1 0 0|0 1 0|. . . . . . . . . . . . . . . .|0 0 0|0 0|
+                  |     |                               |     |
+                  `-opc `-imm16                         `-op2 `-LL
+  
+  
+ 
+.SS System
+ 
+ HLT  #<imm>
+ 
+ if EDSCR.HDE == '0' || !HaltingAllowed() then UNDEFINED;
+ if HaveBTIExt() then
+     SetBTypeCompatible(TRUE);
+ 
+ Halt(DebugHalt_HaltInstruction);
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in imm16
+  Is a 16-bit unsigned immediate, in the range 0 to 65535, encoded in the
+  "imm16" field.
+
+
+
+.SS Operation
+
+ Halt(DebugHalt_HaltInstruction);
+

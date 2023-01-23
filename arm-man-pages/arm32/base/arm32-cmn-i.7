@@ -1,0 +1,108 @@
+.nh
+.TH "CMN (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS CMN (immediate)
+ Compare Negative (immediate)
+
+ Compare Negative (immediate) adds a register value and an immediate value. It
+ updates the condition flags based on the result, and discards the result.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                         20        15 | |                          
+         28        23  21 |      16 | | |12                       0
+          |         |   | |       | | | | |                       |
+  |. . . .|0 0 1 1 0|1 1|1|. . . .|0|0|0|0|. . . . . . . . . . . .|
+  |                 |     |               |
+  `-cond(!= 1111)   `-opc `-Rn            `-imm12
+  
+  
+ 
+.SS A1
+ 
+ CMN{<c>}{<q>} <Rn>, #<const>
+ 
+ n = UInt(Rn);  imm32 = A32ExpandImm(imm12);
+.SS T1 - T32
+ 
+                                                                   
+               10                                                  
+             11 |        05        15                              
+           12 | |      06 |      01 |    12       8               0
+            | | |       | |       | |     |       |               |
+   1 1 1 1 0|.|0|1 0 0 0|1|. . . .|0|. . .|1 1 1 1|. . . . . . . .|
+            |   |       | |         |     |       |
+            `-i `-op1   | `-Rn      |     `-Rd    `-imm8
+                        `-S         `-imm3
+  
+  
+ 
+.SS T1
+ 
+ CMN{<c>}{<q>} <Rn>, #<const>
+ 
+ n = UInt(Rn);  imm32 = T32ExpandImm(i:imm3:imm8);
+ if n == 15 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+     PSTATE.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the general-purpose source register, encoded in the "Rn"
+  field. The PC can be used, but this is deprecated.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1: is the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <const>
+  Encoded in imm12
+  For encoding A1: an immediate value. See Modified immediate constants in A32
+  instructions for the range of values.
+
+ <const>
+  Encoded in i:imm3:imm8
+  For encoding T1: an immediate value. See Modified immediate constants in T32
+  instructions for the range of values.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(R[n], imm32, '0');
+     PSTATE.<N,Z,C,V> = nzcv;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

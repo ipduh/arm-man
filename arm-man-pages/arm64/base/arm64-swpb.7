@@ -1,0 +1,127 @@
+.nh
+.TH "SWPB, SWPAB, SWPALB, SWPLB -- A64" "7" " "  "instruction" "general"
+.SS SWPB, SWPAB, SWPALB, SWPLB
+ Swap byte in memory
+
+ Swap byte in memory atomically loads an 8-bit byte from a memory location, and
+ stores the value held in a register back to the same memory location. The value
+ initially loaded from memory is returned in the destination register.
+
+ If the destination register is not WZR, SWPAB and SWPALB load from memory with
+ acquire semantics.
+
+ If the destination register is not WZR, SWPAB and SWPALB load from memory with
+ acquire semantics.
+
+ If the destination register is not WZR, SWPAB and SWPALB load from memory with
+ acquire semantics.
+
+ SWPLB and SWPALB store to memory with release semantics.
+
+ SWPLB and SWPALB store to memory with release semantics.
+
+ SWPB has no memory ordering requirements.
+
+
+ For more information about memory ordering semantics see Load-Acquire, Store-
+ Release.
+
+ For information about memory accesses see Load/Store addressing modes.
+
+
+
+.SS Integer - A64 - general
+ 
+                       21                                          
+                     22 |                                          
+             26    23 | |          15                              
+     30    27 |  24 | | |        16 |    12  10         5         0
+      |     | |   | | | |         | |     |   |         |         |
+  |0 0|1 1 1|0|0 0|.|.|1|. . . . .|1|0 0 0|0 0|. . . . .|. . . . .|
+  |         |     | |   |         | |         |         |
+  `-size    `-V   | `-R `-Rs      | `-opc     `-Rn      `-Rt
+                  `-A             `-o3
+  
+  
+ 
+.SS SWPAB(A == 1 && R == 0)
+ 
+ SWPAB  <Ws>, <Wt>, [<Xn|SP>]
+.SS SWPALB(A == 1 && R == 1)
+ 
+ SWPALB  <Ws>, <Wt>, [<Xn|SP>]
+.SS SWPB(A == 0 && R == 0)
+ 
+ SWPB  <Ws>, <Wt>, [<Xn|SP>]
+.SS SWPLB(A == 0 && R == 1)
+ 
+ SWPLB  <Ws>, <Wt>, [<Xn|SP>]
+ 
+ if !HaveAtomicExt() then UNDEFINED;
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer s = UInt(Rs);
+ 
+ integer datasize = 8 << UInt(size);
+ integer regsize = if datasize == 64 then 64 else 32;
+ AccType ldacctype = if A == '1' && Rt != '11111' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ AccType stacctype = if R == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) data;
+ bits(datasize) store_value;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ store_value = X[s];
+ data = MemAtomic(address, MemAtomicOp_SWP, store_value, ldacctype, stacctype);
+ X[t] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register to be stored, encoded in
+  the "Rs" field.
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) data;
+ bits(datasize) store_value;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ store_value = X[s];
+ data = MemAtomic(address, MemAtomicOp_SWP, store_value, ldacctype, stacctype);
+ X[t] = ZeroExtend(data, regsize);
+

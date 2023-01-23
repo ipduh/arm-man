@@ -1,0 +1,46 @@
+.nh
+.TH "CLREX -- A64" "7" " "  "instruction" "system"
+.SS CLREX
+ Clear Exclusive
+
+ Clear Exclusive clears the local monitor of the executing PE.
+
+
+
+.SS System - A64 - CLREX_BN_barriers
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 1 1|0 0 1 1|. . . .|0 1 0|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ CLREX  {#<imm>}
+ 
+ // CRm field is ignored
+ 
+ ClearExclusiveLocal(ProcessorID());
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in CRm
+  Is an optional 4-bit unsigned immediate, in the range 0 to 15, defaulting to
+  15 and encoded in the "CRm" field.
+
+
+
+.SS Operation
+
+ ClearExclusiveLocal(ProcessorID());
+

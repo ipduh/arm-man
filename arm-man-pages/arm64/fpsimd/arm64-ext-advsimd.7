@@ -1,0 +1,109 @@
+.nh
+.TH "EXT -- A64" "7" " "  "instruction" "advsimd"
+.SS EXT
+ Extract vector from pair of vectors
+
+ Extract vector from pair of vectors. This instruction extracts the lowest
+ vector elements from the second source SIMD&FP register and the highest vector
+ elements from the first source SIMD&FP register, concatenates the results into
+ a vector, and writes the vector to the destination SIMD&FP register vector. The
+ index value specifies the lowest vector element to extract from the first
+ source register, and consecutive elements are extracted from the first, then
+ second, source registers until the destination vector is filled.
+
+
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - EXT_asimdext_only
+ 
+                                                                   
+                                                                   
+     30                21          15        10                    
+   31 |          24  22 |        16 |      11 |         5         0
+    | |           |   | |         | |       | |         |         |
+   0|.|1 0 1 1 1 0|0 0|0|. . . . .|0|. . . .|0|. . . . .|. . . . .|
+    |             |     |           |         |         |
+    `-Q           `-op2 `-Rm        `-imm4    `-Rn      `-Rd
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ EXT  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<index>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if Q == '0' && imm4<3> == '1' then UNDEFINED;
+ 
+ integer datasize = if Q == '1' then 128 else 64;
+ integer position = UInt(imm4) << 3;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) hi = V[m];
+ bits(datasize) lo = V[n];
+ bits(datasize*2) concat = hi : lo;
+ 
+ V[d] = concat<position+datasize-1:position>;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in Q
+  Is an arrangement specifier,
+
+  Q <T> 
+  0 8B  
+  1 16B 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+ <index>
+  Encoded in Q:imm4
+  Is the lowest numbered byte element to be extracted,
+
+  Q imm4<3> <index>   
+  0 0       imm4<2:0> 
+  0 1       RESERVED  
+  1 x       imm4      
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) hi = V[m];
+ bits(datasize) lo = V[n];
+ bits(datasize*2) concat = hi : lo;
+ 
+ V[d] = concat<position+datasize-1:position>;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

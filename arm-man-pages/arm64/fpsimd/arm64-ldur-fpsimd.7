@@ -1,0 +1,170 @@
+.nh
+.TH "LDUR (SIMD&FP) -- A64" "7" " "  "instruction" "fpsimd"
+.SS LDUR (SIMD&FP)
+ Load SIMD&FP Register (unscaled offset)
+
+ Load SIMD&FP Register (unscaled offset). This instruction loads a SIMD&FP
+ register from memory. The address that is used for the load is calculated from
+ a base register value and an optional immediate offset.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Unscaled offset - A64 - base_plus_offset
+ 
+                                                                   
+                                                                   
+             26        21                                          
+     30    27 |  24  22 |                12  10         5         0
+      |     | |   |   | |                 |   |         |         |
+  |. .|1 1 1|1|0 0|x 1|0|. . . . . . . . .|0 0|. . . . .|. . . . .|
+  |         |     |     |                     |         |
+  `-size    `-V   `-opc `-imm9                `-Rn      `-Rt
+  
+  
+ 
+.SS 8-bit(size == 00 && opc == 01)
+ 
+ LDUR  <Bt>, [<Xn|SP>{, #<simm>}]
+.SS 16-bit(size == 01 && opc == 01)
+ 
+ LDUR  <Ht>, [<Xn|SP>{, #<simm>}]
+.SS 32-bit(size == 10 && opc == 01)
+ 
+ LDUR  <St>, [<Xn|SP>{, #<simm>}]
+.SS 64-bit(size == 11 && opc == 01)
+ 
+ LDUR  <Dt>, [<Xn|SP>{, #<simm>}]
+.SS 128-bit(size == 00 && opc == 11)
+ 
+ LDUR  <Qt>, [<Xn|SP>{, #<simm>}]
+ 
+ boolean wback = FALSE;
+ boolean postindex = FALSE;
+ integer scale = UInt(opc<1>:size);
+ if scale > 4 then UNDEFINED;
+ bits(64) offset = SignExtend(imm9, 64);
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ AccType acctype = AccType_VEC;
+ MemOp memop = if opc<0> == '1' then MemOp_LOAD else MemOp_STORE;
+ integer datasize = 8 << scale;
+ boolean tag_checked = memop != MemOp_PREFETCH && (wback || n != 31);
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(64) address;
+ bits(datasize) data;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data = V[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         V[t] = data;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Bt>
+  Encoded in Rt
+  Is the 8-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Dt>
+  Encoded in Rt
+  Is the 64-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Ht>
+  Encoded in Rt
+  Is the 16-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Qt>
+  Encoded in Rt
+  Is the 128-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <St>
+  Encoded in Rt
+  Is the 32-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <simm>
+  Encoded in imm9
+  Is the optional signed immediate byte offset, in the range -256 to 255,
+  defaulting to 0 and encoded in the "imm9" field.
+
+
+
+.SS Operation
+
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(64) address;
+ bits(datasize) data;
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ if ! postindex then
+     address = address + offset;
+ 
+ case memop of
+     when MemOp_STORE
+         data = V[t];
+         Mem[address, datasize DIV 8, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, datasize DIV 8, acctype];
+         V[t] = data;
+ 
+ if wback then
+     if postindex then
+         address = address + offset;
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

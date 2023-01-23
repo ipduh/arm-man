@@ -1,0 +1,120 @@
+.nh
+.TH "UMAXV -- A64" "7" " "  "instruction" "advsimd"
+.SS UMAXV
+ Unsigned Maximum across Vector
+
+ Unsigned Maximum across Vector. This instruction compares all the vector
+ elements in the source SIMD&FP register, and writes the largest of the values
+ as a scalar to the destination SIMD&FP register. All the values in this
+ instruction are unsigned integer values.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - UMAXV_asimdall_only
+ 
+                                                                   
+       29                                                          
+     30 |                        16                                
+   31 | |        24  22        17 |      12  10         5         0
+    | | |         |   |         | |       |   |         |         |
+   0|.|1|0 1 1 1 0|. .|1 1 0 0 0|0|1 0 1 0|1 0|. . . . .|. . . . .|
+    | |           |             |             |         |
+    | `-U         `-size        `-op          `-Rn      `-Rd
+    `-Q
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ UMAXV  <V><d>, <Vn>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if size:Q == '100' then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ boolean unsigned = (U == '1');
+ boolean min = (op == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ integer maxmin;
+ integer element;
+ 
+ maxmin = Int(Elem[operand, 0, esize], unsigned);
+ for e = 1 to elements-1
+     element = Int(Elem[operand, e, esize], unsigned);
+     maxmin = if min then Min(maxmin, element) else Max(maxmin, element);
+ 
+ V[d] = maxmin<esize-1:0>;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is the destination width specifier,
+
+  size <V>      
+  00   B        
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 RESERVED 
+  10   1 4S       
+  11   x RESERVED 
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand = V[n];
+ integer maxmin;
+ integer element;
+ 
+ maxmin = Int(Elem[operand, 0, esize], unsigned);
+ for e = 1 to elements-1
+     element = Int(Elem[operand, e, esize], unsigned);
+     maxmin = if min then Min(maxmin, element) else Max(maxmin, element);
+ 
+ V[d] = maxmin<esize-1:0>;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

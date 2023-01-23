@@ -1,0 +1,171 @@
+.nh
+.TH "VQRSHL -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VQRSHL
+ Vector Saturating Rounding Shift Left
+
+ Vector Saturating Rounding Shift Left takes each element in a vector, shifts
+ them by a value from the least significant byte of the corresponding element of
+ a second vector, and places the results in the destination vector. If the shift
+ value is positive, the operation is a left shift. Otherwise, it is a right
+ shift.
+
+ For truncated results see VQSHL (register).
+
+ The first operand and result elements are the same data type, and can be any
+ one of:
+
+
+ The second operand is a signed integer of the same size.
+
+ If any of the results overflow, they are saturated. The cumulative saturation
+ bit, FPSCR.QC, is set if saturation occurs. For details see Pseudocode details
+ of saturation.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|.|0|.|. .|. . . .|. . . .|0 1 0 1|.|.|.|1|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRSHL{<c>}{<q>}.<dt> {<Dd>,} <Dm>, <Dn>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRSHL{<c>}{<q>}.<dt> {<Qd>,} <Qm>, <Qn>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  n = UInt(N:Vn);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|.|1 1 1 1 0|.|. .|. . . .|. . . .|0 1 0 1|.|.|.|1|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VQRSHL{<c>}{<q>}.<dt> {<Dd>,} <Dm>, <Dn>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VQRSHL{<c>}{<q>}.<dt> {<Qd>,} <Qm>, <Qn>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1' || Vn<0> == '1') then UNDEFINED;
+ unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  n = UInt(N:Vn);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             shift = SInt(Elem[D[n+r],e,esize]<7:0>);
+             round_const = 1 << (-1-shift); // 0 for left shift, 2^(n-1) for right shift
+             operand = Int(Elem[D[m+r],e,esize], unsigned);
+             (result, sat) = SatQ((operand + round_const) << shift, esize, unsigned);
+             Elem[D[d+r],e,esize] = result;
+             if sat then FPSCR.QC = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in U:size
+  Is the data type for the elements of the vectors,
+
+  U size <dt> 
+  0 00   S8   
+  0 01   S16  
+  0 10   S32  
+  0 11   S64  
+  1 00   U8   
+  1 01   U16  
+  1 10   U32  
+  1 11   U64  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             shift = SInt(Elem[D[n+r],e,esize]<7:0>);
+             round_const = 1 << (-1-shift); // 0 for left shift, 2^(n-1) for right shift
+             operand = Int(Elem[D[m+r],e,esize], unsigned);
+             (result, sat) = SatQ((operand + round_const) << shift, esize, unsigned);
+             Elem[D[d+r],e,esize] = result;
+             if sat then FPSCR.QC = '1';
+

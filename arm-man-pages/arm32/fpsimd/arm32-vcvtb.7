@@ -1,0 +1,156 @@
+.nh
+.TH "VCVTB -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVTB
+ Convert to or from a half-precision value in the bottom half of a single-
+ precision register
+
+ Convert to or from a half-precision value in the bottom half of a single-
+ precision register does one of the following:
+
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19    16                                
+         28        23 |  20 |  17 |      12  10 9 8 7 6 5 4       0
+          |         | |   | |   | |       |   | | | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|0 1|.|. . . .|1 0|1|.|0|1|.|0|. . . .|
+  |                 |     |     | |             | |   |   |
+  `-cond(!= 1111)   `-D   `-o1  | `-Vd          | `-T `-M `-Vm
+                                `-op            `-sz
+  
+  
+ 
+.SS Half-precision to single-precision(op == 0 && sz == 0)
+ 
+ VCVTB{<c>}{<q>}.F32.F16 <Sd>, <Sm>
+.SS Half-precision to double-precision(op == 0 && sz == 1)
+ 
+ VCVTB{<c>}{<q>}.F64.F16 <Dd>, <Sm>
+.SS Single-precision to half-precision(op == 1 && sz == 0)
+ 
+ VCVTB{<c>}{<q>}.F16.F32 <Sd>, <Sm>
+.SS Double-precision to half-precision(op == 1 && sz == 1)
+ 
+ VCVTB{<c>}{<q>}.F16.F64 <Sd>, <Dm>
+ 
+ uses_double = (sz == '1'); convert_from_half = (op == '0');
+ lowbit = (if T == '1' then 16 else 0);
+ if uses_double then
+     if convert_from_half then
+         d = UInt(D:Vd); m = UInt(Vm:M);
+     else
+         d = UInt(Vd:D); m = UInt(M:Vm);
+ else
+     d = UInt(Vd:D); m = UInt(Vm:M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04    01                                
+                   08 |  05 |  02 |      12  10 9 8 7 6 5 4       0
+                    | |   | |   | |       |   | | | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|0 1|.|. . . .|1 0|1|.|0|1|.|0|. . . .|
+                    |     |     | |             | |   |   |
+                    `-D   `-o1  | `-Vd          | `-T `-M `-Vm
+                                `-op            `-sz
+  
+  
+ 
+.SS Half-precision to single-precision(op == 0 && sz == 0)
+ 
+ VCVTB{<c>}{<q>}.F32.F16 <Sd>, <Sm>
+.SS Half-precision to double-precision(op == 0 && sz == 1)
+ 
+ VCVTB{<c>}{<q>}.F64.F16 <Dd>, <Sm>
+.SS Single-precision to half-precision(op == 1 && sz == 0)
+ 
+ VCVTB{<c>}{<q>}.F16.F32 <Sd>, <Sm>
+.SS Double-precision to half-precision(op == 1 && sz == 1)
+ 
+ VCVTB{<c>}{<q>}.F16.F64 <Sd>, <Dm>
+ 
+ uses_double = (sz == '1'); convert_from_half = (op == '0');
+ lowbit = (if T == '1' then 16 else 0);
+ if uses_double then
+     if convert_from_half then
+         d = UInt(D:Vd); m = UInt(Vm:M);
+     else
+         d = UInt(Vd:D); m = UInt(M:Vm);
+ else
+     d = UInt(Vd:D); m = UInt(Vm:M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+     bits(16) hp;
+     if convert_from_half then
+         hp = S[m]<lowbit+15:lowbit>;
+         if uses_double then
+             D[d] = FPConvert(hp, FPSCR);
+         else
+             S[d] = FPConvert(hp, FPSCR);
+     else
+         if uses_double then
+             hp = FPConvert(D[m], FPSCR);
+         else
+             hp = FPConvert(S[m], FPSCR);
+         S[d]<lowbit+15:lowbit> = hp;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations(); CheckVFPEnabled(TRUE);
+     bits(16) hp;
+     if convert_from_half then
+         hp = S[m]<lowbit+15:lowbit>;
+         if uses_double then
+             D[d] = FPConvert(hp, FPSCR);
+         else
+             S[d] = FPConvert(hp, FPSCR);
+     else
+         if uses_double then
+             hp = FPConvert(D[m], FPSCR);
+         else
+             hp = FPConvert(S[m], FPSCR);
+         S[d]<lowbit+15:lowbit> = hp;
+

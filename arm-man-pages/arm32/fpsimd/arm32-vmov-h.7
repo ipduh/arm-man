@@ -1,0 +1,122 @@
+.nh
+.TH "VMOV (between general-purpose register and half-precision) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOV (between general-purpose register and half-precision)
+ Copy 16 bits of a general-purpose register to or from a 32-bit SIMD&FP register
+
+ Copy 16 bits of a general-purpose register to or from a 32-bit SIMD&FP
+ register.  This instruction transfers the value held in the bottom 16 bits of a
+ 32-bit SIMD&FP register to the bottom 16 bits of a general-purpose register, or
+ the value held in the bottom 16 bits of a general-purpose register to the
+ bottom 16 bits of a 32-bit SIMD&FP register.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28            21 |      16      12       8 7 6 5 4 3 2 1 0
+          |             | |       |       |       | | | | | | | | |
+  |. . . .|1 1 1 0 0 0 0|.|. . . .|. . . .|1 0 0 1|.|0|0|1|0|0|0|0|
+  |                     | |       |               |
+  `-cond(!= 1111)       | `-Vn    `-Rt            `-N
+                        `-op
+  
+  
+ 
+.SS From general-purpose register(op == 0)
+ 
+ VMOV{<c>}{<q>}.F16 <Sn>, <Rt>
+.SS To general-purpose register(op == 1)
+ 
+ VMOV{<c>}{<q>}.F16 <Rt>, <Sn>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ if cond != '1110' then UNPREDICTABLE;
+ to_arm_register = (op == '1');  t = UInt(Rt);  n = UInt(Vn:N);
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                       06 |      01      12       8 7 6 5 4 3 2 1 0
+                        | |       |       |       | | | | | | | | |
+   1 1 1 0 1 1 1 0 0 0 0|.|. . . .|. . . .|1 0 0 1|.|0|0|1|0|0|0|0|
+                        | |       |               |
+                        | `-Vn    `-Rt            `-N
+                        `-op
+  
+  
+ 
+.SS From general-purpose register(op == 0)
+ 
+ VMOV{<c>}{<q>}.F16 <Sn>, <Rt>
+.SS To general-purpose register(op == 1)
+ 
+ VMOV{<c>}{<q>}.F16 <Rt>, <Sn>
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ if InITBlock() then UNPREDICTABLE;
+ to_arm_register = (op == '1');  t = UInt(Rt);  n = UInt(Vn:N);
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if to_arm_register then
+         R[t] = Zeros(16) : S[n]<15:0>;
+     else
+         S[n] = Zeros(16) : R[t]<15:0>;
+ 
+
+.SS Assembler Symbols
+
+ <Rt>
+  Encoded in Rt
+  Is the general-purpose register that <Sn> will be transferred to or from,
+  encoded in the "Rt" field.
+
+ <Sn>
+  Encoded in Vn:N
+  Is the 32-bit name of the SIMD&FP register to be transferred, encoded in the
+  "Vn:N" field.
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if to_arm_register then
+         R[t] = Zeros(16) : S[n]<15:0>;
+     else
+         S[n] = Zeros(16) : R[t]<15:0>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,115 @@
+.nh
+.TH "BFC -- AArch32" "7" " "  "instruction" "general"
+.SS BFC
+ Bit Field Clear
+
+ Bit Field Clear clears any number of adjacent bits at any position in a
+ register, without affecting the other bits in the register.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                                                                   
+         28            21        16      12         7     4       0
+          |             |         |       |         |     |       |
+  |. . . .|0 1 1 1 1 1 0|. . . . .|. . . .|. . . . .|0 0 1|1 1 1 1|
+  |                     |         |       |               |
+  `-cond(!= 1111)       `-msb     `-Rd    `-lsb           `-Rn
+  
+  
+ 
+.SS A1
+ 
+ BFC{<c>}{<q>} <Rd>, #<lsb>, #<width>
+ 
+ d = UInt(Rd);  msbit = UInt(msb);  lsbit = UInt(lsb);
+ if d == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                         05                                        
+             11        06 |        15                              
+           12 |  09  07 | |      01 |    12       8   6 5         0
+            | |   |   | | |       | |     |       |   | |         |
+   1 1 1 1 0|0|1 1|0 1|1|0|1 1 1 1|0|. . .|. . . .|. .|0|. . . . .|
+                  |   |   |         |     |       |     |
+                  |   |   `-Rn      |     `-Rd    |     `-msb
+                  |   `-op1<0>      `-imm3        `-imm2
+                  `-op1<2:1>
+  
+  
+ 
+.SS T1
+ 
+ BFC{<c>}{<q>} <Rd>, #<lsb>, #<width>
+ 
+ d = UInt(Rd);  msbit = UInt(msb);  lsbit = UInt(imm3:imm2);
+ if d == 15 then UNPREDICTABLE;  // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if msbit >= lsbit then
+         R[d]<msbit:lsbit> = Replicate('0', msbit-lsbit+1);
+         // Other bits of R[d] are unchanged
+     else
+         UNPREDICTABLE;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <lsb>
+  Encoded in lsb
+  For encoding A1: is the least significant bit to be cleared, in the range 0 to
+  31, encoded in the "lsb" field.
+
+ <lsb>
+  Encoded in imm3:imm2
+  For encoding T1: is the least significant bit that is to be cleared, in the
+  range 0 to 31, encoded in the "imm3:imm2" field.
+
+ <width>
+  Encoded in msb
+  Is the number of bits to be cleared, in the range 1 to 32-<lsb>, encoded in
+  the "msb" field as <lsb>+<width>-1.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if msbit >= lsbit then
+         R[d]<msbit:lsbit> = Replicate('0', msbit-lsbit+1);
+         // Other bits of R[d] are unchanged
+     else
+         UNPREDICTABLE;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

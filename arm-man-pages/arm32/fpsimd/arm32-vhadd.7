@@ -1,0 +1,171 @@
+.nh
+.TH "VHADD -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VHADD
+ Vector Halving Add
+
+ Vector Halving Add adds corresponding elements in two vectors of integers,
+ shifts each result right one bit, and places the final results in the
+ destination vector. The results of the halving operations are truncated. For
+ rounded results, see VRHADD).
+
+ The operand and result elements are all the same type, and can be any one of:
+
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12  10 9 8 7 6 5 4       0
+                | | | |   |       |       |   | | | | | | |       |
+   1 1 1 1 0 0 1|.|0|.|. .|. . . .|. . . .|0 0|0|0|.|.|.|0|. . . .|
+                |   | |   |       |           |   | | | | |
+                `-U | |   `-Vn    `-Vd        |   | | | | `-Vm
+                    | `-size                  |   | | | `-o1
+                    `-D                       |   | | `-M
+                                              |   | `-Q
+                                              |   `-N
+                                              `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VHADD{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VHADD{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ add = (op == '0');  unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12  10 9 8 7 6 5 4       0
+        | |         | |   |       |       |   | | | | | | |       |
+   1 1 1|.|1 1 1 1 0|.|. .|. . . .|. . . .|0 0|0|0|.|.|.|0|. . . .|
+        |           | |   |       |           |   | | | | |
+        `-U         | |   `-Vn    `-Vd        |   | | | | `-Vm
+                    | `-size                  |   | | | `-o1
+                    `-D                       |   | | `-M
+                                              |   | `-Q
+                                              |   `-N
+                                              `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VHADD{<c>}{<q>}.<dt> {<Dd>, }<Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VHADD{<c>}{<q>}.<dt> {<Qd>, }<Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if size == '11' then UNDEFINED;
+ add = (op == '0');  unsigned = (U == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  n = UInt(N:Vn);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Int(Elem[D[n+r],e,esize], unsigned);
+             op2 = Int(Elem[D[m+r],e,esize], unsigned);
+             result = if add then op1+op2 else op1-op2;
+             Elem[D[d+r],e,esize] = result<esize:1>;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in U:size
+  Is the data type for the elements of the operands,
+
+  U size <dt> 
+  0 00   S8   
+  0 01   S16  
+  0 10   S32  
+  1 00   U8   
+  1 01   U16  
+  1 10   U32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Int(Elem[D[n+r],e,esize], unsigned);
+             op2 = Int(Elem[D[m+r],e,esize], unsigned);
+             result = if add then op1+op2 else op1-op2;
+             Elem[D[d+r],e,esize] = result<esize:1>;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

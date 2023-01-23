@@ -1,0 +1,133 @@
+.nh
+.TH "LDRB (literal) -- AArch32" "7" " "  "instruction" "general"
+.SS LDRB (literal)
+ Load Register Byte (literal)
+
+ Load Register Byte (literal) calculates an address from the PC value and an
+ immediate offset, loads a byte from memory, zero-extends it to form a 32-bit
+ word, and writes it to a register. For information about memory accesses see
+ Memory accesses.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12                       0
+          |     | | | | | |       |       |                       |
+  |. . . .|0 1 0|.|.|1|.|1|1 1 1 1|. . . .|. . . . . . . . . . . .|
+  |             | | | | | |       |       |
+  |             | | | | | `-Rn    `-Rt    `-imm12
+  |             | | | | `-o1
+  |             | | | `-W
+  |             | | `-o2
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1(!(P == 0 && W == 1))
+ 
+ LDRB{<c>}{<q>} <Rt>, <label>
+ 
+ LDRB{<c>}{<q>} <Rt>, [PC, #{+/-}<imm>]
+ 
+ if P == '0' && W == '1' then SEE "LDRBT";
+ t = UInt(Rt);  imm32 = ZeroExtend(imm12, 32);
+ add = (U == '1');  wback = (P == '0') || (W == '1');
+ if t == 15 || wback then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                   08    05                                        
+                 09 |  06 |      01      12                       0
+                  | |   | |       |       |                       |
+   1 1 1 1 1 0 0 0|.|0 0|1|1 1 1 1|. . . .|. . . . . . . . . . . .|
+                  | |   |         |       |
+                  | |   `-L       |       `-imm12
+                  | `-size        `-Rt(!= 1111)
+                  `-U
+  
+  
+ 
+.SS T1
+ 
+ LDRB{<c>}{<q>} <Rt>, <label>
+ 
+ LDRB{<c>}{<q>} <Rt>, [PC, #{+/-}<imm>]
+ 
+ if Rt == '1111' then SEE "PLD";
+ t = UInt(Rt);  imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+ // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = Align(PC,4);
+     address = if add then (base + imm32) else (base - imm32);
+     R[t] = ZeroExtend(MemU[address,1], 32);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  Is the general-purpose register to be transferred, encoded in the "Rt" field.
+
+ <label>
+  Encoded in imm12
+  The label of the literal data item that is to be loaded into <Rt>. The
+  assembler calculates the required value of the offset from the Align(PC, 4)
+  value of the instruction to this label. Permitted values of the offset are
+  -4095 to 4095.           If the offset is zero or positive, imm32 is equal to
+  the offset and add == TRUE, encoded as U == 1.           If the offset is
+  negative, imm32 is equal to minus the offset and add == FALSE, encoded as U ==
+  0.
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ <imm>
+  Encoded in imm12
+  For encoding A1: is the 12-bit unsigned immediate byte offset, in the range 0
+  to 4095, defaulting to 0 if omitted, and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T1: is a 12-bit unsigned immediate byte offset, in the range 0 to
+  4095, encoded in the "imm12" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = Align(PC,4);
+     address = if add then (base + imm32) else (base - imm32);
+     R[t] = ZeroExtend(MemU[address,1], 32);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

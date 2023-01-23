@@ -1,0 +1,34 @@
+.nh
+.TH "DRPS -- A64" "7" " "  "instruction" "system"
+.SS DRPS
+ Debug restore process state
+
+
+
+.SS System - A64 - DRPS_64E_branch_reg
+ 
+                                                                   
+                                                                   
+                                                                   
+               25      21        16          10         5         0
+                |       |         |           |         |         |
+   1 1 0 1 0 1 1|0 1 0 1|1 1 1 1 1|0 0 0 0 0 0|1 1 1 1 1|0 0 0 0 0|
+                |       |         |           |         |
+                `-opc   `-op2     `-op3       `-Rt      `-op4
+  
+  
+ 
+.SS System
+ 
+ DRPS
+ 
+ if !Halted() || PSTATE.EL == EL0 then UNDEFINED;
+ 
+ DRPSInstruction();
+ 
+
+
+.SS Operation
+
+ DRPSInstruction();
+

@@ -1,0 +1,233 @@
+.nh
+.TH "LD4 (multiple structures) -- A64" "7" " "  "instruction" "advsimd"
+.SS LD4 (multiple structures)
+ Load multiple 4-element structures to four registers
+
+ Load multiple 4-element structures to four registers. This instruction loads
+ multiple 4-element structures from memory and writes the result to the four
+ SIMD&FP registers, with de-interleaving.
+
+ For an example of de-interleaving, see LD3 (multiple structures).
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: No offset and Post-index
+
+.SS No offset - A64 - LD4_asisdlse_R4
+ 
+                                                                   
+                                                                   
+     30              22                                            
+   31 |            23 |          16      12  10         5         0
+    | |             | |           |       |   |         |         |
+   0|.|0 0 1 1 0 0 0|1|0 0 0 0 0 0|0 0 0 0|. .|. . . . .|. . . . .|
+    |               |             |       |   |         |
+    `-Q             `-L           |       |   `-Rn      `-Rt
+                                  |       `-size
+                                  `-opcode
+  
+  
+ 
+.SS No offset
+ 
+ LD4  { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>]
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer m = integer UNKNOWN;
+ boolean wback = FALSE;
+ boolean tag_checked = wback || n != 31;
+.SS Post-index - A64 - as_post_index
+ 
+                                                                   
+                       21                                          
+     30              22 |                                          
+   31 |            23 | |        16      12  10         5         0
+    | |             | | |         |       |   |         |         |
+   0|.|0 0 1 1 0 0 1|1|0|. . . . .|0 0 0 0|. .|. . . . .|. . . . .|
+    |               |   |         |       |   |         |
+    `-Q             `-L `-Rm      |       |   `-Rn      `-Rt
+                                  |       `-size
+                                  `-opcode
+  
+  
+ 
+.SS Immediate offset(Rm == 11111)
+ 
+ LD4  { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <imm>
+.SS Register offset(Rm != 11111)
+ 
+ LD4  { <Vt>.<T>, <Vt2>.<T>, <Vt3>.<T>, <Vt4>.<T> }, [<Xn|SP>], <Xm>
+ 
+ integer t = UInt(Rt);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ boolean wback = TRUE;
+ boolean tag_checked = wback || n != 31;
+ 
+ MemOp memop = if L == '1' then MemOp_LOAD else MemOp_STORE;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer esize = 8 << UInt(size);
+ integer elements = datasize DIV esize;
+ 
+ integer rpt;    // number of iterations
+ integer selem;  // structure elements 
+ 
+ case opcode of
+     when '0000' rpt = 1; selem = 4;     // LD/ST4 (4 registers)
+     when '0010' rpt = 4; selem = 1;     // LD/ST1 (4 registers)
+     when '0100' rpt = 1; selem = 3;     // LD/ST3 (3 registers)
+     when '0110' rpt = 3; selem = 1;     // LD/ST1 (3 registers)
+     when '0111' rpt = 1; selem = 1;     // LD/ST1 (1 register)
+     when '1000' rpt = 1; selem = 2;     // LD/ST2 (2 registers)
+     when '1010' rpt = 2; selem = 1;     // LD/ST1 (2 registers)
+     otherwise UNDEFINED;
+ 
+ // .1D format only permitted with LD1 & ST1
+ if size:Q == '110' && selem != 1 then UNDEFINED;
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(64) offs;
+ bits(datasize) rval;
+ integer tt;
+ constant integer ebytes = esize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ offs = Zeros();
+ for r = 0 to rpt-1
+     for e = 0 to elements-1
+         tt = (t + r) MOD 32;
+         for s = 0 to selem-1
+             rval = V[tt];
+             if memop == MemOp_LOAD then
+                 Elem[rval, e, esize] = Mem[address + offs, ebytes, AccType_VEC];
+                 V[tt] = rval;
+             else // memop == MemOp_STORE
+                 Mem[address + offs, ebytes, AccType_VEC] = Elem[rval, e, esize];
+             offs = offs + ebytes;
+             tt = (tt + 1) MOD 32;
+ 
+ if wback then
+     if m != 31 then
+         offs = X[m];
+     if n == 31 then
+         SP[] = address + offs;
+     else
+         X[n] = address + offs;
+ 
+
+.SS Assembler Symbols
+
+ <Vt>
+  Encoded in Rt
+  Is the name of the first or only SIMD&FP register to be transferred, encoded
+  in the "Rt" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vt2>
+  Encoded in Rt
+  Is the name of the second SIMD&FP register to be transferred, encoded as "Rt"
+  plus 1 modulo 32.
+
+ <Vt3>
+  Encoded in Rt
+  Is the name of the third SIMD&FP register to be transferred, encoded as "Rt"
+  plus 2 modulo 32.
+
+ <Vt4>
+  Encoded in Rt
+  Is the name of the fourth SIMD&FP register to be transferred, encoded as "Rt"
+  plus 3 modulo 32.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+ <imm>
+  Encoded in Q
+  Is the post-index immediate offset,
+
+  Q <imm> 
+  0 #32   
+  1 #64   
+
+ <Xm>
+  Encoded in Rm
+  Is the 64-bit name of the general-purpose post-index register, excluding XZR,
+  encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ 
+ bits(64) address;
+ bits(64) offs;
+ bits(datasize) rval;
+ integer tt;
+ constant integer ebytes = esize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ offs = Zeros();
+ for r = 0 to rpt-1
+     for e = 0 to elements-1
+         tt = (t + r) MOD 32;
+         for s = 0 to selem-1
+             rval = V[tt];
+             if memop == MemOp_LOAD then
+                 Elem[rval, e, esize] = Mem[address + offs, ebytes, AccType_VEC];
+                 V[tt] = rval;
+             else // memop == MemOp_STORE
+                 Mem[address + offs, ebytes, AccType_VEC] = Elem[rval, e, esize];
+             offs = offs + ebytes;
+             tt = (tt + 1) MOD 32;
+ 
+ if wback then
+     if m != 31 then
+         offs = X[m];
+     if n == 31 then
+         SP[] = address + offs;
+     else
+         X[n] = address + offs;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

@@ -1,0 +1,122 @@
+.nh
+.TH "UBFX -- AArch32" "7" " "  "instruction" "general"
+.SS UBFX
+ Unsigned Bit Field Extract
+
+ Unsigned Bit Field Extract extracts any number of adjacent bits at any position
+ from a register, zero-extends them to 32 bits, and writes the result to the
+ destination register.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                       21                                          
+                     22 |                                          
+         28        23 | |        16      12         7     4       0
+          |         | | |         |       |         |     |       |
+  |. . . .|0 1 1 1 1|1|1|. . . . .|. . . .|. . . . .|1 0 1|. . . .|
+  |                 |   |         |       |               |
+  `-cond(!= 1111)   `-U `-widthm1 `-Rd    `-lsb           `-Rn
+  
+  
+ 
+.SS A1
+ 
+ UBFX{<c>}{<q>} <Rd>, <Rn>, #<lsb>, #<width>
+ 
+ d = UInt(Rd);  n = UInt(Rn);
+ lsbit = UInt(lsb);  widthminus1 = UInt(widthm1);
+ if d == 15 || n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                         05                                        
+             11        06 |        15                              
+           12 |  09  07 | |      01 |    12       8   6 5         0
+            | |   |   | | |       | |     |       |   | |         |
+   1 1 1 1 0|0|1 1|1 1|0|0|. . . .|0|. . .|. . . .|. .|0|. . . . .|
+                  |   |   |         |     |       |     |
+                  |   |   `-Rn      |     `-Rd    |     `-widthm1
+                  |   `-op1<0>      `-imm3        `-imm2
+                  `-op1<2:1>
+  
+  
+ 
+.SS T1
+ 
+ UBFX{<c>}{<q>} <Rd>, <Rn>, #<lsb>, #<width>
+ 
+ d = UInt(Rd);  n = UInt(Rn);
+ lsbit = UInt(imm3:imm2);  widthminus1 = UInt(widthm1);
+ if d == 15 || n == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     msbit = lsbit + widthminus1;
+     if msbit <= 31 then
+         R[d] = ZeroExtend(R[n]<msbit:lsbit>, 32);
+     else
+         UNPREDICTABLE;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose source register, encoded in the "Rn" field.
+
+ <lsb>
+  Encoded in lsb
+  For encoding A1: is the bit number of the least significant bit in the field,
+  in the range 0 to 31, encoded in the "lsb" field.
+
+ <lsb>
+  Encoded in imm3:imm2
+  For encoding T1: is the bit number of the least significant bit in the field,
+  in the range 0 to 31, encoded in the "imm3:imm2" field.
+
+ <width>
+  Encoded in widthm1
+  Is the width of the field, in the range 1 to 32-<lsb>, encoded in the
+  "widthm1" field as <width>-1.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     msbit = lsbit + widthminus1;
+     if msbit <= 31 then
+         R[d] = ZeroExtend(R[n]<msbit:lsbit>, 32);
+     else
+         UNPREDICTABLE;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, this instruction has passed its condition execution check, and does not use R15 as either its source or destination: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

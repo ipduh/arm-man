@@ -1,0 +1,86 @@
+.nh
+.TH "INSR (SIMD&FP scalar)" "7" " "  "instruction" "sve"
+.SS INSR (SIMD&FP scalar)
+ Insert SIMD&FP scalar register in shifted vector
+
+ Shift the destination vector left by one element, and then place a copy of the
+ SIMD&FP scalar register in element 0 of the destination vector. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - insr_z_v_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                      10         5         0
+                  |   |                       |         |         |
+   0 0 0 0 0 1 0 1|. .|1 1 0 1 0 0 0 0 1 1 1 0|. . . . .|. . . . .|
+                  |                           |         |
+                  `-size                      `-Vm      `-Zdn
+  
+  
+ 
+.SS SVE
+ 
+ INSR    <Zdn>.<T>, <V><m>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Vm);
+ 
+ CheckSVEEnabled();
+ bits(VL) dest = Z[dn];
+ bits(esize) src = V[m];
+ Z[dn] = dest<VL-esize-1:0> : src;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <m>
+  Encoded in Vm
+  Is the number [0-31] of the source SIMD&FP register, encoded in the "Vm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(VL) dest = Z[dn];
+ bits(esize) src = V[m];
+ Z[dn] = dest<VL-esize-1:0> : src;
+

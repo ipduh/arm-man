@@ -1,0 +1,87 @@
+.nh
+.TH "MNEG -- A64" "7" " "  "alias" "general"
+.SS MNEG
+ MNEG is an alias of MSUB
+
+ Multiply-Negate
+
+ Multiply-Negate multiplies two register values, negates the product, and writes
+ the result to the destination register.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+                                                                   
+                                   15                              
+   31  29        24    21        16 |        10         5         0
+    |   |         |     |         | |         |         |         |
+  |.|0 0|1 1 0 1 1|0 0 0|. . . . .|1|1 1 1 1 1|. . . . .|. . . . .|
+  | |             |     |         | |         |         |
+  | `-op54        |     `-Rm      | `-Ra      `-Rn      `-Rd
+  `-sf            `-op31          `-o0
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ MNEG  <Wd>, <Wn>, <Wm>
+ 
+ MSUB <Wd>, <Wn>, <Wm>, WZR
+.SS 64-bit(sf == 1)
+ 
+ MNEG  <Xd>, <Xn>, <Xm>
+ 
+ MSUB <Xd>, <Xn>, <Xm>, XZR
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the first general-purpose source register holding the
+  multiplicand, encoded in the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the second general-purpose source register holding the
+  multiplier, encoded in the "Rm" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the first general-purpose source register holding the
+  multiplicand, encoded in the "Rn" field.
+
+ <Xm>
+  Encoded in Rm
+  Is the 64-bit name of the second general-purpose source register holding the
+  multiplier, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ The manual of MSUB gives pseudocode for MNEG.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

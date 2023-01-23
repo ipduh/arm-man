@@ -1,0 +1,102 @@
+.nh
+.TH "SMADDL -- A64" "7" " "  "instruction" "general"
+.SS SMADDL
+ Signed Multiply-Add Long
+
+ Signed Multiply-Add Long multiplies two 32-bit register values, adds a 64-bit
+ register value, and writes the result to the 64-bit destination register.
+
+
+
+.SS 64-bit - A64 - SMADDL_64WA_dp_3src
+ 
+                                                                   
+                                                                   
+                   23              15                              
+   31  29        24 |  21        16 |        10         5         0
+    |   |         | |   |         | |         |         |         |
+  |1|0 0|1 1 0 1 1|0|0 1|. . . . .|0|. . . . .|. . . . .|. . . . .|
+  | |             |     |         | |         |         |
+  | `-op54        `-U   `-Rm      | `-Ra      `-Rn      `-Rd
+  `-sf                            `-o0
+  
+  
+ 
+.SS 64-bit
+ 
+ SMADDL  <Xd>, <Wn>, <Wm>, <Xa>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer a = UInt(Ra);
+ integer destsize = 64;
+ integer datasize = 32;
+ boolean sub_op = (o0 == '1');
+ boolean unsigned = (U == '1');
+ 
+ bits(datasize) operand1 = X[n];
+ bits(datasize) operand2 = X[m];
+ bits(destsize) operand3 = X[a];
+ 
+ integer result;
+ 
+ if sub_op then
+     result = Int(operand3, unsigned) - (Int(operand1, unsigned) * Int(operand2, unsigned));
+ else
+     result = Int(operand3, unsigned) + (Int(operand1, unsigned) * Int(operand2, unsigned));
+ 
+ X[d] = result<63:0>;
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the first general-purpose source register holding the
+  multiplicand, encoded in the "Rn" field.
+
+ <Wm>
+  Encoded in Rm
+  Is the 32-bit name of the second general-purpose source register holding the
+  multiplier, encoded in the "Rm" field.
+
+ <Xa>
+  Encoded in Ra
+  Is the 64-bit name of the third general-purpose source register holding the
+  addend, encoded in the "Ra" field.
+
+
+
+.SS Operation
+
+ bits(datasize) operand1 = X[n];
+ bits(datasize) operand2 = X[m];
+ bits(destsize) operand3 = X[a];
+ 
+ integer result;
+ 
+ if sub_op then
+     result = Int(operand3, unsigned) - (Int(operand1, unsigned) * Int(operand2, unsigned));
+ else
+     result = Int(operand3, unsigned) + (Int(operand1, unsigned) * Int(operand2, unsigned));
+ 
+ X[d] = result<63:0>;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

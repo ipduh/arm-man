@@ -1,0 +1,289 @@
+.nh
+.TH "FMULX (by element) -- A64" "7" " "  "instruction" "advsimd"
+.SS FMULX (by element)
+ Floating-point Multiply extended (by element)
+
+ Floating-point Multiply extended (by element). This instruction multiplies the
+ floating-point values in the vector elements in the first source SIMD&FP
+ register by the specified floating-point value in the second source SIMD&FP
+ register, places the results in a vector, and writes the vector to the
+ destination SIMD&FP register.
+
+ If one value is zero and the other value is infinite, the result is 2.0. In
+ this case, the result is negative if only one of the values is negative,
+ otherwise the result is positive.
+
+ This instruction can generate a floating-point exception. Depending on the
+ settings in FPCR, the exception results in either a flag being set in FPSR or a
+ synchronous exception being generated. For more information, see Floating-point
+ exception traps.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 4 classes: Scalar, half-precision, Scalar, single-precision and double-precision, Vector, half-precision and Vector, single-precision and double-precision
+
+.SS Scalar, half-precision - A64 - FMULX_asisdelem_RH_H
+ 
+                                                                   
+                         20                  10                    
+       29              21 |                11 |                    
+     30 |        24  22 | |      16      12 | |         5         0
+      | |         |   | | |       |       | | |         |         |
+   0 1|1|1 1 1 1 1|0 0|.|.|. . . .|1 0 0 1|.|0|. . . . .|. . . . .|
+      |           |   | | |       |       |   |         |
+      `-U         |   | | `-Rm    |       `-H `-Rn      `-Rd
+                  |   | `-M       `-opcode
+                  |   `-L
+                  `-size
+  
+  
+ 
+.SS Scalar, half-precision
+ 
+ FMULX  <Hd>, <Hn>, <Vm>.H[<index>]
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer idxdsize = if H == '1' then 128 else 64;
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Rd);
+ integer index = UInt(H:L:M);
+ 
+ integer esize = 16;
+ integer datasize = esize;
+ integer elements = 1;
+ boolean mulx_op = (U == '1');
+.SS Scalar, single-precision and double-precision - A64 - FMULX_asisdelem_R_SD
+ 
+                       21                                          
+                     22 |                    10                    
+       29          23 | |                  11 |                    
+     30 |        24 | | |20      16      12 | |         5         0
+      | |         | | | | |       |       | | |         |         |
+   0 1|1|1 1 1 1 1|1|.|.|.|. . . .|1 0 0 1|.|0|. . . . .|. . . . .|
+      |             | | | |       |       |   |         |
+      `-U           | | | `-Rm    |       `-H `-Rn      `-Rd
+                    | | `-M       `-opcode
+                    | `-L
+                    `-sz
+  
+  
+ 
+.SS Scalar, single-precision and double-precision
+ 
+ FMULX  <V><d>, <V><n>, <Vm>.<Ts>[<index>]
+ 
+ integer idxdsize = if H == '1' then 128 else 64; 
+ integer index;
+ bit Rmhi = M;
+ case sz:L of
+     when '0x' index = UInt(H:L);
+     when '10' index = UInt(H);
+     when '11' UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rmhi:Rm);
+ 
+ integer esize = 32 << UInt(sz);
+ integer datasize = esize;
+ integer elements = 1;
+ boolean mulx_op = (U == '1');
+.SS Vector, half-precision - A64 - FMULX_asimdelem_RH_H
+ 
+                                                                   
+       29                20                  10                    
+     30 |              21 |                11 |                    
+   31 | |        24  22 | |      16      12 | |         5         0
+    | | |         |   | | |       |       | | |         |         |
+   0|.|1|0 1 1 1 1|0 0|.|.|. . . .|1 0 0 1|.|0|. . . . .|. . . . .|
+    | |           |   | | |       |       |   |         |
+    | `-U         |   | | `-Rm    |       `-H `-Rn      `-Rd
+    `-Q           |   | `-M       `-opcode
+                  |   `-L
+                  `-size
+  
+  
+ 
+.SS Vector, half-precision
+ 
+ FMULX  <Vd>.<T>, <Vn>.<T>, <Vm>.H[<index>]
+ 
+ if !HaveFP16Ext() then UNDEFINED;
+ 
+ integer idxdsize = if H == '1' then 128 else 64;
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Rd);
+ integer index = UInt(H:L:M);
+ 
+ integer esize = 16;
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ boolean mulx_op = (U == '1');
+.SS Vector, single-precision and double-precision - A64 - FMULX_asimdelem_R_SD
+ 
+                       21                                          
+       29            22 |                    10                    
+     30 |          23 | |                  11 |                    
+   31 | |        24 | | |20      16      12 | |         5         0
+    | | |         | | | | |       |       | | |         |         |
+   0|.|1|0 1 1 1 1|1|.|.|.|. . . .|1 0 0 1|.|0|. . . . .|. . . . .|
+    | |             | | | |       |       |   |         |
+    | `-U           | | | `-Rm    |       `-H `-Rn      `-Rd
+    `-Q             | | `-M       `-opcode
+                    | `-L
+                    `-sz
+  
+  
+ 
+.SS Vector, single-precision and double-precision
+ 
+ FMULX  <Vd>.<T>, <Vn>.<T>, <Vm>.<Ts>[<index>]
+ 
+ integer idxdsize = if H == '1' then 128 else 64; 
+ integer index;
+ bit Rmhi = M;
+ case sz:L of
+     when '0x' index = UInt(H:L);
+     when '10' index = UInt(H);
+     when '11' UNDEFINED;
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rmhi:Rm);
+ 
+ if sz:Q == '10' then UNDEFINED;
+ integer esize = 32 << UInt(sz);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ boolean mulx_op = (U == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(idxdsize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2 = Elem[operand2, index, esize];
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     if mulx_op then
+         Elem[result, e, esize] = FPMulX(element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = FPMul(element1, element2, FPCR);
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hn>
+  Encoded in Rn
+  Is the 16-bit name of the first SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <V>
+  Encoded in sz
+  Is a width specifier,
+
+  sz <V> 
+  0  S   
+  1  D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in Q
+  For the vector, half-precision variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in Q:sz
+  For the vector, single-precision and double-precision variant: is an
+  arrangement specifier,
+
+  Q sz <T>      
+  0 0  2S       
+  0 1  RESERVED 
+  1 0  4S       
+  1 1  2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  For the half-precision variant: is the name of the second SIMD&FP source
+  register, in the range V0 to V15, encoded in the "Rm" field.
+
+ <Vm>
+  Encoded in M:Rm
+  For the single-precision and double-precision variant: is the name of the
+  second SIMD&FP source register, encoded in the "M:Rm" fields.
+
+ <Ts>
+  Encoded in sz
+  Is an element size specifier,
+
+  sz <Ts> 
+  0  S    
+  1  D    
+
+ <index>
+  Encoded in H:L:M
+  For the half-precision variant: is the element index, in the range 0 to 7,
+  encoded in the "H:L:M" fields.
+
+ <index>
+  Encoded in sz:L:H
+  For the single-precision and double-precision variant: is the element index,
+
+  sz L <index>  
+  0  x H:L      
+  1  0 H        
+  1  1 RESERVED 
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(idxdsize) operand2 = V[m];
+ bits(datasize) result;
+ bits(esize) element1;
+ bits(esize) element2 = Elem[operand2, index, esize];
+ 
+ for e = 0 to elements-1
+     element1 = Elem[operand1, e, esize];
+     if mulx_op then
+         Elem[result, e, esize] = FPMulX(element1, element2, FPCR);
+     else
+         Elem[result, e, esize] = FPMul(element1, element2, FPCR);
+ 
+ V[d] = result;
+

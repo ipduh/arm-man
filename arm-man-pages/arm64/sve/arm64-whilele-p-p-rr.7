@@ -1,0 +1,142 @@
+.nh
+.TH "WHILELE" "7" " "  "instruction" "sve"
+.SS WHILELE
+ While incrementing signed scalar less than or equal to scalar
+
+ Generate a predicate that starting from the lowest numbered element is true
+ while the incrementing value of the first, signed scalar operand is less than
+ or equal to the second scalar operand and false thereafter up to the highest
+ numbered element.
+
+ If the second scalar operand is equal to the maximum signed integer value then
+ a condition which includes an equality test can never fail and the result will
+ be an all-true predicate.
+
+ The full width of the scalar operands is significant for the purposes of
+ comparison, and the full width first operand is incremented by one for each
+ destination predicate element, irrespective of the predicate result element
+ size. The first general-purpose source register is not itself updated.
+
+ The predicate result is placed in the predicate destination register. Sets the
+ First (N), None (Z), !Last (C) condition flags based on the predicate result,
+ and the V flag to zero.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - whilele_p_p_rr_
+ 
+                                             10                    
+                                           11 |                    
+                       21                12 | |                    
+                 24  22 |        16    13 | | |         5 4       0
+                  |   | |         |     | | | |         | |       |
+   0 0 1 0 0 1 0 1|. .|1|. . . . .|0 0 0|.|0|1|. . . . .|1|. . . .|
+                  |     |               | | | |         | |
+                  |     `-Rm            | | | `-Rn      | `-Pd
+                  `-size                | | `-lt        `-eq
+                                        | `-U
+                                        `-sf
+  
+  
+ 
+.SS SVE
+ 
+ WHILELE <Pd>.<T>, <R><n>, <R><m>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer rsize = 32 << UInt(sf);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer d = UInt(Pd);
+ boolean unsigned = FALSE;
+ SVECmp op = Cmp_LE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = Ones(PL);
+ bits(rsize) operand1 = X[n];
+ bits(rsize) operand2 = X[m];
+ bits(PL) result;
+ boolean last = TRUE;
+ 
+ for e = 0 to elements-1
+     boolean cond;
+     case op of
+         when Cmp_LT cond = (Int(operand1, unsigned) <  Int(operand2, unsigned));
+         when Cmp_LE cond = (Int(operand1, unsigned) <= Int(operand2, unsigned));
+ 
+     last = last && cond;
+     ElemP[result, e, esize] = if last then '1' else '0';
+     operand1 = operand1 + 1;
+ 
+ PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <R>
+  Encoded in sf
+  Is a width specifier,
+
+  sf <R> 
+  0  W   
+  1  X   
+
+ <n>
+  Encoded in Rn
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = Ones(PL);
+ bits(rsize) operand1 = X[n];
+ bits(rsize) operand2 = X[m];
+ bits(PL) result;
+ boolean last = TRUE;
+ 
+ for e = 0 to elements-1
+     boolean cond;
+     case op of
+         when Cmp_LT cond = (Int(operand1, unsigned) <  Int(operand2, unsigned));
+         when Cmp_LE cond = (Int(operand1, unsigned) <= Int(operand2, unsigned));
+ 
+     last = last && cond;
+     ElemP[result, e, esize] = if last then '1' else '0';
+     operand1 = operand1 + 1;
+ 
+ PSTATE.<N,Z,C,V> = PredTest(mask, result, esize);
+ P[d] = result;
+

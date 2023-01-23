@@ -1,0 +1,135 @@
+.nh
+.TH "VPOP -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VPOP
+ VPOP is an alias of VLDM
+
+ Pop SIMD&FP registers from Stack
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12  10   8             1 0
+          |     | | | | | |       |       |   |   |             | |
+  |. . . .|1 1 0|0|1|.|1|1|1 1 0 1|. . . .|1 0|1 1|. . . . . . .|0|
+  |             | | | | | |       |           |   |             |
+  |             | | | | | `-Rn    `-Vd        |   `-imm8<7:1>   `-imm8<0>
+  |             | | | | `-L                   `-size
+  |             | | | `-W
+  |             | | `-D
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Increment After
+ 
+ VPOP{<c>}{<q>}{.<size>} <dreglist>
+ 
+ VLDM{<c>}{<q>}{.<size>} SP!, <dreglist>
+.SS A2 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12  10   8               0
+          |     | | | | | |       |       |   |   |               |
+  |. . . .|1 1 0|0|1|.|1|1|1 1 0 1|. . . .|1 0|1 0|. . . . . . . .|
+  |             | | | | | |       |           |   |
+  |             | | | | | `-Rn    `-Vd        |   `-imm8
+  |             | | | | `-L                   `-size
+  |             | | | `-W
+  |             | | `-D
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Increment After
+ 
+ VPOP{<c>}{<q>}{.<size>} <sreglist>
+ 
+ VLDM{<c>}{<q>}{.<size>} SP!, <sreglist>
+.SS T1 - T32
+ 
+                     07                                            
+                   08 |                                            
+                 09 | |  05                                        
+               10 | | |06 |      01      12  10   8             1 0
+                | | | | | |       |       |   |   |             | |
+   1 1 1 0 1 1 0|0|1|.|1|1|1 1 0 1|. . . .|1 0|1 1|. . . . . . .|0|
+                | | | | | |       |           |   |             |
+                | | | | | `-Rn    `-Vd        |   `-imm8<7:1>   `-imm8<0>
+                | | | | `-L                   `-size
+                | | | `-W
+                | | `-D
+                | `-U
+                `-P
+  
+  
+ 
+.SS Increment After
+ 
+ VPOP{<c>}{<q>}{.<size>} <dreglist>
+ 
+ VLDM{<c>}{<q>}{.<size>} SP!, <dreglist>
+.SS T2 - T32
+ 
+                     07                                            
+                   08 |                                            
+                 09 | |  05                                        
+               10 | | |06 |      01      12  10   8               0
+                | | | | | |       |       |   |   |               |
+   1 1 1 0 1 1 0|0|1|.|1|1|1 1 0 1|. . . .|1 0|1 0|. . . . . . . .|
+                | | | | | |       |           |   |
+                | | | | | `-Rn    `-Vd        |   `-imm8
+                | | | | `-L                   `-size
+                | | | `-W
+                | | `-D
+                | `-U
+                `-P
+  
+  
+ 
+.SS Increment After
+ 
+ VPOP{<c>}{<q>}{.<size>} <sreglist>
+ 
+ VLDM{<c>}{<q>}{.<size>} SP!, <sreglist>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  An optional data size specifier. If present, it must be equal to the size in
+  bits, 32 or 64, of the registers being transferred.
+
+ <sreglist>
+  Is the list of consecutively numbered 32-bit SIMD&FP registers to be
+  transferred. The first register in the list is encoded in "Vd:D", and "imm8"
+  is set to the number of registers in the list. The list must contain at least
+  one register.
+
+ <dreglist>
+  Is the list of consecutively numbered 64-bit SIMD&FP registers to be
+  transferred. The first register in the list is encoded in "D:Vd", and "imm8"
+  is set to twice the number of registers in the list. The list must contain at
+  least one register, and must not contain more than 16 registers.
+
+
+
+.SS Operation
+
+ The manual of VLDM gives pseudocode for VPOP.

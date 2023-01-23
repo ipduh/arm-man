@@ -1,0 +1,97 @@
+.nh
+.TH "YIELD -- AArch32" "7" " "  "instruction" "general"
+.SS YIELD
+ Yield hint
+
+ YIELD is a hint instruction. Software with a multithreading capability can use
+ a YIELD instruction to indicate to the PE that it is performing a task, for
+ example a spin-lock, that could be swapped out to improve overall system
+ performance. The PE can use this hint to suspend and resume multiple software
+ threads if it supports the capability.
+
+ For more information about the recommended use of this instruction see The
+ Yield instruction.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20  18  16 | | |12                       0
+          |         | |   |   |   | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0|0 0|1|1|1|1|0 0 0 0 0 0 0 0 0 0 0 1|
+  |                 |     |   |           |
+  `-cond(!= 1111)   `-R   |   `-imm4<1:0> `-imm12
+                          `-imm4<3:2>
+  
+  
+ 
+.SS A1
+ 
+ YIELD{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                  8       4       0                                
+                  |       |       |                                
+   1 0 1 1 1 1 1 1|0 0 0 1|0 0 0 0|                                
+                  |
+                  `-hint
+  
+  
+ 
+.SS T1
+ 
+ YIELD{<c>}{<q>}
+ 
+ // No additional decoding required
+.SS T2 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 0|0 0 0 1|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T2
+ 
+ YIELD{<c>}.W
+ 
+ // No additional decoding required
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     Hint_Yield();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     Hint_Yield();
+

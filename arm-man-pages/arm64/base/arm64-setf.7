@@ -1,0 +1,75 @@
+.nh
+.TH "SETF8, SETF16 -- A64" "7" " "  "instruction" "general"
+.SS SETF8, SETF16
+ Evaluation of 8 or 16 bit flag values
+
+ Set the PSTATE.NZV flags based on the value in the specified general-purpose
+ register. SETF8 treats the value as an 8 bit value, and SETF16 treats the value
+ as an 16 bit value.
+
+ The PSTATE.C flag is not affected by these instructions.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                                          
+     30 |                            14                            
+   31 | |              21          15 |      10         5 4       0
+    | | |               |           | |       |         | |       |
+  |0|0|1|1 1 0 1 0 0 0 0|0 0 0 0 0 0|.|0 0 1 0|. . . . .|0|1 1 0 1|
+  | | |                 |           |         |         | |
+  | | `-S               `-opcode2   `-sz      `-Rn      | `-mask
+  | `-op                                                `-o3
+  `-sf
+  
+  
+ 
+.SS SETF8(sz == 0)
+ 
+ SETF8  <Wn>
+.SS SETF16(sz == 1)
+ 
+ SETF16  <Wn>
+ 
+ if !HaveFlagManipulateExt() || sf != '0' then UNDEFINED;
+ integer msb = if sz=='1' then 15 else 7;
+ integer n = UInt(Rn);
+ 
+ bits(32) tmpreg = X[n];
+ PSTATE.N = tmpreg<msb>;
+ PSTATE.Z = if (tmpreg<msb:0> == Zeros(msb+1)) then '1' else '0';
+ PSTATE.V = tmpreg<msb+1> EOR tmpreg<msb>;
+ //PSTATE.C unchanged;
+ 
+
+.SS Assembler Symbols
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+
+
+.SS Operation
+
+ bits(32) tmpreg = X[n];
+ PSTATE.N = tmpreg<msb>;
+ PSTATE.Z = if (tmpreg<msb:0> == Zeros(msb+1)) then '1' else '0';
+ PSTATE.V = tmpreg<msb+1> EOR tmpreg<msb>;
+ //PSTATE.C unchanged;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

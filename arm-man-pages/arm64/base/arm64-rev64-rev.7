@@ -1,0 +1,66 @@
+.nh
+.TH "REV64 -- A64" "7" " "  "alias" "general"
+.SS REV64
+ REV64 is an alias of REV
+
+ Reverse Bytes
+
+ Reverse Bytes reverses the byte order in a 64-bit general-purpose register.
+
+ When assembling for Armv8.2, an assembler must support this pseudo-instruction.
+ It is optional whether an assembler supports this pseudo-instruction when
+ assembling for an architecture earlier than Armv8.2.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                                          
+     30 |                                                          
+   31 | |              21        16      12  10         5         0
+    | | |               |         |       |   |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 0|0 0 0 0|1 1|. . . . .|. . . . .|
+  |   |                 |         |       |   |         |
+  |   `-S               `-opcode2 |       |   `-Rn      `-Rd
+  `-sf                            |       `-opc
+                                  `-opcode[5:2]
+  
+  
+ 
+.SS 64-bit
+ 
+ REV64  <Xd>, <Xn>
+ 
+ REV  <Xd>, <Xn>
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of REV gives pseudocode for REV64.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

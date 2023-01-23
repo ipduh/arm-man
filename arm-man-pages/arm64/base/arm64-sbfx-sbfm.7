@@ -1,0 +1,95 @@
+.nh
+.TH "SBFX -- A64" "7" " "  "alias" "general"
+.SS SBFX
+ SBFX is an alias of SBFM
+
+ Signed Bitfield Extract
+
+ Signed Bitfield Extract copies a bitfield of <width> bits starting from bit
+ position <lsb> in the source register to the least significant bits of the
+ destination register, and sets destination bits above the bitfield to a copy of
+ the most significant bit of the bitfield.
+
+
+
+.SS With sign replication to left and zeros to right - A64 - signed_fill
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |.|0 0|1 0 0 1 1 0|.|. . . . . .|. . . . . .|. . . . .|. . . . .|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      `-imms      `-Rn      `-Rd
+  `-sf              `-N
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0)
+ 
+ SBFX  <Wd>, <Wn>, #<lsb>, #<width>
+ 
+ SBFM <Wd>, <Wn>, #<lsb>, #(<lsb>+<width>-1)
+.SS 64-bit(sf == 1 && N == 1)
+ 
+ SBFX  <Xd>, <Xn>, #<lsb>, #<width>
+ 
+ SBFM <Xd>, <Xn>, #<lsb>, #(<lsb>+<width>-1)
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <lsb>
+  For the 32-bit variant: is the bit number of the lsb of the source bitfield,
+  in the range 0 to 31.
+
+ <lsb>
+  For the 64-bit variant: is the bit number of the lsb of the source bitfield,
+  in the range 0 to 63.
+
+ <width>
+  For the 32-bit variant: is the width of the bitfield, in the range 1 to
+  32-<lsb>.
+
+ <width>
+  For the 64-bit variant: is the width of the bitfield, in the range 1 to
+  64-<lsb>.
+
+
+
+.SS Operation
+
+ The manual of SBFM gives pseudocode for SBFX.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

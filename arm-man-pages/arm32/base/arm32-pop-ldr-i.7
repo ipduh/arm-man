@@ -1,0 +1,90 @@
+.nh
+.TH "POP (single register) -- AArch32" "7" " "  "alias" "general"
+.SS POP (single register)
+ POP is an alias of LDR
+
+ Pop Single Register from Stack
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T4).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12                       0
+          |     | | | | | |       |       |                       |
+  |. . . .|0 1 0|0|1|0|0|1|1 1 0 1|. . . .|0 0 0 0 0 0 0 0 0 1 0 0|
+  |             | | | | | |       |       |
+  |             | | | | | `-Rn    `-Rt    `-imm12
+  |             | | | | `-o1
+  |             | | | `-W
+  |             | | `-o2
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Post-indexed
+ 
+ POP{<c>}{<q>} <single_register_list>
+ 
+ LDR{<c>}{<q>} <Rt>, [SP], #4
+.SS T4 - T32
+ 
+                                                                   
+                                             10                    
+                         05                11 |                    
+                   08  06 |      01      12 | | 9 8               0
+                    |   | |       |       | | | | |               |
+   1 1 1 1 1 0 0 0 0|1 0|1|1 1 0 1|. . . .|1|0|1|1|0 0 0 0 0 1 0 0|
+                    |   | |       |         | | | |
+                    |   | `-Rn    `-Rt      | | | `-imm8
+                    |   `-L                 | | `-W
+                    `-size                  | `-U
+                                            `-P
+  
+  
+ 
+.SS Post-indexed
+ 
+ POP{<c>}{<q>} <single_register_list>
+ 
+ LDR{<c>}{<q>} <Rt>, [SP], #4
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <single_register_list>
+  Is the general-purpose register <Rt> to be loaded surrounded by { and }.
+
+ <Rt>
+  Encoded in Rt
+  For encoding A1: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The PC can be used. If the PC is used, the instruction
+  branches to the address (data) loaded to the PC. This is an interworking
+  branch, see Pseudocode description of operations on the AArch32 general-
+  purpose registers and the PC.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T4: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The PC can be used, provided the instruction is either outside
+  an IT block or the last instruction of an IT block. If the PC is used, the
+  instruction branches to the address (data) loaded to the PC. This is an
+  interworking branch, see Pseudocode description of operations on the AArch32
+  general-purpose registers and the PC.
+
+
+
+.SS Operation
+
+ The manual of LDR gives pseudocode for POP.

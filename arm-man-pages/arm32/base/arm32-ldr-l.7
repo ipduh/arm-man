@@ -1,0 +1,190 @@
+.nh
+.TH "LDR (literal) -- AArch32" "7" " "  "instruction" "general"
+.SS LDR (literal)
+ Load Register (literal)
+
+ Load Register (literal) calculates an address from the PC value and an
+ immediate offset, loads a word from memory, and writes it to a register. For
+ information about memory accesses see Memory accesses.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12                       0
+          |     | | | | | |       |       |                       |
+  |. . . .|0 1 0|.|.|0|.|1|1 1 1 1|. . . .|. . . . . . . . . . . .|
+  |             | | | | | |       |       |
+  |             | | | | | `-Rn    `-Rt    `-imm12
+  |             | | | | `-o1
+  |             | | | `-W
+  |             | | `-o2
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1(!(P == 0 && W == 1))
+ 
+ LDR{<c>}{<q>} <Rt>, <label>
+ 
+ LDR{<c>}{<q>} <Rt>, [PC, #{+/-}<imm>]
+ 
+ if P == '0' && W == '1' then SEE "LDRT";
+ t = UInt(Rt);  imm32 = ZeroExtend(imm12, 32);
+ add = (U == '1');  wback = (P == '0') || (W == '1');
+ if wback then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+           11     8               0                                
+            |     |               |                                
+   0 1 0 0 1|. . .|. . . . . . . .|                                
+            |     |
+            `-Rt  `-imm8
+  
+  
+ 
+.SS T1
+ 
+ LDR{<c>}{<q>} <Rt>, <label>
+ 
+ t = UInt(Rt);  imm32 = ZeroExtend(imm8:'00', 32);  add = TRUE;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                   08    05                                        
+                 09 |  06 |      01      12                       0
+                  | |   | |       |       |                       |
+   1 1 1 1 1 0 0 0|.|1 0|1|1 1 1 1|. . . .|. . . . . . . . . . . .|
+                  | |   |         |       |
+                  | |   `-L       `-Rt    `-imm12
+                  | `-size
+                  `-U
+  
+  
+ 
+.SS T2
+ 
+ LDR{<c>}.W <Rt>, <label>
+ 
+ LDR{<c>}{<q>} <Rt>, <label>
+ 
+ LDR{<c>}{<q>} <Rt>, [PC, #{+/-}<imm>]
+ 
+ t = UInt(Rt);  imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+ if t == 15 && InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = Align(PC,4);
+     address = if add then (base + imm32) else (base - imm32);
+     data = MemU[address,4];
+     if t == 15 then
+         if address<1:0> == '00' then
+             LoadWritePC(data);
+         else
+             UNPREDICTABLE;
+     else
+         R[t] = data;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  For encoding A1: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The PC can be used. If the PC is used, the instruction
+  branches to the address (data) loaded to the PC. This is an interworking
+  branch, see Pseudocode description of operations on the AArch32 general-
+  purpose registers and the PC.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T1: is the general-purpose register to be transferred, encoded in
+  the "Rt" field.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T2: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The SP can be used. The PC can be used, provided the
+  instruction is either outside an IT block or the last instruction of an IT
+  block. If the PC is used, the instruction branches to the address (data)
+  loaded to the PC. This is an interworking branch, see Pseudocode description
+  of operations on the AArch32 general-purpose registers and the PC.
+
+ <label>
+  Encoded in imm12
+  For encoding A1 and T2: the label of the literal data item that is to be
+  loaded into <Rt>. The assembler calculates the required value of the offset
+  from the Align(PC, 4) value of the instruction to this label. Permitted values
+  of the offset are -4095 to 4095.           If the offset is zero or positive,
+  imm32 is equal to the offset and add == TRUE, encoded as U == 1.           If
+  the offset is negative, imm32 is equal to minus the offset and add == FALSE,
+  encoded as U == 0.
+
+ <label>
+  Encoded in imm8
+  For encoding T1: the label of the literal data item that is to be loaded into
+  <Rt>. The assembler calculates the required value of the offset from the
+  Align(PC, 4) value of the instruction to this label. Permitted values of the
+  offset are Multiples of four in the range 0 to 1020.
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ <imm>
+  Encoded in imm12
+  For encoding A1: is the 12-bit unsigned immediate byte offset, in the range 0
+  to 4095, defaulting to 0 if omitted, and encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T2: is a 12-bit unsigned immediate byte offset, in the range 0 to
+  4095, encoded in the "imm12" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     base = Align(PC,4);
+     address = if add then (base + imm32) else (base - imm32);
+     data = MemU[address,4];
+     if t == 15 then
+         if address<1:0> == '00' then
+             LoadWritePC(data);
+         else
+             UNPREDICTABLE;
+     else
+         R[t] = data;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

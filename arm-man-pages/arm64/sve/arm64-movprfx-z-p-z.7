@@ -1,0 +1,137 @@
+.nh
+.TH "MOVPRFX (predicated)" "7" " "  "instruction" "sve"
+.SS MOVPRFX (predicated)
+ Move prefix (predicated)
+
+ The predicated MOVPRFX instruction is a hint to hardware that the instruction
+ may be combined with the destructive instruction which follows it in program
+ order to create a single constructive operation. Since it is a hint it is also
+ permitted to be implemented as a discrete vector copy, and the result of
+ executing the pair of instructions with or without combining is identical. The
+ choice of combined versus discrete operation may vary dynamically.
+
+ Unless the combination of a constructive operation with merging predication is
+ specifically required, it is strongly recommended that for performance reasons
+ software should prefer to use the zeroing form of predicated MOVPRFX or the
+ unpredicated MOVPRFX instruction.
+
+ Although the operation of the instruction is defined as a simple predicated
+ vector copy, it is required that the prefixed instruction at PC+4 must be an
+ SVE destructive binary or ternary instruction encoding, or a unary operation
+ with merging predication, but excluding other MOVPRFX instructions. The
+ prefixed instruction must specify the same predicate register, and have the
+ same maximum element size (ignoring a fixed 64-bit "wide vector" operand), and
+ the same destination vector as the MOVPRFX instruction. The prefixed
+ instruction must not use the destination register in any other operand
+ position, even if they have different names but refer to the same architectural
+ register state. Any other use is UNPREDICTABLE.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - movprfx_z_p_z_
+ 
+                                 16                                
+                               17 |                                
+                             18 | |                                
+                 24  22    19 | | |    13    10         5         0
+                  |   |     | | | |     |     |         |         |
+   0 0 0 0 0 1 0 0|. .|0 1 0|0|0|.|0 0 1|. . .|. . . . .|. . . . .|
+                  |         | | |       |     |         |
+                  `-size    | | `-M     `-Pg  `-Zn      `-Zd
+                            | `-opc<0>
+                            `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ MOVPRFX <Zd>.<T>, <Pg>/<ZM>, <Zn>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer d = UInt(Zd);
+ boolean merging = (M == '1');
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) dest = Z[d];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = element;
+     elsif merging then
+         Elem[result, e, esize] = Elem[dest, e, esize];
+     else
+         Elem[result, e, esize] = Zeros();
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <ZM>
+  Encoded in M
+  Is the predication qualifier,
+
+  M <ZM> 
+  0 Z    
+  1 M    
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the source scalable vector register, encoded in the "Zn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) dest = Z[d];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = element;
+     elsif merging then
+         Elem[result, e, esize] = Elem[dest, e, esize];
+     else
+         Elem[result, e, esize] = Zeros();
+ 
+ Z[d] = result;
+

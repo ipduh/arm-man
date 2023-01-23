@@ -1,0 +1,96 @@
+.nh
+.TH "AND (immediate)" "7" " "  "instruction" "sve"
+.SS AND (immediate)
+ Bitwise AND with immediate (unpredicated)
+
+ Bitwise AND an immediate with each 64-bit element of the source vector, and
+ destructively place the results in the corresponding elements of the source
+ vector. The immediate is a 64-bit value consisting of a single run of ones or
+ zeros repeating every 2, 4, 8, 16, 32 or 64 bits. This instruction is
+ unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - and_z_zi_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |      18                         5         0
+                  | | |       |                         |         |
+   0 0 0 0 0 1 0 1|1|0|0 0 0 0|. . . . . . . . . . . . .|. . . . .|
+                  | |         |                         |
+                  | `-opc     `-imm13                   `-Zdn
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ AND     <Zdn>.<T>, <Zdn>.<T>, #<const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer dn = UInt(Zdn);
+ bits(64) imm;
+ (imm, -) = DecodeBitMasks(imm13<12>, imm13<5:0>, imm13<11:6>, TRUE);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV 64;
+ bits(VL) operand = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(64) element1 = Elem[operand, e, 64];
+     Elem[result, e, 64] = element1 AND imm;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in imm13<12>:imm13<5:0>
+  Is the size specifier,
+
+  imm13<12> imm13<5:0> <T>      
+  0         0xxxxx     S        
+  0         10xxxx     H        
+  0         110xxx     B        
+  0         1110xx     B        
+  0         11110x     B        
+  0         111110     RESERVED 
+  0         111111     RESERVED 
+  1         xxxxxx     D        
+
+ <const>
+  Encoded in imm13
+  Is a 64, 32, 16 or 8-bit bitmask consisting of replicated 2, 4, 8, 16, 32 or
+  64 bit fields, each field containing a rotated run of non-zero bits, encoded
+  in the "imm13" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV 64;
+ bits(VL) operand = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(64) element1 = Elem[operand, e, 64];
+     Elem[result, e, 64] = element1 AND imm;
+ 
+ Z[dn] = result;
+

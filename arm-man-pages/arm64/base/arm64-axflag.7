@@ -1,0 +1,57 @@
+.nh
+.TH "AXFLAG -- A64" "7" " "  "instruction" "system"
+.SS AXFLAG
+ Convert floating-point condition flags from Arm to external format
+
+ Convert floating-point condition flags from Arm to external format. This
+ instruction converts the state of the PSTATE.{N,Z,C,V} flags from a form
+ representing the result of an Arm floating-point scalar compare instruction to
+ an alternative representation required by some software.
+
+
+
+.SS System - A64 - AXFLAG_M_pstate
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 0|0 0 0|0 1 0 0|0 0 0 0|0 1 0|1 1 1 1 1|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt 
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ AXFLAG
+ 
+ if !HaveFlagFormatExt() then UNDEFINED;
+ 
+ bit N = '0';
+ bit Z = PSTATE.Z OR PSTATE.V;
+ bit C = PSTATE.C AND NOT(PSTATE.V);
+ bit V = '0';
+ 
+ PSTATE.N = N;
+ PSTATE.Z = Z;
+ PSTATE.C = C;
+ PSTATE.V = V;
+ 
+
+
+.SS Operation
+
+ bit N = '0';
+ bit Z = PSTATE.Z OR PSTATE.V;
+ bit C = PSTATE.C AND NOT(PSTATE.V);
+ bit V = '0';
+ 
+ PSTATE.N = N;
+ PSTATE.Z = Z;
+ PSTATE.C = C;
+ PSTATE.V = V;
+

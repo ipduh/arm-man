@@ -1,0 +1,107 @@
+.nh
+.TH "LDREX -- AArch32" "7" " "  "instruction" "general"
+.SS LDREX
+ Load Register Exclusive
+
+ Load Register Exclusive calculates an address from a base register value and an
+ immediate offset, loads a word from memory, writes it to a register and:
+
+
+ For more information about support for shared memory see Synchronization and
+ semaphores. For information about memory accesses see Memory accesses.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                         20                11 |                    
+         28        23  21 |      16      12 | | 9 8       4       0
+          |         |   | |       |       | | | | |       |       |
+  |. . . .|0 0 0 1 1|0 0|1|. . . .|. . . .|1|1|1|1|1 0 0 1|1 1 1 1|
+  |                 |   | |       |           | |         |
+  `-cond(!= 1111)   |   | `-Rn    `-Rt        | `-ord     `-xRt
+                    |   `-L                   `-ex
+                    `-size
+  
+  
+ 
+.SS A1
+ 
+ LDREX{<c>}{<q>} <Rt>, [<Rn> {, {#}<imm>}]
+ 
+ t = UInt(Rt);  n = UInt(Rn);  imm32 = Zeros(32); // Zero offset
+ if t == 15 || n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                       06 |      01      12       8               0
+                        | |       |       |       |               |
+   1 1 1 0 1 0 0 0 0 1 0|1|. . . .|. . . .|1 1 1 1|. . . . . . . .|
+                        | |       |       |       |
+                        | `-Rn    `-Rt    `-Rd    `-imm8
+                        `-L
+  
+  
+ 
+.SS T1
+ 
+ LDREX{<c>}{<q>} <Rt>, [<Rn> {, #<imm>}]
+ 
+ t = UInt(Rt);  n = UInt(Rn);  imm32 = ZeroExtend(imm8:'00', 32);
+ if t == 15 || n == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] + imm32;
+     AArch32.SetExclusiveMonitors(address,4);
+     R[t] = MemA[address,4];
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  Is the general-purpose register to be transferred, encoded in the "Rt" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose base register, encoded in the "Rn" field.
+
+ <imm>
+  For encoding A1: the immediate offset added to the value of <Rn> to calculate
+  the address. <imm> can only be 0 or omitted.
+
+ <imm>
+  For encoding T1: the immediate offset added to the value of <Rn> to calculate
+  the address. <imm> can be omitted, meaning an offset of 0. Values are
+  multiples of 4 in the range 0-1020.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = R[n] + imm32;
+     AArch32.SetExclusiveMonitors(address,4);
+     R[t] = MemA[address,4];
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

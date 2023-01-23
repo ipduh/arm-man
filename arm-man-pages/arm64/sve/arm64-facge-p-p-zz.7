@@ -1,0 +1,158 @@
+.nh
+.TH "FAC<cc>" "7" " "  "instruction" "sve"
+.SS FAC<cc>
+ Floating-point absolute compare vectors
+
+ Compare active absolute values of floating-point elements in the first source
+ vector with corresponding absolute values of elements in the second source
+ vector, and place the boolean results of the specified comparison in the
+ corresponding elements of the destination predicate. Inactive elements in the
+ destination predicate register are set to zero. Does not set the condition
+ flags.
+
+
+
+ The <cc> symbol specifies one of the standard ARM condition codes: GE, GT, LE,
+ or LT.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Greater than and Greater than or equal
+
+.SS Greater than - A64 - facgt_p_p_zz_
+ 
+                                       13                          
+                                     14 |                          
+                       21          15 | |                          
+                 24  22 |        16 | | |    10         5 4       0
+                  |   | |         | | | |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0|. . . . .|1|1|1|. . .|. . . . .|1|. . . .|
+                  |     |         |   | |     |         | |
+                  |     `-Zm      |   | `-Pg  `-Zn      | `-Pd
+                  `-size          |   `-o2              `-o3
+                                  `-op
+  
+  
+ 
+.SS Greater than
+ 
+ FACGT   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_GT;
+.SS Greater than or equal - A64 - facge_p_p_zz_
+ 
+                                       13                          
+                                     14 |                          
+                       21          15 | |                          
+                 24  22 |        16 | | |    10         5 4       0
+                  |   | |         | | | |     |         | |       |
+   0 1 1 0 0 1 0 1|. .|0|. . . . .|1|1|0|. . .|. . . . .|1|. . . .|
+                  |     |         |   | |     |         | |
+                  |     `-Zm      |   | `-Pg  `-Zn      | `-Pd
+                  `-size          |   `-o2              `-o3
+                                  `-op
+  
+  
+ 
+.SS Greater than or equal
+ 
+ FACGE   <Pd>.<T>, <Pg>/Z, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Pd);
+ SVECmp op = Cmp_GE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         case op of
+             when Cmp_GE res = FPCompareGE(FPAbs(element1), FPAbs(element2), FPCR);
+             when Cmp_GT res = FPCompareGT(FPAbs(element1), FPAbs(element2), FPCR);
+         ElemP[result, e, esize] = if res then '1' else '0';
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(PL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         case op of
+             when Cmp_GE res = FPCompareGE(FPAbs(element1), FPAbs(element2), FPCR);
+             when Cmp_GT res = FPCompareGT(FPAbs(element1), FPAbs(element2), FPCR);
+         ElemP[result, e, esize] = if res then '1' else '0';
+     else
+         ElemP[result, e, esize] = '0';
+ 
+ P[d] = result;
+

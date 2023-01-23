@@ -1,0 +1,80 @@
+.nh
+.TH "MOV (scalar, predicated)" "7" " "  "alias" "sve"
+.SS MOV (scalar, predicated)
+ MOV is an alias of CPY
+
+ Move general-purpose register to vector elements (predicated)
+
+ Move the general-purpose scalar source register to each active element in the
+ destination vector. Inactive elements in the destination vector register remain
+ unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - cpy_z_p_r_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                13    10         5         0
+                  |   |                 |     |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 1 0 0 0 1 0 1|. . .|. . . . .|. . . . .|
+                  |                     |     |         |
+                  `-size                `-Pg  `-Rn      `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, <Pg>/M, <R><n|SP>
+ 
+ CPY     <Zd>.<T>, <Pg>/M, <R><n|SP>
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <n|SP>
+  Encoded in Rn
+  Is the number [0-30] of the general-purpose source register or the name SP
+  (31), encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of CPY gives pseudocode for MOV.

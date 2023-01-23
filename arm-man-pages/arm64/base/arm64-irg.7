@@ -1,0 +1,111 @@
+.nh
+.TH "IRG -- A64" "7" " "  "instruction" "general"
+.SS IRG
+ Insert Random Tag
+
+ Insert Random Tag inserts a random Logical Address Tag into the address in the
+ first source register, and writes the result to the destination register. Any
+ tags specified in the optional second source register or in GCR_EL1.Exclude are
+ excluded from the selection of the random Logical Address Tag.
+
+
+
+.SS Integer - A64 - IRG_64I_dp_2src
+ 
+                                       13                          
+       29                            14 |    10                    
+     30 |                          15 | |  11 |                    
+   31 | |              21        16 | | |12 | |         5         0
+    | | |               |         | | | | | | |         |         |
+  |1|0|0|1 1 0 1 0 1 1 0|. . . . .|0|0|0|1|0|0|. . . . .|. . . . .|
+  |   |                 |         | | | | | | |         |
+  |   `-S               `-Xm      | | | | | | `-Xn      `-Xd
+  `-sf                            | | | | | `-opcode<0>
+                                  | | | | `-opcode<1>
+                                  | | | `-opcode<2>
+                                  | | `-opcode<3>
+                                  | `-opcode<4>
+                                  `-opcode<5>
+  
+  
+ 
+.SS Integer
+ 
+ IRG  <Xd|SP>, <Xn|SP>{, <Xm>}
+ 
+ integer d = UInt(Xd);
+ integer n = UInt(Xn);
+ integer m = UInt(Xm);
+ 
+ bits(64) operand = if n == 31 then SP[] else X[n];
+ bits(64) exclude_reg = X[m];
+ bits(16) exclude = exclude_reg<15:0> OR GCR_EL1.Exclude;
+ 
+ if AArch64.AllocationTagAccessIsEnabled() then
+     if GCR_EL1.RRND == '1' then
+         RGSR_EL1 = bits(32) UNKNOWN;
+         rtag = _ChooseRandomNonExcludedTag(exclude);
+     else
+         bits(4) start = RGSR_EL1.TAG;
+         bits(4) offset = AArch64.RandomTag();
+ 
+         rtag = AArch64.ChooseNonExcludedTag(start, offset, exclude);
+ 
+         RGSR_EL1.TAG = rtag;
+ else
+     rtag = '0000';
+ 
+ bits(64) result = AArch64.AddressWithAllocationTag(operand, rtag);
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Xd|SP>
+  Encoded in Xd
+  Is the 64-bit name of the destination general-purpose register or stack
+  pointer, encoded in the "Xd" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the first source general-purpose register or stack
+  pointer, encoded in the "Xn" field.
+
+ <Xm>
+  Encoded in Xm
+  Is the 64-bit name of the second general-purpose source register, encoded in
+  the "Xm" field. Defaults to XZR if absent.
+
+
+
+.SS Operation
+
+ bits(64) operand = if n == 31 then SP[] else X[n];
+ bits(64) exclude_reg = X[m];
+ bits(16) exclude = exclude_reg<15:0> OR GCR_EL1.Exclude;
+ 
+ if AArch64.AllocationTagAccessIsEnabled() then
+     if GCR_EL1.RRND == '1' then
+         RGSR_EL1 = bits(32) UNKNOWN;
+         rtag = _ChooseRandomNonExcludedTag(exclude);
+     else
+         bits(4) start = RGSR_EL1.TAG;
+         bits(4) offset = AArch64.RandomTag();
+ 
+         rtag = AArch64.ChooseNonExcludedTag(start, offset, exclude);
+ 
+         RGSR_EL1.TAG = rtag;
+ else
+     rtag = '0000';
+ 
+ bits(64) result = AArch64.AddressWithAllocationTag(operand, rtag);
+ 
+ if d == 31 then
+     SP[] = result;
+ else
+     X[d] = result;
+

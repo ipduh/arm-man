@@ -1,0 +1,55 @@
+.nh
+.TH "B.cond -- A64" "7" " "  "instruction" "general"
+.SS B.cond
+ Branch conditionally
+
+ Branch conditionally to a label at a PC-relative offset, with a hint that this
+ is not a subroutine call or return.
+
+
+
+.SS 19-bit signed PC-relative branch offset - A64 - B_only_condbranch
+ 
+                                                                   
+                                                                   
+                 24                                                
+               25 |                                     5 4       0
+                | |                                     | |       |
+   0 1 0 1 0 1 0|0|. . . . . . . . . . . . . . . . . . .|0|. . . .|
+                | |                                     | |
+                | `-imm19                               | `-cond
+                `-o1                                    `-o0
+  
+  
+ 
+.SS 19-bit signed PC-relative branch offset
+ 
+ B.<cond>  <label>
+ 
+ bits(64) offset = SignExtend(imm19:'00', 64);
+ bits(4) condition = cond;
+ 
+ if ConditionHolds(condition) then
+     BranchTo(PC[] + offset, BranchType_DIR);
+ 
+
+.SS Assembler Symbols
+
+ <cond>
+  Encoded in cond
+  Is one of the standard conditions, encoded in the "cond" field in the standard
+  way.
+
+ <label>
+  Encoded in imm19
+  Is the program label to be conditionally branched to. Its offset from the
+  address of this instruction, in the range +/-1MB, is encoded as "imm19" times
+  4.
+
+
+
+.SS Operation
+
+ if ConditionHolds(condition) then
+     BranchTo(PC[] + offset, BranchType_DIR);
+

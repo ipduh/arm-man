@@ -1,0 +1,117 @@
+.nh
+.TH "VCVT (from single-precision to BFloat16, Advanced SIMD) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVT (from single-precision to BFloat16, Advanced SIMD)
+ Vector Convert from single-precision to BFloat16
+
+ Vector Convert from single-precision to BFloat16 converts each 32-bit element
+ in a vector from single-precision floating-point to BFloat16 format, and writes
+ the result into a second vector. The result vector elements are half the width
+ of the source vector elements.
+
+ Unlike the BFloat16 multiplication instructions, this instruction uses the
+ Round to Nearest rounding mode, and can generate a floating-point exception
+ that causes cumulative exception bits in the FPSCR to be set.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|0 1|1 0|. . . .|0|1 1 0 0|1|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS A1
+ 
+ VCVT{<c>}{<q>}.BF16.F32 <Dd>, <Qm>
+ 
+ if !HaveAArch32BF16Ext() then UNDEFINED;
+ if Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |       7 6 5 4       0
+                    | |   |   |   |       | |       | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|0 1|1 0|. . . .|0|1 1 0 0|1|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-opc2  | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS T1
+ 
+ VCVT{<c>}{<q>}.BF16.F32 <Dd>, <Qm>
+ 
+ if !HaveAArch32BF16Ext() then UNDEFINED;
+ if Vm<0> == '1' then UNDEFINED;
+ integer d = UInt(D:Vd);
+ integer m = UInt(M:Vm);
+ 
+ bits(128) operand;
+ bits(64) result;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     CheckAdvSIMDEnabled();
+ 
+     operand = Q[m>>1];
+     for e = 0 to 3
+         bits(32) op = Elem[operand, e, 32];
+         Elem[result, e, 16] = FPConvertBF(op, StandardFPSCRValue());
+     D[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+
+
+.SS Operation
+
+ bits(128) operand;
+ bits(64) result;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     CheckAdvSIMDEnabled();
+ 
+     operand = Q[m>>1];
+     for e = 0 to 3
+         bits(32) op = Elem[operand, e, 32];
+         Elem[result, e, 16] = FPConvertBF(op, StandardFPSCRValue());
+     D[d] = result;
+

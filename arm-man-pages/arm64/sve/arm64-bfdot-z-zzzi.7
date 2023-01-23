@@ -1,0 +1,135 @@
+.nh
+.TH "BFDOT (indexed)" "7" " "  "instruction" "sve"
+.SS BFDOT (indexed)
+ BFloat16 floating-point indexed dot product
+
+ The BFloat16 floating-point (BF16) indexed dot product instruction computes the
+ dot product of a pair of BF16 values held in each 32-bit element of the first
+ source vector multiplied by a pair of BF16 values in an indexed 32-bit element
+ of the second source vector, and then destructively adds the single-precision
+ dot product to the corresponding single-precision element of the destination
+ vector.
+
+ The BF16 pairs within the second source vector are specified using an immediate
+ index which selects the same BF16 pair position within each 128-bit vector
+ segment. The index range is from 0 to 3. This instruction is unpredicated.
+
+ All floating-point calculations performed by this instruction are performed
+ with the following behaviors, irrespective of the value in FPCR:
+
+ * Uses the non-IEEE 754 Round-to-Odd mode, which forces bit 0 of an inexact
+ result to 1, and rounds an overflow to an appropriately signed Infinity.
+
+ * The cumulative FPSR exception bits (IDC, IXC, UFC, OFC, DZC and IOC) are not
+ modified.
+
+ * Trapped floating-point exceptions are disabled, as if the FPCR trap enable
+ bits (IDE, IXE, UFE, OFE, DZE and IOE) are all zero.
+
+ * Denormalized inputs and results are flushed to zero, as if FPCR.FZ == 1.
+
+ * Only the Default NaN is generated, as if FPCR.DN == 1.
+
+ ID_AA64ZFR0_EL1.BF16 indicates whether this instruction is implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - bfdot_z_zzzi_
+ 
+                                                                   
+                       21                                          
+                     22 |                                          
+                   23 | |  19    16          10         5         0
+                    | | |   |     |           |         |         |
+   0 1 1 0 0 1 0 0 0|1|1|. .|. . .|0 1 0 0 0 0|. . . . .|. . . . .|
+                    |   |   |                 |         |
+                    |   |   `-Zm              `-Zn      `-Zda
+                    |   `-i2
+                    `-op
+  
+  
+ 
+.SS SVE
+ 
+ BFDOT   <Zda>.S, <Zn>.H, <Zm>.H[<imm>]
+ 
+ if !HaveSVE() || !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ integer index = UInt(i2);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV 32;
+ integer eltspersegment = 128 DIV 32;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(16) elt1_a = Elem[operand1, 2 * e + 0, 16];
+     bits(16) elt1_b = Elem[operand1, 2 * e + 1, 16];
+     bits(16) elt2_a = Elem[operand2, 2 * s + 0, 16];
+     bits(16) elt2_b = Elem[operand2, 2 * s + 1, 16];
+ 
+     bits(32) sum = BFAdd(BFMul(elt1_a, elt2_a), BFMul(elt1_b, elt2_b));
+     Elem[result, e, 32] = BFAdd(Elem[operand3, e, 32], sum);
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register Z0-Z7, encoded in
+  the "Zm" field.
+
+ <imm>
+  Encoded in i2
+  Is the immediate index, in the range 0 to 3, encoded in the "i2" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV 32;
+ integer eltspersegment = 128 DIV 32;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(16) elt1_a = Elem[operand1, 2 * e + 0, 16];
+     bits(16) elt1_b = Elem[operand1, 2 * e + 1, 16];
+     bits(16) elt2_a = Elem[operand2, 2 * s + 0, 16];
+     bits(16) elt2_b = Elem[operand2, 2 * s + 1, 16];
+ 
+     bits(32) sum = BFAdd(BFMul(elt1_a, elt2_a), BFMul(elt1_b, elt2_b));
+     Elem[result, e, 32] = BFAdd(Elem[operand3, e, 32], sum);
+ 
+ Z[da] = result;
+

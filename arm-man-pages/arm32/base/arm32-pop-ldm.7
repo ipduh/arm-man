@@ -1,0 +1,100 @@
+.nh
+.TH "POP (multiple registers) -- AArch32" "7" " "  "alias" "general"
+.SS POP (multiple registers)
+ POP is an alias of LDM
+
+ Pop Multiple Registers from Stack
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16                               0
+          |     | | | | | |       |                               |
+  |. . . .|1 0 0|0|1|0|1|1|1 1 0 1|. . . . . . . . . . . . . . . .|
+  |             | | | | | |       |
+  |             | | | | | `-Rn    `-register_list
+  |             | | | | `-L
+  |             | | | `-W
+  |             | | `-op
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS A1
+ 
+ POP{<c>}{<q>} <registers>
+ 
+ LDM{<c>}{<q>} SP!, <registers>
+.SS T2 - T32
+ 
+                         05                                        
+                       06 |          14                            
+                     07 | |        15 |                            
+               10  08 | | |      01 | |                           0
+                |   | | | |       | | |                           |
+   1 1 1 0 1 0 0|0 1|0|1|1|1 1 0 1|.|.|. . . . . . . . . . . . . .|
+                |     | | |       | | |
+                `-opc | | `-Rn    | | `-register_list
+                      | `-L       | `-M
+                      `-W         `-P
+  
+  
+ 
+.SS T2
+ 
+ POP{<c>}.W <registers>
+ 
+ POP{<c>}{<q>} <registers>
+ 
+ LDM{<c>}{<q>} SP!, <registers>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <registers>
+  For encoding A1: is a list of two or more registers to be loaded, separated by
+  commas and surrounded by { and }. The lowest-numbered register is loaded from
+  the lowest memory address, through to the highest-numbered register from the
+  highest memory address. See also Encoding of lists of general-purpose
+  registers and the PC.           If the SP is in the list, the value of the SP
+  after such an instruction is unknown.           The PC can be in the list. If
+  it is, the instruction branches to the address loaded to the PC. This is an
+  interworking branch, see Pseudocode description of operations on the AArch32
+  general-purpose registers and the PC.           Arm deprecates the use of this
+  instruction with both the LR and the PC in the list.
+
+ <registers>
+  Encoded in register_list
+  For encoding T2: is a list of two or more registers to be loaded, separated by
+  commas and surrounded by { and }. The lowest-numbered register is loaded from
+  the lowest memory address, through to the highest-numbered register from the
+  highest memory address. See also Encoding of lists of general-purpose
+  registers and the PC.           The registers in the list must be in the range
+  R0-R12, encoded in the "register_list" field, and can optionally contain one
+  of  the LR or the PC. If the LR is in the list, the "M" field is set to 1,
+  otherwise it defaults to 0. If the PC is in the list, the "P" field is set to
+  1, otherwise it defaults to 0.           The PC can be in the list. If it is,
+  the instruction branches to the address loaded to the PC. This is an
+  interworking branch, see Pseudocode description of operations on the AArch32
+  general-purpose registers and the PC. If the PC is in the list:
+  The LR must not be in the list.             The instruction must be either
+  outside any IT block, or the last instruction in an IT block.
+
+
+
+.SS Operation
+
+ The manual of LDM gives pseudocode for POP.

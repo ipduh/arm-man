@@ -1,0 +1,267 @@
+.nh
+.TH "VFMS -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VFMS
+ Vector Fused Multiply Subtract
+
+ Vector Fused Multiply Subtract negates the elements of one vector and
+ multiplies them with the corresponding elements of another vector, adds the
+ products to the corresponding elements of the destination vector, and places
+ the results in the destination vector. The instruction does not round the
+ result of the multiply before the addition.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16      12       8 7 6 5 4       0
+                | | | | | |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|0|0|.|1|.|. . . .|. . . .|1 1 0 0|.|.|.|1|. . . .|
+                |   | | | |       |       |       | | | | |
+                `-U | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VFMS{<c>}{<q>}.<dt> <Dd>, <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VFMS{<c>}{<q>}.<dt> <Qd>, <Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ advsimd = TRUE; op1_neg = (op == '1');
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+         28      24 | |  20      16      12  10   8 7 6 5 4       0
+          |       | | |   |       |       |   |   | | | | |       |
+  |. . . .|1 1 1 0|1|.|1 0|. . . .|. . . .|1 0|. .|.|1|.|0|. . . .|
+  |               | | |   |       |           |   | | |   |
+  `-cond(!= 1111) | | |   `-Vn    `-Vd        |   | | `-M `-Vm
+                  | | `-o1                    |   | `-op
+                  | `-D                       |   `-N
+                  `-o0                        `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VFMS{<c>}{<q>}.F16 <Sd>, <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VFMS{<c>}{<q>}.F32 <Sd>, <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VFMS{<c>}{<q>}.F64 <Dd>, <Dn>, <Dm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ advsimd = FALSE; op1_neg = (op == '1');
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12       8 7 6 5 4       0
+        | |         | | | |       |       |       | | | | |       |
+   1 1 1|0|1 1 1 1 0|.|1|.|. . . .|. . . .|1 1 0 0|.|.|.|1|. . . .|
+        |           | | | |       |       |       | | | | |
+        `-U         | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VFMS{<c>}{<q>}.<dt> <Dd>, <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VFMS{<c>}{<q>}.<dt> <Qd>, <Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ if sz == '1' && InITBlock() then UNPREDICTABLE;
+ advsimd = TRUE; op1_neg = (op == '1');
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                     07                                            
+                   08 |                                            
+                 09 | |  05      01      12  10   8 7 6 5 4       0
+                  | | |   |       |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0|1|.|1 0|. . . .|. . . .|1 0|. .|.|1|.|0|. . . .|
+                  | | |   |       |           |   | | |   |
+                  | | |   `-Vn    `-Vd        |   | | `-M `-Vm
+                  | | `-o1                    |   | `-op
+                  | `-D                       |   `-N
+                  `-o0                        `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VFMS{<c>}{<q>}.F16 <Sd>, <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VFMS{<c>}{<q>}.F32 <Sd>, <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VFMS{<c>}{<q>}.F64 <Dd>, <Dn>, <Dm>
+ 
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ advsimd = FALSE; op1_neg = (op == '1');
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if advsimd then // Advanced SIMD instruction
+         for r = 0 to regs-1
+             for e = 0 to elements-1
+                 bits(esize) op1 = Elem[D[n+r],e,esize];
+                 if op1_neg then op1 = FPNeg(op1);
+                 Elem[D[d+r],e,esize] = FPMulAdd(Elem[D[d+r],e,esize],
+                                        op1, Elem[D[m+r],e,esize], StandardFPSCRValue());
+ 
+     else // VFP instruction
+         case esize of
+             when 16
+                 op16 = if op1_neg then FPNeg(S[n]<15:0>) else S[n]<15:0>;
+                 S[d] = Zeros(16) : FPMulAdd(S[d]<15:0>, op16, S[m]<15:0>, FPSCR);
+             when 32
+                 op32 = if op1_neg then FPNeg(S[n]) else S[n];
+                 S[d] = FPMulAdd(S[d], op32, S[m], FPSCR);
+             when 64
+                 op64 = if op1_neg then FPNeg(D[n]) else D[n];
+                 D[d] = FPMulAdd(D[d], op64, D[m], FPSCR);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding A2, T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in sz
+  Is the data type for the elements of the vectors,
+
+  sz <dt> 
+  0  F32  
+  1  F16  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sn>
+  Encoded in Vn:N
+  Is the 32-bit name of the first SIMD&FP source register, encoded in the "Vn:N"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the
+  "Vm:M" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if advsimd then // Advanced SIMD instruction
+         for r = 0 to regs-1
+             for e = 0 to elements-1
+                 bits(esize) op1 = Elem[D[n+r],e,esize];
+                 if op1_neg then op1 = FPNeg(op1);
+                 Elem[D[d+r],e,esize] = FPMulAdd(Elem[D[d+r],e,esize],
+                                        op1, Elem[D[m+r],e,esize], StandardFPSCRValue());
+ 
+     else // VFP instruction
+         case esize of
+             when 16
+                 op16 = if op1_neg then FPNeg(S[n]<15:0>) else S[n]<15:0>;
+                 S[d] = Zeros(16) : FPMulAdd(S[d]<15:0>, op16, S[m]<15:0>, FPSCR);
+             when 32
+                 op32 = if op1_neg then FPNeg(S[n]) else S[n];
+                 S[d] = FPMulAdd(S[d], op32, S[m], FPSCR);
+             when 64
+                 op64 = if op1_neg then FPNeg(D[n]) else D[n];
+                 D[d] = FPMulAdd(D[d], op64, D[m], FPSCR);
+

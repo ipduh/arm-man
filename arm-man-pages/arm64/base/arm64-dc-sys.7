@@ -1,0 +1,94 @@
+.nh
+.TH "DC -- A64" "7" " "  "alias" "system"
+.SS DC
+ DC is an alias of SYS
+
+ Data Cache operation
+
+ Data Cache operation. For more information, see op0==0b01, cache maintenance,
+ TLB maintenance, and address translation instructions.
+
+
+
+.SS System - A64 - SYS_CR_systeminstrs
+ 
+                                                                   
+                                                                   
+                       21                                          
+                     22 |  19    16      12       8     5         0
+                      | |   |     |       |       |     |         |
+   1 1 0 1 0 1 0 1 0 0|0|0 1|. . .|0 1 1 1|. . . .|. . .|. . . . .|
+                      | |   |     |       |       |     |
+                      | |   `-op1 `-CRn   `-CRm   `-op2 `-Rt
+                      | `-op0
+                      `-L
+  
+  
+ 
+.SS System
+ 
+ DC  <dc_op>, <Xt>
+ 
+ SYS #<op1>, C7, <Cm>, #<op2>, <Xt>
+ 
+
+.SS Assembler Symbols
+
+ <dc_op>
+  Encoded in op1:CRm:op2
+  Is a DC instruction name, as listed for the DC system instruction group,
+
+  op1 CRm  op2 <dc_op> Architectural Feature 
+  000 0110 001 IVAC                          
+  000 0110 010 ISW                           
+  000 0110 011 IGVAC   ARMv8.5-MemTag        
+  000 0110 100 IGSW    ARMv8.5-MemTag        
+  000 0110 101 IGDVAC  ARMv8.5-MemTag        
+  000 0110 110 IGDSW   ARMv8.5-MemTag        
+  000 1010 010 CSW                           
+  000 1010 100 CGSW    ARMv8.5-MemTag        
+  000 1010 110 CGDSW   ARMv8.5-MemTag        
+  000 1110 010 CISW                          
+  000 1110 100 CIGSW   ARMv8.5-MemTag        
+  000 1110 110 CIGDSW  ARMv8.5-MemTag        
+  011 0100 001 ZVA                           
+  011 0100 011 GVA     ARMv8.5-MemTag        
+  011 0100 100 GZVA    ARMv8.5-MemTag        
+  011 1010 001 CVAC                          
+  011 1010 011 CGVAC   ARMv8.5-MemTag        
+  011 1010 101 CGDVAC  ARMv8.5-MemTag        
+  011 1011 001 CVAU                          
+  011 1100 001 CVAP    ARMv8.2-DCPoP         
+  011 1100 011 CGVAP   ARMv8.5-MemTag        
+  011 1100 101 CGDVAP  ARMv8.5-MemTag        
+  011 1101 001 CVADP   ARMv8.2-DCCVADP       
+  011 1101 011 CGVADP  ARMv8.5-MemTag        
+  011 1101 101 CGDVADP ARMv8.5-MemTag        
+  011 1110 001 CIVAC                         
+  011 1110 011 CIGVAC  ARMv8.5-MemTag        
+  011 1110 101 CIGDVAC ARMv8.5-MemTag        
+
+ <op1>
+  Encoded in op1
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op1"
+  field.
+
+ <Cm>
+  Encoded in CRm
+  Is a name 'Cm', with 'm' in the range 0 to 15, encoded in the "CRm" field.
+
+ <op2>
+  Encoded in op2
+  Is a 3-bit unsigned immediate, in the range 0 to 7, encoded in the "op2"
+  field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rt"
+  field.
+
+
+
+.SS Operation
+
+ The manual of SYS gives pseudocode for DC.

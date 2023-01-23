@@ -1,0 +1,242 @@
+.nh
+.TH "VNEG -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VNEG
+ Vector Negate
+
+ Vector Negate negates each element in a vector, and places the results in a
+ second vector. The floating-point version only inverts the sign bit.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                                                                   
+                                             10                    
+                     22                    11 |                    
+                   23 |  20  18  16      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|0 1|. . . .|0|.|1 1 1|.|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-F     | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VNEG{<c>}{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VNEG{<c>}{<q>}.<dt> <Qd>, <Qm>
+ 
+ if size == '11' then UNDEFINED;
+ if F == '1' && ((size == '01' && !HaveFP16Ext()) || size == '00') then UNDEFINED;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ advsimd = TRUE;  floating_point = (F == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|0 0 1|. . . .|1 0|. .|0|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VNEG{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VNEG{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VNEG{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && cond != '1110' then UNPREDICTABLE;
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ advsimd = FALSE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                                                                   
+                                             10                    
+                     07                    11 |                    
+                   08 |  05  03  01      12 | |     7 6 5 4       0
+                    | |   |   |   |       | | |     | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|0 1|. . . .|0|.|1 1 1|.|.|0|. . . .|
+                    |     |   |   |         |       | |   |
+                    `-D   |   |   `-Vd      `-F     | `-M `-Vm
+                          |   `-opc1                `-Q
+                          `-size
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VNEG{<c>}{<q>}.<dt> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VNEG{<c>}{<q>}.<dt> <Qd>, <Qm>
+ 
+ if size == '11' then UNDEFINED;
+ if F == '1' && ((size == '01' && !HaveFP16Ext()) || size == '00') then UNDEFINED;
+ if F == '1' && size == '01' && InITBlock() then UNPREDICTABLE;
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ advsimd = TRUE;  floating_point = (F == '1');
+ esize = 8 << UInt(size);  elements = 64 DIV esize;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|0 0 1|. . . .|1 0|. .|0|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VNEG{<c>}{<q>}.F16 <Sd>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VNEG{<c>}{<q>}.F32 <Sd>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VNEG{<c>}{<q>}.F64 <Dd>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ if FPSCR.Len != '000' || FPSCR.Stride != '00' then UNDEFINED;
+ advsimd = FALSE;
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); m = UInt(M:Vm);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if advsimd then  // Advanced SIMD instruction
+         for r = 0 to regs-1
+             for e = 0 to elements-1
+                 if floating_point then
+                     Elem[D[d+r],e,esize] = FPNeg(Elem[D[m+r],e,esize]);
+                 else
+                     result = -SInt(Elem[D[m+r],e,esize]);
+                     Elem[D[d+r],e,esize] = result<esize-1:0>;
+     else             // VFP instruction
+         case esize of
+             when 16 S[d] = Zeros(16) : FPNeg(S[m]<15:0>);
+             when 32 S[d] = FPNeg(S[m]);
+             when 64 D[d] = FPNeg(D[m]);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding A2, T1 and T2: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in F:size
+  Is the data type for the elements of the vectors,
+
+  F size <dt> 
+  0 00   S8   
+  0 01   S16  
+  0 10   S32  
+  1 01   F16  
+  1 10   F32  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if advsimd then  // Advanced SIMD instruction
+         for r = 0 to regs-1
+             for e = 0 to elements-1
+                 if floating_point then
+                     Elem[D[d+r],e,esize] = FPNeg(Elem[D[m+r],e,esize]);
+                 else
+                     result = -SInt(Elem[D[m+r],e,esize]);
+                     Elem[D[d+r],e,esize] = result<esize-1:0>;
+     else             // VFP instruction
+         case esize of
+             when 16 S[d] = Zeros(16) : FPNeg(S[m]<15:0>);
+             when 32 S[d] = FPNeg(S[m]);
+             when 64 D[d] = FPNeg(D[m]);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

@@ -1,0 +1,127 @@
+.nh
+.TH "SSAT -- AArch32" "7" " "  "instruction" "general"
+.SS SSAT
+ Signed Saturate
+
+ Signed Saturate saturates an optionally-shifted signed value to a selectable
+ signed range.
+
+ This instruction sets PSTATE.Q to 1 if the operation saturates.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                       21                                          
+                     22 |                                          
+         28        23 | |        16      12         7 6   4       0
+          |         | | |         |       |         | |   |       |
+  |. . . .|0 1 1 0 1|0|1|. . . . .|. . . .|. . . . .|.|0 1|. . . .|
+  |                 |   |         |       |         |     |
+  `-cond(!= 1111)   `-U `-sat_imm `-Rd    `-imm5    `-sh  `-Rn
+  
+  
+ 
+.SS Arithmetic shift right(sh == 1)
+ 
+ SSAT{<c>}{<q>} <Rd>, #<imm>, <Rn>, ASR #<amount>
+.SS Logical shift left(sh == 0)
+ 
+ SSAT{<c>}{<q>} <Rd>, #<imm>, <Rn> {, LSL #<amount>}
+ 
+ d = UInt(Rd);  n = UInt(Rn);  saturate_to = UInt(sat_imm)+1;
+ (shift_t, shift_n) = DecodeImmShift(sh:'0', imm5);
+ if d == 15 || n == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                         05                                        
+             11        06 |        15                              
+           12 |  09  07 | |      01 |    12       8   6 5         0
+            | |   |   | | |       | |     |       |   | |         |
+   1 1 1 1 0|0|1 1|0 0|.|0|. . . .|0|. . .|. . . .|. .|0|. . . . .|
+                      |   |         |     |       |     |
+                      |   `-Rn      |     `-Rd    |     `-sat_imm
+                      `-sh          `-imm3        `-imm2
+  
+  
+ 
+.SS Arithmetic shift right(sh == 1 && !(imm3 == 000 && imm2 == 00))
+ 
+ SSAT{<c>}{<q>} <Rd>, #<imm>, <Rn>, ASR #<amount>
+.SS Logical shift left(sh == 0)
+ 
+ SSAT{<c>}{<q>} <Rd>, #<imm>, <Rn> {, LSL #<amount>}
+ 
+ if sh == '1' && (imm3:imm2) == '00000' then SEE "SSAT16";
+ d = UInt(Rd);  n = UInt(Rn);  saturate_to = UInt(sat_imm)+1;
+ (shift_t, shift_n) = DecodeImmShift(sh:'0', imm3:imm2);
+ if d == 15 || n == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand = Shift(R[n], shift_t, shift_n, PSTATE.C);  // PSTATE.C ignored
+     (result, sat) = SignedSatQ(SInt(operand), saturate_to);
+     R[d] = SignExtend(result, 32);
+     if sat then
+         PSTATE.Q = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <imm>
+  Encoded in sat_imm
+  Is the bit position for saturation, in the range 1 to 32, encoded in the
+  "sat_imm" field as <imm>-1.
+
+ <Rn>
+  Encoded in Rn
+  Is the general-purpose source register, encoded in the "Rn" field.
+
+ <amount>
+  Encoded in imm5
+  For encoding A1: is the optional shift amount, in the range 0 to 31,
+  defaulting to 0 and encoded in the "imm5" field.
+
+ <amount>
+  Encoded in imm5
+  For encoding A1: is the shift amount, in the range 1 to 32 encoded in the
+  "imm5" field as <amount> modulo 32.
+
+ <amount>
+  Encoded in imm3:imm2
+  For encoding T1: is the optional shift amount, in the range 0 to 31,
+  defaulting to 0 and encoded in the "imm3:imm2" field.
+
+ <amount>
+  Encoded in imm3:imm2
+  For encoding T1: is the shift amount, in the range 1 to 31 encoded in the
+  "imm3:imm2" field as <amount>.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand = Shift(R[n], shift_t, shift_n, PSTATE.C);  // PSTATE.C ignored
+     (result, sat) = SignedSatQ(SInt(operand), saturate_to);
+     R[d] = SignExtend(result, 32);
+     if sat then
+         PSTATE.Q = '1';
+

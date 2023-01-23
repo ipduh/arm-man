@@ -1,0 +1,238 @@
+.nh
+.TH "LDR (register) -- AArch32" "7" " "  "instruction" "general"
+.SS LDR (register)
+ Load Register (register)
+
+ Load Register (register) calculates an address from a base register value and
+ an offset register value, loads a word from memory, and writes it to a
+ register. The offset register value can optionally be shifted. For information
+ about memory accesses, see Memory accesses.
+
+ The T32 form of LDR (register) does not support register writeback.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+         28    25 | | |21 |      16      12         7   5 4       0
+          |     | | | | | |       |       |         |   | |       |
+  |. . . .|0 1 1|.|.|0|.|1|. . . .|. . . .|. . . . .|. .|0|. . . .|
+  |             | | | | | |       |       |         |     |
+  |             | | | | | `-Rn    `-Rt    `-imm5    |     `-Rm
+  |             | | | | `-o1                        `-stype
+  |             | | | `-W
+  |             | | `-o2
+  |             | `-U
+  |             `-P
+  `-cond(!= 1111)
+  
+  
+ 
+.SS Offset(P == 1 && W == 0)
+ 
+ LDR{<c>}{<q>} <Rt>, [<Rn>, {+/-}<Rm>{, <shift>}]
+.SS Post-indexed(P == 0 && W == 0)
+ 
+ LDR{<c>}{<q>} <Rt>, [<Rn>], {+/-}<Rm>{, <shift>}
+.SS Pre-indexed(P == 1 && W == 1)
+ 
+ LDR{<c>}{<q>} <Rt>, [<Rn>, {+/-}<Rm>{, <shift>}]!
+ 
+ if P == '0' && W == '1' then SEE "LDRT";
+ t = UInt(Rt);  n = UInt(Rn);  m = UInt(Rm);
+ index = (P == '1');  add = (U == '1');  wback = (P == '0') || (W == '1');
+ (shift_t, shift_n) = DecodeImmShift(stype, imm5);
+ if m == 15 then UNPREDICTABLE;
+ if wback && (n == 15 || n == t) then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                9                                                  
+             10 |                                                  
+           11 | |                                                  
+         12 | | |     6     3     0                                
+          | | | |     |     |     |                                
+   0 1 0 1|1|0|0|. . .|. . .|. . .|                                
+          | | | |     |     |
+          | | | `-Rm  `-Rn  `-Rt
+          | | `-H
+          | `-B
+          `-L
+  
+  
+ 
+.SS T1
+ 
+ LDR{<c>}{<q>} <Rt>, [<Rn>, {+}<Rm>]
+ 
+ t = UInt(Rt);  n = UInt(Rn);  m = UInt(Rm);
+ (shift_t, shift_n) = (SRType_LSL, 0);
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                   08  06 |      01      12           6   4       0
+                    |   | |       |       |           |   |       |
+   1 1 1 1 1 0 0 0 0|1 0|1|. . . .|. . . .|0 0 0 0 0 0|. .|. . . .|
+                    |   | |       |                   |   |
+                    |   | |       `-Rt                |   `-Rm
+                    |   | `-Rn(!= 1111)               `-imm2
+                    |   `-L
+                    `-size
+  
+  
+ 
+.SS T2
+ 
+ LDR{<c>}.W <Rt>, [<Rn>, {+}<Rm>]
+ 
+ LDR{<c>}{<q>} <Rt>, [<Rn>, {+}<Rm>{, LSL #<imm>}]
+ 
+ if Rn == '1111' then SEE "LDR (literal)";
+ t = UInt(Rt);  n = UInt(Rn);  m = UInt(Rm);
+ (shift_t, shift_n) = (SRType_LSL, UInt(imm2));
+ if m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ if t == 15 && InITBlock() && !LastInITBlock() then UNPREDICTABLE;
+ 
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+         offset_addr = if add then (R[n] + offset) else (R[n] - offset);
+         address = if index then offset_addr else R[n];
+         data = MemU[address,4];
+         if wback then R[n] = offset_addr;
+         if t == 15 then
+             if address<1:0> == '00' then
+                 LoadWritePC(data);
+             else
+                 UNPREDICTABLE;
+         else
+             R[t] = data;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+         offset_addr = (R[n] + offset);
+         address = offset_addr;
+         data = MemU[address,4];
+         if t == 15 then
+             if address<1:0> == '00' then
+                 LoadWritePC(data);
+             else
+                 UNPREDICTABLE;
+         else
+             R[t] = data;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rt>
+  Encoded in Rt
+  For encoding A1: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The PC can be used. If the PC is used, the instruction
+  branches to the address (data) loaded to the PC. This branch is an
+  interworking branch, see Pseudocode description of operations on the AArch32
+  general-purpose registers and the PC.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T1: is the general-purpose register to be transferred, encoded in
+  the "Rt" field.
+
+ <Rt>
+  Encoded in Rt
+  For encoding T2: is the general-purpose register to be transferred, encoded in
+  the "Rt" field. The PC can be used, provided the instruction is either outside
+  an IT block or the last instruction of an IT block. If the PC is used, the
+  instruction branches to the address (data) loaded to the PC. This is an
+  interworking branch, see Pseudocode description of operations on the AArch32
+  general-purpose registers and the PC.
+
+ <Rn>
+  Encoded in Rn
+  For encoding A1: is the general-purpose base register, encoded in the "Rn"
+  field. The PC can be used in the offset variant.
+
+ <Rn>
+  Encoded in Rn
+  For encoding T1 and T2: is the general-purpose base register, encoded in the
+  "Rn" field.
+
+ +/-
+  Encoded in U
+  Specifies the index register is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ +
+  Specifies the index register is added to the base register.
+
+ <Rm>
+  Encoded in Rm
+  Is the general-purpose index register, encoded in the "Rm" field.
+
+ <shift>
+  The shift to apply to the value read from <Rm>. If absent, no shift is
+  applied. Otherwise, see Shifts applied to a register.
+
+ <imm>
+  If present, the size of the left shift to apply to the value from <Rm>, in the
+  range 1-3. <imm> is encoded in imm2. If absent, no shift is specified and imm2
+  is encoded as 0b00.
+
+
+
+.SS Operation
+
+ if CurrentInstrSet() == InstrSet_A32 then
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+         offset_addr = if add then (R[n] + offset) else (R[n] - offset);
+         address = if index then offset_addr else R[n];
+         data = MemU[address,4];
+         if wback then R[n] = offset_addr;
+         if t == 15 then
+             if address<1:0> == '00' then
+                 LoadWritePC(data);
+             else
+                 UNPREDICTABLE;
+         else
+             R[t] = data;
+ else
+     if ConditionPassed() then
+         EncodingSpecificOperations();
+         offset = Shift(R[m], shift_t, shift_n, PSTATE.C);
+         offset_addr = (R[n] + offset);
+         address = offset_addr;
+         data = MemU[address,4];
+         if t == 15 then
+             if address<1:0> == '00' then
+                 LoadWritePC(data);
+             else
+                 UNPREDICTABLE;
+         else
+             R[t] = data;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

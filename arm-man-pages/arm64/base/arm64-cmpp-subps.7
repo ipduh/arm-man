@@ -1,0 +1,57 @@
+.nh
+.TH "CMPP -- A64" "7" " "  "alias" "general"
+.SS CMPP
+ CMPP is an alias of SUBPS
+
+ Compare with Tag
+
+ Compare with Tag subtracts the 56-bit address held in the second source
+ register from the 56-bit address held in the first source register, updates the
+ condition flags based on the result of the subtraction, and discards the
+ result.
+
+
+
+.SS Integer - A64 - SUBPS_64S_dp_2src
+ 
+                                       13                          
+       29                            14 |    10                    
+     30 |                          15 | |  11 |                    
+   31 | |              21        16 | | |12 | |         5         0
+    | | |               |         | | | | | | |         |         |
+  |1|0|1|1 1 0 1 0 1 1 0|. . . . .|0|0|0|0|0|0|. . . . .|1 1 1 1 1|
+  |   |                 |         | | | | | | |         |
+  |   `-S               `-Xm      | | | | | | `-Xn      `-Xd
+  `-sf                            | | | | | `-opcode<0>
+                                  | | | | `-opcode<1>
+                                  | | | `-opcode<2>
+                                  | | `-opcode<3>
+                                  | `-opcode<4>
+                                  `-opcode<5>
+  
+  
+ 
+.SS Integer
+ 
+ CMPP  <Xn|SP>, <Xm|SP>
+ 
+ SUBPS XZR, <Xn|SP>, <Xm|SP>
+ 
+
+.SS Assembler Symbols
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the first source general-purpose register or stack
+  pointer, encoded in the "Xn" field.
+
+ <Xm|SP>
+  Encoded in Xm
+  Is the 64-bit name of the second general-purpose source register or stack
+  pointer, encoded in the "Xm" field.
+
+
+
+.SS Operation
+
+ The manual of SUBPS gives pseudocode for CMPP.

@@ -1,0 +1,118 @@
+.nh
+.TH "PLD (literal) -- AArch32" "7" " "  "instruction" "general"
+.SS PLD (literal)
+ Preload Data (literal)
+
+ Preload Data (literal) signals the memory system that data memory accesses from
+ a specified address are likely in the near future. The memory system can
+ respond by taking actions that are expected to speed up the memory accesses
+ when they do occur, such as preloading the cache line containing the specified
+ address into the data cache.
+
+ The effect of a PLD instruction is implementation defined.  For more
+ information, see Preloading caches.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                13                          
+                   23 |              14 |                          
+                 24 | |            15 | |                          
+               25 | | |  20      16 | | |12                       0
+                | | | |   |       | | | | |                       |
+   1 1 1 1 0 1 0|1|.|1|0 1|1 1 1 1|1|1|1|1|. . . . . . . . . . . .|
+                | | |     |               |
+                | | `-R   `-Rn            `-imm12
+                | `-U
+                `-D
+  
+  
+ 
+.SS A1
+ 
+ PLD{<c>}{<q>} <label>
+ 
+ PLD{<c>}{<q>} [PC, #{+/-}<imm>]
+ 
+ imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+.SS T1 - T32
+ 
+                       06                                          
+                     07 |                                          
+                   08 | |                                          
+                 09 | | |05      01      12                       0
+                  | | | | |       |       |                       |
+   1 1 1 1 1 0 0 0|.|0|0|1|1 1 1 1|1 1 1 1|. . . . . . . . . . . .|
+                  |   | |         |       |
+                  `-U | `-L       `-Rt    `-imm12
+                      `-W
+  
+  
+ 
+.SS T1
+ 
+ PLD{<c>}{<q>} <label>
+ 
+ PLD{<c>}{<q>} [PC, #{+/-}<imm>]
+ 
+ imm32 = ZeroExtend(imm12, 32);  add = (U == '1');
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = if add then (Align(PC,4) + imm32) else (Align(PC,4) - imm32);
+     Hint_PreloadData(address);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. Must be AL or omitted.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <label>
+  Encoded in imm12
+  The label of the literal data item that is likely to be accessed in the near
+  future. The assembler calculates the required value of the offset from the
+  Align(PC, 4) value of the instruction to this label. The offset must be in the
+  range –4095 to 4095.           If the offset is zero or positive, imm32 is
+  equal to the offset and add == TRUE.           If the offset is negative,
+  imm32 is equal to minus the offset and add == FALSE.
+
+ +/-
+  Encoded in U
+  Specifies the offset is added to or subtracted from the base register,
+  defaulting to + if omitted and
+
+  U +/- 
+  0 -   
+  1 +   
+
+ <imm>
+  Encoded in imm12
+  For encoding A1: is the 12-bit unsigned immediate byte offset, in the range 0
+  to 4095, encoded in the "imm12" field.
+
+ <imm>
+  Encoded in imm12
+  For encoding T1: is a 12-bit unsigned immediate byte offset, in the range 0 to
+  4095, encoded in the "imm12" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     address = if add then (Align(PC,4) + imm32) else (Align(PC,4) - imm32);
+     Hint_PreloadData(address);
+

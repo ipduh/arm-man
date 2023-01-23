@@ -1,0 +1,81 @@
+.nh
+.TH "DCPS1 -- A64" "7" " "  "instruction" "system"
+.SS DCPS1
+ Debug Change PE State to EL1.
+
+ Debug Change PE State to EL1, when executed in Debug state:
+
+
+ The target exception level of a DCPS1 instruction is:
+
+
+ When the target Exception level of a DCPS1 instruction is ELx, on executing
+ this instruction:
+
+ ELR_ELx becomes unknown.
+
+ ELR_ELx becomes unknown.
+
+ SPSR_ELx becomes unknown.
+
+ SPSR_ELx becomes unknown.
+
+ ESR_ELx becomes unknown.
+
+ ESR_ELx becomes unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ DLR_EL0 and DSPSR_EL0 become unknown.
+
+ The endianness is set according to SCTLR_ELx. EE.
+
+
+ This instruction is undefined at EL0 in Non-secure state if EL2 is implemented
+ and HCR_EL2.TGE == 1.
+
+ This instruction is always undefined in Non-debug state.
+
+ For more information on the operation of the DCPSn instructions, see DCPS.
+
+
+
+.SS System - A64 - DCPS1_DC_exception
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24    21                               5     2   0
+                  |     |                               |     |   |
+   1 1 0 1 0 1 0 0|1 0 1|. . . . . . . . . . . . . . . .|0 0 0|0 1|
+                  |     |                               |     |
+                  `-opc `-imm16                         `-op2 `-LL
+  
+  
+ 
+.SS System
+ 
+ DCPS1  {#<imm>}
+ 
+ bits(2) target_level = LL;
+ if LL == '00' then UNDEFINED;
+ if !Halted() then UNDEFINED;
+ 
+ DCPSInstruction(target_level);
+ 
+
+.SS Assembler Symbols
+
+ <imm>
+  Encoded in imm16
+  Is an optional 16-bit unsigned immediate, in the range 0 to 65535, defaulting
+  to 0 and encoded in the "imm16" field.
+
+
+
+.SS Operation
+
+ DCPSInstruction(target_level);
+

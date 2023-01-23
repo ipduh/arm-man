@@ -1,0 +1,109 @@
+.nh
+.TH "SUB (immediate, from PC) -- AArch32" "7" " "  "alias" "general"
+.SS SUB (immediate, from PC)
+ SUB is an alias of ADR
+
+ Subtract from PC
+
+
+It has encodings from the following instruction sets:  A32 (A2) and  T32 (T2).
+
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12                       0
+          |       |     | |       |       |                       |
+  |. . . .|0 0 1 0|0 1 0|0|1 1 1 1|. . . .|. . . . . . . . . . . .|
+  |               |     | |       |       |
+  `-cond(!= 1111) `-opc | `-Rn    `-Rd    `-imm12
+                        `-S
+  
+  
+ 
+.SS A2
+ 
+ SUB{<c>}{<q>} <Rd>, PC, #<const>
+ 
+ ADR{<c>}{<q>} <Rd>, <label>
+.SS T2 - T32
+ 
+                       06                                          
+                     07 |                                          
+             11    08 | |          15                              
+           12 |  09 | | |05      01 |    12       8               0
+            | |   | | | | |       | |     |       |               |
+   1 1 1 1 0|.|1 0|1|0|1|0|1 1 1 1|0|. . .|. . . .|. . . . . . . .|
+            |     |   |   |         |     |       |
+            `-i   |   |   `-Rn      |     `-Rd    `-imm8
+                  |   `-o2          `-imm3
+                  `-o1
+  
+  
+ 
+.SS T2
+ 
+ SUB{<c>}{<q>} <Rd>, PC, #<imm12>
+ 
+ ADR{<c>}{<q>} <Rd>, <label>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A2: is the general-purpose destination register, encoded in the
+  "Rd" field. If the PC is used, the instruction is a branch to the address
+  calculated by the operation. This is an interworking branch, see Pseudocode
+  description of operations on the AArch32 general-purpose registers and the PC.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T2: is the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <label>
+  Encoded in imm12
+  For encoding A2: the label of an instruction or literal data item whose
+  address is to be loaded into <Rd>. The assembler calculates the required value
+  of the offset from the Align(PC, 4) value of the ADR instruction to this
+  label.           If the offset is zero or positive, encoding A1 is used, with
+  imm32 equal to the offset.           If the offset is negative, encoding A2 is
+  used, with imm32 equal to the size of the offset. That is, the use of encoding
+  A2 indicates that the required offset is minus the value of imm32.
+  Permitted values of the size of the offset are any of the constants described
+  in Modified immediate constants in A32 instructions.
+
+ <label>
+  Encoded in i:imm3:imm8
+  For encoding T2: the label of an instruction or literal data item whose
+  address is to be loaded into <Rd>. The assembler calculates the required value
+  of the offset from the Align(PC, 4) value of the ADR instruction to this
+  label.           If the offset is zero or positive, encoding T3 is used, with
+  imm32 equal to the offset.           If the offset is negative, encoding T2 is
+  used, with imm32 equal to the size of the offset. That is, the use of encoding
+  T2 indicates that the required offset is minus the value of imm32.
+  Permitted values of the size of the offset are 0-4095.
+
+ <imm12>
+  Encoded in i:imm3:imm8
+  Is a 12-bit unsigned immediate, in the range 0 to 4095, encoded in the
+  "i:imm3:imm8" field.
+
+ <const>
+  Encoded in imm12
+  An immediate value. See Modified immediate constants in A32 instructions for
+  the range of values.
+
+
+
+.SS Operation
+
+ The manual of ADR gives pseudocode for SUB.

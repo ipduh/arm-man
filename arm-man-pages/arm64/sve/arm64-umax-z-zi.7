@@ -1,0 +1,91 @@
+.nh
+.TH "UMAX (immediate)" "7" " "  "instruction" "sve"
+.SS UMAX (immediate)
+ Unsigned maximum with immediate (unpredicated)
+
+ Determine the unsigned maximum of an immediate and each element of the source
+ vector, and destructively place the results in the corresponding elements of
+ the source vector. The immediate is an unsigned 8-bit value in the range 0 to
+ 255, inclusive. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - umax_z_zi_
+ 
+                                                                   
+                                                                   
+                                 16    13                          
+                 24  22    19  17 |  14 |               5         0
+                  |   |     |   | |   | |               |         |
+   0 0 1 0 0 1 0 1|. .|1 0 1|0 0|1|1 1|0|. . . . . . . .|. . . . .|
+                  |             |     | |               |
+                  `-size        `-U   | `-imm8          `-Zdn
+                                      `-o2
+  
+  
+ 
+.SS SVE
+ 
+ UMAX    <Zdn>.<T>, <Zdn>.<T>, #<imm>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer dn = UInt(Zdn);
+ boolean unsigned = TRUE;
+ integer imm = Int(imm8, unsigned);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = Int(Elem[operand1, e, esize], unsigned);
+     Elem[result, e, esize] = Max(element1, imm)<esize-1:0>;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <imm>
+  Encoded in imm8
+  Is the unsigned immediate operand, in the range 0 to 255, encoded in the
+  "imm8" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     integer element1 = Int(Elem[operand1, e, esize], unsigned);
+     Elem[result, e, esize] = Max(element1, imm)<esize-1:0>;
+ 
+ Z[dn] = result;
+

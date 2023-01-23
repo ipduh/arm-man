@@ -1,0 +1,97 @@
+.nh
+.TH "AUTDB, AUTDZB -- A64" "7" " "  "instruction" "general"
+.SS AUTDB, AUTDZB
+ Authenticate Data address, using key B
+
+ Authenticate Data address, using key B. This instruction authenticates a data
+ address, using a modifier and key B.
+
+ The address is in the general-purpose register that is specified by <Xd>.
+
+ The modifier is:
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTDB.
+
+ In the general-purpose register or stack pointer that is specified by <Xn|SP>
+ for AUTDB.
+
+ The value zero, for AUTDZB.
+
+
+ If the authentication passes, the upper bits of the address are restored to
+ enable subsequent use of the address. If the authentication fails, the upper
+ bits are corrupted and any subsequent use of the address results in a
+ Translation fault.
+
+
+
+.SS Integer - A64 - general
+ 
+                                       13                          
+       29                            14 |                          
+     30 |                          15 | |                          
+   31 | |              21        16 | | |    10         5         0
+    | | |               |         | | | |     |         |         |
+  |1|1|0|1 1 0 1 0 1 1 0|0 0 0 0 1|0|0|.|1 1 1|. . . . .|. . . . .|
+  |   |                 |         | | | |     |         |
+  |   `-S               `-opcode2 | | | |     `-Rn      `-Rd
+  `-sf                            | | | `-opcode[2:0]
+                                  | | `-Z
+                                  | `-opcode[4]
+                                  `-opcode[5]
+  
+  
+ 
+.SS AUTDB(Z == 0)
+ 
+ AUTDB  <Xd>, <Xn|SP>
+.SS AUTDZB(Z == 1 && Rn == 11111)
+ 
+ AUTDZB  <Xd>
+ 
+ boolean source_is_sp = FALSE;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if !HavePACExt() then
+     UNDEFINED;
+ 
+ if Z == '0' then // AUTDB
+     if n == 31 then source_is_sp = TRUE;
+ else // AUTDZB
+     if n != 31 then UNDEFINED;
+ 
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthDB(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthDB(X[d], X[n], auth_then_branch);
+ 
+
+.SS Assembler Symbols
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ auth_then_branch = FALSE;
+ 
+ if HavePACExt() then
+     if source_is_sp then
+         X[d] = AuthDB(X[d], SP[], auth_then_branch);
+     else
+         X[d] = AuthDB(X[d], X[n], auth_then_branch);
+

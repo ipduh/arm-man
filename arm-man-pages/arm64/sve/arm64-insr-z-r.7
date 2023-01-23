@@ -1,0 +1,85 @@
+.nh
+.TH "INSR (scalar)" "7" " "  "instruction" "sve"
+.SS INSR (scalar)
+ Insert general-purpose register in shifted vector
+
+ Shift the destination vector left by one element, and then place a copy of the
+ least-significant bits of the general-purpose register in element 0 of the
+ destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - insr_z_r_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                      10         5         0
+                  |   |                       |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 0 1 0 0 0 0 1 1 1 0|. . . . .|. . . . .|
+                  |                           |         |
+                  `-size                      `-Rm      `-Zdn
+  
+  
+ 
+.SS SVE
+ 
+ INSR    <Zdn>.<T>, <R><m>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer dn = UInt(Zdn);
+ integer m = UInt(Rm);
+ 
+ CheckSVEEnabled();
+ bits(VL) dest = Z[dn];
+ bits(esize) src = X[m];
+ Z[dn] = dest<VL-esize-1:0> : src;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <m>
+  Encoded in Rm
+  Is the number [0-30] of the source general-purpose register or the name ZR
+  (31), encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(VL) dest = Z[dn];
+ bits(esize) src = X[m];
+ Z[dn] = dest<VL-esize-1:0> : src;
+

@@ -1,0 +1,74 @@
+.nh
+.TH "STUMAXB, STUMAXLB -- A64" "7" " "  "alias" "general"
+.SS STUMAXB, STUMAXLB
+ STUMAXLB is an alias of LDUMAXLB
+
+ Atomic unsigned maximum on byte in memory, without return
+
+ Atomic unsigned maximum on byte in memory, without return, atomically loads an
+ 8-bit byte from memory, compares it against the value held in a register, and
+ stores the larger value back to memory, treating the values as unsigned
+ numbers.
+
+ STUMAXB has no memory ordering semantics.
+
+ STUMAXLB stores to memory with release semantics, as described in Load-Acquire,
+ Store-Release.
+
+ STUMAXLB stores to memory with release semantics, as described in Load-Acquire,
+ Store-Release.
+
+
+ For information about memory accesses see Load/Store addressing modes.
+
+
+
+.SS Integer - A64 - general
+ 
+                       21                                          
+                     22 |                                          
+             26    23 | |          15                              
+     30    27 |  24 | | |        16 |    12  10         5         0
+      |     | |   | | | |         | |     |   |         |         |
+  |0 0|1 1 1|0|0 0|0|.|1|. . . . .|0|1 1 0|0 0|. . . . .|1 1 1 1 1|
+  |         |     | |   |         | |         |         |
+  `-size    `-V   | `-R `-Rs      | `-opc     `-Rn      `-Rt
+                  `-A             `-o3
+  
+  
+ 
+.SS No memory ordering(R == 0)
+ 
+ STUMAXB  <Ws>, [<Xn|SP>]
+ 
+ LDUMAXB <Ws>, WZR, [<Xn|SP>]
+.SS Release(R == 1)
+ 
+ STUMAXLB  <Ws>, [<Xn|SP>]
+ 
+ LDUMAXLB <Ws>, WZR, [<Xn|SP>]
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register holding the data value to
+  be operated on with the contents of the memory location, encoded in the "Rs"
+  field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ The manual of LDUMAXLB gives pseudocode for STUMAXLB.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

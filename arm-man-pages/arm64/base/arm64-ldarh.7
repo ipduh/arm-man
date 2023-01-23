@@ -1,0 +1,111 @@
+.nh
+.TH "LDARH -- A64" "7" " "  "instruction" "general"
+.SS LDARH
+ Load-Acquire Register Halfword
+
+ Load-Acquire Register Halfword derives an address from a base register value,
+ loads a halfword from memory, zero-extends it, and writes it to a register. The
+ instruction also has memory ordering semantics as described in Load-Acquire,
+ Store-Release. For information about memory accesses, see Load/Store addressing
+ modes.
+
+
+
+.SS No offset - A64 - LDARH_LR32_ldstexcl
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |          15                              
+     30          24 | | |        16 |        10         5         0
+      |           | | | |         | |         |         |         |
+  |0 1|0 0 1 0 0 0|1|1|0|1 1 1 1 1|1|1 1 1 1 1|. . . . .|. . . . .|
+  |               | | | |         | |         |         |
+  `-size          | | | `-Rs      | `-Rt2     `-Rn      `-Rt
+                  | | `-o1        `-o0
+                  | `-L
+                  `-o2
+  
+  
+ 
+.SS No offset
+ 
+ LDARH  <Wt>, [<Xn|SP>{,#0}]
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer t2 = UInt(Rt2); // ignored by load/store single register
+ integer s = UInt(Rs);   // ignored by all loads and store-release
+ 
+ AccType acctype = if o0 == '0' then AccType_LIMITEDORDERED else AccType_ORDERED;
+ MemOp memop = if L == '1' then MemOp_LOAD else MemOp_STORE;
+ integer elsize = 8 << UInt(size);
+ integer regsize = if elsize == 64 then 64 else 32;
+ integer datasize = elsize;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) data;
+ constant integer dbytes = datasize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ case memop of
+     when MemOp_STORE
+         data = X[t];
+         Mem[address, dbytes, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, dbytes, acctype];
+         X[t] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be transferred, encoded
+  in the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) data;
+ constant integer dbytes = datasize DIV 8;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ case memop of
+     when MemOp_STORE
+         data = X[t];
+         Mem[address, dbytes, acctype] = data;
+ 
+     when MemOp_LOAD
+         data = Mem[address, dbytes, acctype];
+         X[t] = ZeroExtend(data, regsize);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

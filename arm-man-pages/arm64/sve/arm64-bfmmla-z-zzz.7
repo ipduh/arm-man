@@ -1,0 +1,123 @@
+.nh
+.TH "BFMMLA" "7" " "  "instruction" "sve"
+.SS BFMMLA
+ BFloat16 floating-point matrix multiply-accumulate
+
+ This BFloat16 floating-point (BF16) matrix multiply-accumulate instruction
+ multiplies the 2×4 matrix of BF16 values held in each 128-bit segment of the
+ first source vector by the 4×2 BF16 matrix in the corresponding segment of the
+ second source vector. The resulting 2×2 single-precision (FP32) matrix product
+ is then destructively added to the FP32 matrix accumulator held in the
+ corresponding segment of the addend and destination vector. This is equivalent
+ to performing a 4-way dot product per destination element.
+
+ This instruction is unpredicated and vector length agnostic.
+
+ All floating-point calculations performed by this instruction are performed
+ with the following behaviors, irrespective of the value in FPCR:
+
+ * Uses the non-IEEE 754 Round-to-Odd mode, which forces bit 0 of an inexact
+ result to 1, and rounds an overflow to an appropriately signed Infinity.
+
+ * The cumulative FPSR exception bits (IDC, IXC, UFC, OFC, DZC and IOC) are not
+ modified.
+
+ * Trapped floating-point exceptions are disabled, as if the FPCR trap enable
+ bits (IDE, IXE, UFE, OFE, DZE and IOE) are all zero.
+
+ * Denormalized inputs and results are flushed to zero, as if FPCR.FZ == 1.
+
+ * Only the Default NaN is generated, as if FPCR.DN == 1.
+
+ ID_AA64ZFR0_EL1.BF16 indicates whether this instruction is implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - bfmmla_z_zzz_
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16          10         5         0
+                  | | | |         |           |         |         |
+   0 1 1 0 0 1 0 0|0|1|1|. . . . .|1 1 1 0 0 1|. . . . .|. . . . .|
+                  | |   |                     |         |
+                  | |   `-Zm                  `-Zn      `-Zda
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS SVE
+ 
+ BFMMLA  <Zda>.S, <Zn>.H, <Zm>.H
+ 
+ if !HaveSVE() || !HaveBF16Ext() then UNDEFINED;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ 
+ CheckSVEEnabled();
+ integer segments =  VL DIV 128;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ bits(128) op1, op2;
+ bits(128) res, addend;
+ 
+ for s = 0 to segments-1
+     op1    = Elem[operand1, s, 128];
+     op2    = Elem[operand2, s, 128];
+     addend = Elem[operand3, s, 128];
+     res    = BFMatMulAdd(addend, op1, op2);
+     Elem[result, s, 128] = res;
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer segments =  VL DIV 128;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result;
+ bits(128) op1, op2;
+ bits(128) res, addend;
+ 
+ for s = 0 to segments-1
+     op1    = Elem[operand1, s, 128];
+     op2    = Elem[operand2, s, 128];
+     addend = Elem[operand3, s, 128];
+     res    = BFMatMulAdd(addend, op1, op2);
+     Elem[result, s, 128] = res;
+ 
+ Z[da] = result;
+

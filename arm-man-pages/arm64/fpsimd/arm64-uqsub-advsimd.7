@@ -1,0 +1,164 @@
+.nh
+.TH "UQSUB -- A64" "7" " "  "instruction" "advsimd"
+.SS UQSUB
+ Unsigned saturating Subtract
+
+ Unsigned saturating Subtract. This instruction subtracts the element values of
+ the second source SIMD&FP register from the corresponding element values of the
+ first source SIMD&FP register, places the results into a vector, and writes the
+ vector to the destination SIMD&FP register.
+
+ If overflow occurs with any of the results, those results are saturated. If
+ saturation occurs, the cumulative saturation bit FPSR.QC is set.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - UQSUB_asisdsame_only
+ 
+                                                                   
+                                                                   
+       29              21                    10                    
+     30 |        24  22 |        16        11 |         5         0
+      | |         |   | |         |         | |         |         |
+   0 1|1|1 1 1 1 0|. .|1|. . . . .|0 0 1 0 1|1|. . . . .|. . . . .|
+      |           |     |         |           |         |
+      `-U         |     `-Rm      `-opcode    `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Scalar
+ 
+ UQSUB  <V><d>, <V><n>, <V><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ boolean unsigned = (U == '1');
+.SS Vector - A64 - UQSUB_asimdsame_only
+ 
+                                                                   
+       29                                                          
+     30 |              21                    10                    
+   31 | |        24  22 |        16        11 |         5         0
+    | | |         |   | |         |         | |         |         |
+   0|.|1|0 1 1 1 0|. .|1|. . . . .|0 0 1 0 1|1|. . . . .|. . . . .|
+    | |           |     |         |           |         |
+    | `-U         |     `-Rm      `-opcode    `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ UQSUB  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size:Q == '110' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ boolean unsigned = (U == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ integer diff;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     diff = element1 - element2;
+     (Elem[result, e, esize], sat) = SatQ(diff, esize, unsigned);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   0 RESERVED 
+  11   1 2D       
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ integer diff;
+ boolean sat;
+ 
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     diff = element1 - element2;
+     (Elem[result, e, esize], sat) = SatQ(diff, esize, unsigned);
+     if sat then FPSR.QC = '1';
+ 
+ V[d] = result;
+

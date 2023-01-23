@@ -1,0 +1,81 @@
+.nh
+.TH "DUPM" "7" " "  "instruction" "sve"
+.SS DUPM
+ Broadcast logical bitmask immediate to vector (unpredicated)
+
+ Unconditionally broadcast the logical bitmask immediate into each element of
+ the destination vector. This instruction is unpredicated. The immediate is a
+ 64-bit value consisting of a single run of ones or zeros repeating every 2, 4,
+ 8, 16, 32 or 64 bits.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - dupm_z_i_
+ 
+                                                                   
+                                                                   
+                                                                   
+                             18                         5         0
+                              |                         |         |
+   0 0 0 0 0 1 0 1 1 1 0 0 0 0|. . . . . . . . . . . . .|. . . . .|
+                              |                         |
+                              `-imm13                   `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ DUPM    <Zd>.<T>, #<const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer d = UInt(Zd);
+ bits(esize) imm;
+ (imm, -) = DecodeBitMasks(imm13<12>, imm13<5:0>, imm13<11:6>, TRUE);
+ 
+ CheckSVEEnabled();
+ bits(VL) result = Replicate(imm);
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in imm13<12>:imm13<5:0>
+  Is the size specifier,
+
+  imm13<12> imm13<5:0> <T>      
+  0         0xxxxx     S        
+  0         10xxxx     H        
+  0         110xxx     B        
+  0         1110xx     B        
+  0         11110x     B        
+  0         111110     RESERVED 
+  0         111111     RESERVED 
+  1         xxxxxx     D        
+
+ <const>
+  Encoded in imm13
+  Is a 64, 32, 16 or 8-bit bitmask consisting of replicated 2, 4, 8, 16, 32 or
+  64 bit fields, each field containing a rotated run of non-zero bits, encoded
+  in the "imm13" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ bits(VL) result = Replicate(imm);
+ Z[d] = result;
+

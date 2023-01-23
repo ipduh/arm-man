@@ -1,0 +1,169 @@
+.nh
+.TH "VCVT (between floating-point and integer, Advanced SIMD) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVT (between floating-point and integer, Advanced SIMD)
+ Vector Convert between floating-point and integer
+
+ Vector Convert between floating-point and integer converts each element in a
+ vector from floating-point to integer, or from integer to floating-point, and
+ places the results in a second vector.
+
+ The vector elements are the same type, and are floating-point numbers or
+ integers. Signed and unsigned integers are distinct.
+
+ The floating-point to integer operation uses the Round towards Zero rounding
+ mode. The integer to floating-point operation uses the Round to Nearest
+ rounding mode.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22                    11                      
+                   23 |  20  18  16      12 |   9   7 6 5 4       0
+                    | |   |   |   |       | |   |   | | | |       |
+   1 1 1 1 0 0 1 1 1|.|1 1|. .|1 1|. . . .|0|1 1|. .|.|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          |   | `-M `-Vm
+                          |   `-opc1            |   `-Q
+                          `-size                `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Qd>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ to_integer = (op<1> == '1');  unsigned = (op<0> == '1');
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07                    11                      
+                   08 |  05  03  01      12 |   9   7 6 5 4       0
+                    | |   |   |   |       | |   |   | | | |       |
+   1 1 1 1 1 1 1 1 1|.|1 1|. .|1 1|. . . .|0|1 1|. .|.|.|0|. . . .|
+                    |     |   |   |             |   | |   |
+                    `-D   |   |   `-Vd          |   | `-M `-Vm
+                          |   `-opc1            |   `-Q
+                          `-size                `-op
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Dd>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VCVT{<c>}{<q>}.<dt1>.<dt2> <Qd>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if (size == '01' && !HaveFP16Ext()) || size IN {'00', '11'} then UNDEFINED;
+ if size == '01' && InITBlock()  then UNPREDICTABLE;
+ to_integer = (op<1> == '1');  unsigned = (op<0> == '1');
+ case size of
+     when '01' esize = 16; elements = 4;
+     when '10' esize = 32; elements = 2;
+ d = UInt(D:Vd);  m = UInt(M:Vm);  regs = if Q == '0' then 1 else 2;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     bits(esize) result;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[m+r],e,esize];
+             if to_integer then
+                 result = FPToFixed(op1, 0, unsigned, StandardFPSCRValue(), FPRounding_ZERO);
+             else
+                 result = FixedToFP(op1, 0, unsigned, StandardFPSCRValue(), FPRounding_TIEEVEN);
+             Elem[D[d+r],e,esize] = result;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt1>
+  Encoded in size:op
+  Is the data type for the elements of the destination vector,
+
+  size op <dt1> 
+  01   0x F16   
+  01   10 S16   
+  01   11 U16   
+  10   0x F32   
+  10   10 S32   
+  10   11 U32   
+
+ <dt2>
+  Encoded in size:op
+  Is the data type for the elements of the source vector,
+
+  size op <dt2> 
+  01   00 S16   
+  01   01 U16   
+  01   1x F16   
+  10   00 S32   
+  10   01 U32   
+  10   1x F32   
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     bits(esize) result;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[m+r],e,esize];
+             if to_integer then
+                 result = FPToFixed(op1, 0, unsigned, StandardFPSCRValue(), FPRounding_ZERO);
+             else
+                 result = FixedToFP(op1, 0, unsigned, StandardFPSCRValue(), FPRounding_TIEEVEN);
+             Elem[D[d+r],e,esize] = result;
+

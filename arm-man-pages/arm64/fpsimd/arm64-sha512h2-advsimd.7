@@ -1,0 +1,106 @@
+.nh
+.TH "SHA512H2 -- A64" "7" " "  "instruction" "advsimd"
+.SS SHA512H2
+ SHA512 Hash update part 2
+
+ SHA512 Hash update part 2 takes the values from the three 128-bit source
+ SIMD&FP registers and produces a 128-bit output value that combines the sigma0
+ and majority functions of two iterations of the SHA512 computation. It returns
+ this value to the destination SIMD&FP register.
+
+ This instruction is implemented only when ARMv8.2-SHA is implemented.
+
+
+
+.SS Advanced SIMD - A64 - SHA512H2_QQV_cryptosha512_3
+ 
+                                                                   
+                                     14                            
+                                   15 |                            
+                       21        16 | |  12  10         5         0
+                        |         | | |   |   |         |         |
+   1 1 0 0 1 1 1 0 0 1 1|. . . . .|1|0|0 0|0 1|. . . . .|. . . . .|
+                        |           |     |   |         |
+                        `-Rm        `-O   |   `-Rn      `-Rd
+                                          `-opcode
+  
+  
+ 
+.SS Advanced SIMD
+ 
+ SHA512H2  <Qd>, <Qn>, <Vm>.2D
+ 
+ if !HaveSHA512Ext() then UNDEFINED;
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vtmp;  
+ bits(64) NSigma0;
+ bits(64) tmp;
+ bits(128) X = V[n];
+ bits(128) Y = V[m];
+ bits(128) W = V[d];
+ 
+ NSigma0 =  ROR(Y<63:0>, 28) EOR ROR(Y<63:0>,34) EOR ROR(Y<63:0>,39);
+ Vtmp<127:64> = (X<63:0> AND Y<127:64>) EOR (X<63:0> AND Y<63:0>) EOR (Y<127:64> AND Y<63:0>);
+ Vtmp<127:64> = (Vtmp<127:64> + NSigma0 +  W<127:64>);
+ NSigma0 =  ROR(Vtmp<127:64>, 28) EOR ROR(Vtmp<127:64>,34) EOR ROR(Vtmp<127:64>,39);
+ Vtmp<63:0> =   (Vtmp<127:64> AND Y<63:0>) EOR (Vtmp<127:64> AND Y<127:64>) EOR (Y<127:64> AND Y<63:0>);
+ Vtmp<63:0> =   (Vtmp<63:0> + NSigma0 + W<63:0>);
+ 
+ V[d] = Vtmp;
+ 
+
+.SS Assembler Symbols
+
+ <Qd>
+  Encoded in Rd
+  Is the 128-bit name of the SIMD&FP source and destination register, encoded in
+  the "Rd" field.
+
+ <Qn>
+  Encoded in Rn
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the "Rn"
+  field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the third SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ AArch64.CheckFPAdvSIMDEnabled();
+ 
+ bits(128) Vtmp;  
+ bits(64) NSigma0;
+ bits(64) tmp;
+ bits(128) X = V[n];
+ bits(128) Y = V[m];
+ bits(128) W = V[d];
+ 
+ NSigma0 =  ROR(Y<63:0>, 28) EOR ROR(Y<63:0>,34) EOR ROR(Y<63:0>,39);
+ Vtmp<127:64> = (X<63:0> AND Y<127:64>) EOR (X<63:0> AND Y<63:0>) EOR (Y<127:64> AND Y<63:0>);
+ Vtmp<127:64> = (Vtmp<127:64> + NSigma0 +  W<127:64>);
+ NSigma0 =  ROR(Vtmp<127:64>, 28) EOR ROR(Vtmp<127:64>,34) EOR ROR(Vtmp<127:64>,39);
+ Vtmp<63:0> =   (Vtmp<127:64> AND Y<63:0>) EOR (Vtmp<127:64> AND Y<127:64>) EOR (Y<127:64> AND Y<63:0>);
+ Vtmp<63:0> =   (Vtmp<63:0> + NSigma0 + W<63:0>);
+ 
+ V[d] = Vtmp;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

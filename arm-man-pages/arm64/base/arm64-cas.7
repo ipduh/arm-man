@@ -1,0 +1,164 @@
+.nh
+.TH "CAS, CASA, CASAL, CASL -- A64" "7" " "  "instruction" "general"
+.SS CAS, CASA, CASAL, CASL
+ Compare and Swap word or doubleword in memory
+
+ Compare and Swap word or doubleword in memory reads a 32-bit word or 64-bit
+ doubleword from memory, and compares it against the value held in a first
+ register. If the comparison is equal, the value in a second register is written
+ to memory. If the write is performed, the read and write occur atomically such
+ that no other modification of the memory location can take place between the
+ read and write.
+
+ CASA and CASAL load from memory with acquire semantics.
+
+ CASA and CASAL load from memory with acquire semantics.
+
+ CASL and CASAL store to memory with release semantics.
+
+ CASL and CASAL store to memory with release semantics.
+
+ CAS has no memory ordering requirements.
+
+
+ For more information about memory ordering semantics see Load-Acquire, Store-
+ Release.
+
+ For information about memory accesses see Load/Store addressing modes.
+
+ The architecture permits that the data read clears any exclusive monitors
+ associated with that location, even if the compare subsequently fails.
+
+ If the instruction generates a synchronous Data Abort, the register which is
+ compared and loaded, that is <Ws>, or <Xs>, is restored to the value held in
+ the register before the instruction was executed.
+
+
+
+.SS No offset - A64 - base_register
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |          15                              
+     30          24 | | |        16 |        10         5         0
+      |           | | | |         | |         |         |         |
+  |1 x|0 0 1 0 0 0|1|.|1|. . . . .|.|1 1 1 1 1|. . . . .|. . . . .|
+  |               | | | |         | |         |         |
+  `-size          | | | `-Rs      | `-Rt2     `-Rn      `-Rt
+                  | | `-o1        `-o0
+                  | `-L
+                  `-o2
+  
+  
+ 
+.SS 32-bit CAS(size == 10 && L == 0 && o0 == 0)
+ 
+ CAS  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS 32-bit CASA(size == 10 && L == 1 && o0 == 0)
+ 
+ CASA  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS 32-bit CASAL(size == 10 && L == 1 && o0 == 1)
+ 
+ CASAL  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS 32-bit CASL(size == 10 && L == 0 && o0 == 1)
+ 
+ CASL  <Ws>, <Wt>, [<Xn|SP>{,#0}]
+.SS 64-bit CAS(size == 11 && L == 0 && o0 == 0)
+ 
+ CAS  <Xs>, <Xt>, [<Xn|SP>{,#0}]
+.SS 64-bit CASA(size == 11 && L == 1 && o0 == 0)
+ 
+ CASA  <Xs>, <Xt>, [<Xn|SP>{,#0}]
+.SS 64-bit CASAL(size == 11 && L == 1 && o0 == 1)
+ 
+ CASAL  <Xs>, <Xt>, [<Xn|SP>{,#0}]
+.SS 64-bit CASL(size == 11 && L == 0 && o0 == 1)
+ 
+ CASL  <Xs>, <Xt>, [<Xn|SP>{,#0}]
+ 
+ if !HaveAtomicExt() then UNDEFINED;
+ 
+ integer n = UInt(Rn);
+ integer t = UInt(Rt);
+ integer s = UInt(Rs);
+ 
+ integer datasize = 8 << UInt(size);
+ integer regsize = if datasize == 64 then 64 else 32;
+ AccType ldacctype = if L == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ AccType stacctype = if o0 == '1' then AccType_ORDEREDATOMICRW else AccType_ATOMICRW;
+ boolean tag_checked = n != 31;
+ 
+ bits(64) address;
+ bits(datasize) comparevalue;
+ bits(datasize) newvalue;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ comparevalue = X[s];
+ newvalue = X[t];
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ X[s] = ZeroExtend(data, regsize);
+ 
+
+.SS Assembler Symbols
+
+ <Ws>
+  Encoded in Rs
+  Is the 32-bit name of the general-purpose register to be compared and loaded,
+  encoded in the "Rs" field.
+
+ <Wt>
+  Encoded in Rt
+  Is the 32-bit name of the general-purpose register to be conditionally stored,
+  encoded in the "Rt" field.
+
+ <Xs>
+  Encoded in Rs
+  Is the 64-bit name of the general-purpose register to be compared and loaded,
+  encoded in the "Rs" field.
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be conditionally stored,
+  encoded in the "Rt" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(datasize) comparevalue;
+ bits(datasize) newvalue;
+ bits(datasize) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ comparevalue = X[s];
+ newvalue = X[t];
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data = MemAtomicCompareAndSwap(address, comparevalue, newvalue, ldacctype, stacctype);
+ 
+ X[s] = ZeroExtend(data, regsize);
+

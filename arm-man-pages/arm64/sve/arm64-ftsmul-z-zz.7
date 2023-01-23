@@ -1,0 +1,110 @@
+.nh
+.TH "FTSMUL" "7" " "  "instruction" "sve"
+.SS FTSMUL
+ Floating-point trigonometric starting value
+
+ The FTSMUL instruction calculates the initial value for the FTMAD instruction.
+ The instruction squares each element in the first source vector and then sets
+ the sign bit to a copy of bit 0 of the corresponding element in the second
+ source register, and places the results in the destination vector. This
+ instruction is unpredicated.
+
+ To compute sin(x) or cos(x) the instruction is executed with elements of the
+ first source vector set to x, adjusted to be in the range -π/4 < x ≤ π/4.
+
+ The elements of the second source vector hold the corresponding value of the
+ quadrant q number as an integer not a floating-point value. The value q
+ satisfies the relationship (2q-1) × π/4 < x ≤ (2q+1) × π/4.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - ftsmul_z_zz_
+ 
+                                                                   
+                                                                   
+                       21                    10                    
+                 24  22 |        16    13  11 |         5         0
+                  |   | |         |     |   | |         |         |
+   0 1 1 0 0 1 0 1|. .|0|. . . . .|0 0 0|0 1|1|. . . . .|. . . . .|
+                  |     |               |   | |         |
+                  |     `-Zm            |   | `-Zn      `-Zd
+                  `-size                |   `-opc<0>
+                                        `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ FTSMUL  <Zd>.<T>, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPTrigSMul(element1, element2, FPCR);
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = FPTrigSMul(element1, element2, FPCR);
+ 
+ Z[d] = result;
+

@@ -1,0 +1,142 @@
+.nh
+.TH "FMMLA" "7" " "  "instruction" "sve"
+.SS FMMLA
+ Floating-point matrix multiply-accumulate
+
+ The floating-point matrix multiply-accumulate instruction supports single-
+ precision and double-precision data types in a 2×2 matrix contained in segments
+ of 128 or 256 bits, respectively. It multiplies the 2×2 matrix in each segment
+ of the first source vector by the 2×2 matrix in the corresponding segment of
+ the second source vector. The resulting 2×2 matrix product is then
+ destructively added to the matrix accumulator held in the corresponding segment
+ of the addend and destination vector. This is equivalent to performing a 2-way
+ dot product per destination element. This instruction is unpredicated. The
+ single-precision variant is vector length agnostic. The double-precision
+ variant requires that the current vector length is at least 256 bits, and if
+ the current vector length is not an integer multiple of 256 bits then the
+ trailing bits are set to zero.
+
+ ID_AA64ZFR0_EL1.F32MM indicates whether the single-precision variant is
+ implemented.
+
+ ID_AA64ZFR0_EL1.F64MM indicates whether the double-precision variant is
+ implemented.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: 32-bit element and 64-bit element
+
+.SS 32-bit element - A64 - fmmla_z_zzz_s
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16          10         5         0
+                  | | | |         |           |         |         |
+   0 1 1 0 0 1 0 0|1|0|1|. . . . .|1 1 1 0 0 1|. . . . .|. . . . .|
+                  | |   |                     |         |
+                  | |   `-Zm                  `-Zn      `-Zda
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS 32-bit element
+ 
+ FMMLA   <Zda>.S, <Zn>.S, <Zm>.S
+ 
+ if !HaveSVEFP32MatMulExt() then UNDEFINED;
+ integer esize = 32;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+.SS 64-bit element - A64 - fmmla_z_zzz_d
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+                 24 | | |        16          10         5         0
+                  | | | |         |           |         |         |
+   0 1 1 0 0 1 0 0|1|1|1|. . . . .|1 1 1 0 0 1|. . . . .|. . . . .|
+                  | |   |                     |         |
+                  | |   `-Zm                  `-Zn      `-Zda
+                  | `-opc<0>
+                  `-opc<1>
+  
+  
+ 
+.SS 64-bit element
+ 
+ FMMLA   <Zda>.D, <Zn>.D, <Zm>.D
+ 
+ if !HaveSVEFP64MatMulExt() then UNDEFINED;
+ integer esize = 64;
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ 
+ CheckSVEEnabled();
+ if VL < esize * 4 then UNDEFINED;
+ integer segments = VL DIV (4 * esize);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result = Zeros();
+ bits(4*esize) op1, op2;
+ bits(4*esize) res, addend;
+ 
+ for s = 0 to segments-1
+     op1    = Elem[operand1, s, 4*esize];
+     op2    = Elem[operand2, s, 4*esize];
+     addend = Elem[operand3, s, 4*esize];
+     res    = FPMatMulAdd(addend, op1, op2, esize, FPCR);
+     Elem[result, s, 4*esize] = res;
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ if VL < esize * 4 then UNDEFINED;
+ integer segments = VL DIV (4 * esize);
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) operand3 = Z[da];
+ bits(VL) result = Zeros();
+ bits(4*esize) op1, op2;
+ bits(4*esize) res, addend;
+ 
+ for s = 0 to segments-1
+     op1    = Elem[operand1, s, 4*esize];
+     op2    = Elem[operand2, s, 4*esize];
+     addend = Elem[operand3, s, 4*esize];
+     res    = FPMatMulAdd(addend, op1, op2, esize, FPCR);
+     Elem[result, s, 4*esize] = res;
+ 
+ Z[da] = result;
+

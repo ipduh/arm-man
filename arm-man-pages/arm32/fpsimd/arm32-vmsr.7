@@ -1,0 +1,138 @@
+.nh
+.TH "VMSR -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMSR
+ Move general-purpose register to SIMD&FP Special register
+
+ Move general-purpose register to SIMD&FP Special register moves the value of a
+ general-purpose register to a floating-point System register.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ When these settings permit the execution of floating-point and Advanced SIMD
+ instructions:
+
+ If the specified floating-point System register is FPSID or FPEXC, the
+ instruction is undefined if executed in User mode.
+
+ If the specified floating-point System register is FPSID or FPEXC, the
+ instruction is undefined if executed in User mode.
+
+ If the specified floating-point System register is FPSID or FPEXC, the
+ instruction is undefined if executed in User mode.
+
+ If the specified floating-point System register is the FPSID and the
+ instruction is executed in a mode other than User mode, the instruction is
+ ignored.
+
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28            21 |      16      12       8 7 6 5 4 3 2 1 0
+          |             | |       |       |       | | | | | | | | |
+  |. . . .|1 1 1 0 1 1 1|0|. . . .|. . . .|1 0 1 0|0|0|0|1|0|0|0|0|
+  |                     | |       |
+  `-cond(!= 1111)       | `-reg   `-Rt
+                        `-L
+  
+  
+ 
+.SS A1
+ 
+ VMSR{<c>}{<q>} <spec_reg>, <Rt>
+ 
+ t = UInt(Rt);
+ if reg != '000x' && reg != '1000' then UNPREDICTABLE;
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                         05                                        
+                       06 |      01      12       8 7 6 5 4 3 2 1 0
+                        | |       |       |       | | | | | | | | |
+   1 1 1 0 1 1 1 0 1 1 1|0|. . . .|. . . .|1 0 1 0|0|0|0|1|0|0|0|0|
+                        | |       |
+                        | `-reg   `-Rt
+                        `-L
+  
+  
+ 
+.SS T1
+ 
+ VMSR{<c>}{<q>} <spec_reg>, <Rt>
+ 
+ t = UInt(Rt);
+ if reg != '000x' && reg != '1000' then UNPREDICTABLE;
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if reg == '0001' then                 // FPSCR
+         CheckVFPEnabled(TRUE);
+         FPSCR = R[t];
+     elsif PSTATE.EL == EL0 then
+         UNDEFINED;                        // Non-FPSCR registers accessible only at PL1 or above
+     else
+         CheckVFPEnabled(FALSE);           // Non-FPSCR registers are not affected by FPEXC.EN
+         case reg of
+             when '0000'                   // VMSR access to FPSID is ignored
+             when '1000'  FPEXC = R[t];
+             otherwise    Unreachable();   // Dealt with above or in encoding-specific pseudocode
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <spec_reg>
+  Encoded in reg
+  Is the destination Advanced SIMD and floating-point System register,
+
+  reg  <spec_reg>    
+  0000 FPSID         
+  0001 FPSCR         
+  001x UNPREDICTABLE 
+  01xx UNPREDICTABLE 
+  1000 FPEXC         
+  1001 UNPREDICTABLE 
+  101x UNPREDICTABLE 
+  11xx UNPREDICTABLE 
+
+ <Rt>
+  Encoded in Rt
+  Is the general-purpose source register, encoded in the "Rt" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if reg == '0001' then                 // FPSCR
+         CheckVFPEnabled(TRUE);
+         FPSCR = R[t];
+     elsif PSTATE.EL == EL0 then
+         UNDEFINED;                        // Non-FPSCR registers accessible only at PL1 or above
+     else
+         CheckVFPEnabled(FALSE);           // Non-FPSCR registers are not affected by FPEXC.EN
+         case reg of
+             when '0000'                   // VMSR access to FPSID is ignored
+             when '1000'  FPEXC = R[t];
+             otherwise    Unreachable();   // Dealt with above or in encoding-specific pseudocode
+

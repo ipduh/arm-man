@@ -1,0 +1,133 @@
+.nh
+.TH "UMOV -- A64" "7" " "  "instruction" "advsimd"
+.SS UMOV
+ Unsigned Move vector element to general-purpose register
+
+ Unsigned Move vector element to general-purpose register. This instruction
+ reads the unsigned integer from the source SIMD&FP register, zero-extends it to
+ form a 32-bit or 64-bit value, and writes the result to the destination
+ general-purpose register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - advsimd
+ 
+                                             10                    
+       29                                  11 |                    
+     30 |                          15    12 | |                    
+   31 | |              21        16 |  13 | | |         5         0
+    | | |               |         | |   | | | |         |         |
+   0|.|0|0 1 1 1 0 0 0 0|. . . . .|0|0 1|1|1|1|. . . . .|. . . . .|
+    | |                 |           |   | |   |         |
+    | `-op              `-imm5      |   | |   `-Rn      `-Rd
+    `-Q                             |   | `-imm4<0>
+                                    |   `-imm4<1>
+                                    `-imm4<3:2>
+  
+  
+ 
+.SS 32-bit(Q == 0)
+ 
+ UMOV  <Wd>, <Vn>.<Ts>[<index>]
+.SS 64-reg,UMOV-64-reg(Q == 1 && imm5 == x1000)
+ 
+ UMOV  <Xd>, <Vn>.<Ts>[<index>]
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ integer size;
+ case Q:imm5 of
+     when '0xxxx1' size = 0;     // UMOV Wd, Vn.B
+     when '0xxx10' size = 1;     // UMOV Wd, Vn.H
+     when '0xx100' size = 2;     // UMOV Wd, Vn.S
+     when '1x1000' size = 3;     // UMOV Xd, Vn.D
+     otherwise     UNDEFINED;
+ 
+ integer idxdsize = if imm5<4> == '1' then 128 else 64;
+ integer index = UInt(imm5<4:size+1>);
+ integer esize = 8 << size;
+ integer datasize = if Q == '1' then 64 else 32;
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(idxdsize) operand = V[n];
+ 
+ X[d] = ZeroExtend(Elem[operand, index, esize], datasize);
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Ts>
+  Encoded in imm5
+  For the 32-bit variant: is an element size specifier,
+
+  imm5  <Ts>     
+  xx000 RESERVED 
+  xxxx1 B        
+  xxx10 H        
+  xx100 S        
+
+ <Ts>
+  Encoded in imm5
+  For the 64-reg,UMOV-64-reg variant: is an element size specifier,
+
+  imm5  <Ts>     
+  x0000 RESERVED 
+  xxxx1 RESERVED 
+  xxx10 RESERVED 
+  xx100 RESERVED 
+  x1000 D        
+
+ <index>
+  Encoded in imm5
+  For the 32-bit variant: is the element index
+
+  imm5  <index>   
+  xx000 RESERVED  
+  xxxx1 imm5<4:1> 
+  xxx10 imm5<4:2> 
+  xx100 imm5<4:3> 
+
+ <index>
+  Encoded in imm5
+  For the 64-reg,UMOV-64-reg variant: is the element index encoded in "imm5<4>".
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(idxdsize) operand = V[n];
+ 
+ X[d] = ZeroExtend(Elem[operand, index, esize], datasize);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

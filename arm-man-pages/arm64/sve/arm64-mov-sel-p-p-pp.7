@@ -1,0 +1,62 @@
+.nh
+.TH "MOV (predicate, predicated, merging)" "7" " "  "alias" "sve"
+.SS MOV (predicate, predicated, merging)
+ MOV is an alias of SEL
+
+ Move predicates (merging)
+
+ Read active elements from the source predicate and place in the corresponding
+ elements of the destination predicate. Inactive elements in the destination
+ predicate register remain unmodified. Does not set the condition flags.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - sel_p_p_pp_
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|0|0 0|. . . .|0 1|. . . .|1|. . . .|1|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Pd>.B, <Pg>/M, <Pn>.B
+ 
+ SEL <Pd>.B, <Pg>, <Pn>.B, <Pd>.B
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+
+
+.SS Operation
+
+ The manual of SEL gives pseudocode for MOV.

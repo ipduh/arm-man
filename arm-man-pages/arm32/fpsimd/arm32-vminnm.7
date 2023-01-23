@@ -1,0 +1,269 @@
+.nh
+.TH "VMINNM -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMINNM
+ Floating-point Minimum Number
+
+ This instruction determines the floating point minimum number.
+
+ It handles NaNs in consistence with the IEEE754-2008 specification. It returns
+ the numerical operand when one operand is numerical and the other is a quiet
+ NaN, but otherwise the result is identical to floating-point VMIN.
+
+ This instruction is not conditional.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1 and A2) and  T32 (T1 and T2).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |  20                                        
+               25 | | |21 |      16      12       8 7 6 5 4       0
+                | | | | | |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|1|0|.|1|.|. . . .|. . . .|1 1 1 1|.|.|.|1|. . . .|
+                |   | | | |       |       |       | | | | |
+                `-U | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMINNM{<q>}.<dt> <Dd>, <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMINNM{<q>}.<dt> <Qd>, <Qn>, <Qm>
+ 
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ maximum = (op == '0');
+ advsimd = TRUE;
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm); regs = if Q == '0' then 1 else 2;
+.SS A2 - A32
+ 
+                                                                   
+                                                                   
+                     22                                            
+                   23 |  20      16      12  10   8 7 6 5 4       0
+                    | |   |       |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 1|.|0 0|. . . .|. . . .|1 0|. .|.|1|.|0|. . . .|
+                    |     |       |           |   | | |   |
+                    `-D   `-Vn    `-Vd        |   | | `-M `-Vm
+                                              |   | `-op
+                                              |   `-N
+                                              `-size(!= 00)
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VMINNM{<q>}.F16 <Sd>, <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VMINNM{<q>}.F32 <Sd>, <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMINNM{<q>}.F64 <Dd>, <Dn>, <Dm>
+ 
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ advsimd = FALSE;
+ maximum = (op == '0');
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+.SS T1 - T32
+ 
+                         05                                        
+                       06 |                                        
+         13          07 | |                                        
+       14 |        08 | | |      01      12       8 7 6 5 4       0
+        | |         | | | |       |       |       | | | | |       |
+   1 1 1|1|1 1 1 1 0|.|1|.|. . . .|. . . .|1 1 1 1|.|.|.|1|. . . .|
+        |           | | | |       |       |       | | | | |
+        `-U         | | | `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | | `-sz                      | | | `-o1
+                    | `-op                        | | `-M
+                    `-D                           | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VMINNM{<q>}.<dt> <Dd>, <Dn>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VMINNM{<q>}.<dt> <Qd>, <Qn>, <Qm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if Q == '1' && (Vd<0> == '1' || Vn<0> == '1' || Vm<0> == '1') then UNDEFINED;
+ if sz == '1' && !HaveFP16Ext() then UNDEFINED;
+ maximum = (op == '0');
+ advsimd = TRUE;
+ case sz of
+     when '0' esize = 32; elements = 2;
+     when '1' esize = 16; elements = 4;
+ d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm); regs = if Q == '0' then 1 else 2;
+.SS T2 - T32
+ 
+                                                                   
+                                                                   
+                     07                                            
+                   08 |  05      01      12  10   8 7 6 5 4       0
+                    | |   |       |       |   |   | | | | |       |
+   1 1 1 1 1 1 1 0 1|.|0 0|. . . .|. . . .|1 0|. .|.|1|.|0|. . . .|
+                    |     |       |           |   | | |   |
+                    `-D   `-Vn    `-Vd        |   | | `-M `-Vm
+                                              |   | `-op
+                                              |   `-N
+                                              `-size(!= 00)
+  
+  
+ 
+.SS Half-precision scalar(size == 01)
+ 
+ VMINNM{<q>}.F16 <Sd>, <Sn>, <Sm>
+.SS Single-precision scalar(size == 10)
+ 
+ VMINNM{<q>}.F32 <Sd>, <Sn>, <Sm>
+.SS Double-precision scalar(size == 11)
+ 
+ VMINNM{<q>}.F64 <Dd>, <Dn>, <Dm>
+ 
+ if InITBlock() then UNPREDICTABLE;
+ if size == '00' || (size == '01' && !HaveFP16Ext()) then UNDEFINED;
+ advsimd = FALSE;
+ maximum = (op == '0');
+ case size of
+     when '01' esize = 16; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '10' esize = 32; d = UInt(Vd:D); n = UInt(Vn:N); m = UInt(Vm:M);
+     when '11' esize = 64; d = UInt(D:Vd); n = UInt(N:Vn); m = UInt(M:Vm);
+ 
+ EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+ if advsimd then             // Advanced SIMD instruction
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[n+r], e, esize]; op2 = Elem[D[m+r], e, esize];
+             if maximum then
+                 Elem[D[d+r], e, esize] = FPMaxNum(op1, op2, StandardFPSCRValue());
+             else
+                 Elem[D[d+r], e, esize] = FPMinNum(op1, op2, StandardFPSCRValue());
+ else                        // VFP instruction
+     case esize of
+         when 16
+             if maximum then
+                 S[d] = Zeros(16) : FPMaxNum(S[n]<15:0>, S[m]<15:0>, FPSCR);
+             else
+                 S[d] = Zeros(16) : FPMinNum(S[n]<15:0>, S[m]<15:0>, FPSCR);
+         when 32
+             if maximum then
+                 S[d] = FPMaxNum(S[n], S[m], FPSCR);
+             else
+                 S[d] = FPMinNum(S[n], S[m], FPSCR);
+         when 64
+             if maximum then
+                 D[d] = FPMaxNum(D[n], D[m], FPSCR);
+             else
+                 D[d] = FPMinNum(D[n], D[m], FPSCR);
+ 
+
+.SS Assembler Symbols
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Encoded in sz
+  Is the data type for the elements of the vectors,
+
+  sz <dt> 
+  0  F32  
+  1  F16  
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qn>
+  Encoded in N:Vn
+  Is the 128-bit name of the first SIMD&FP source register, encoded in the
+  "N:Vn" field as <Qn>*2.
+
+ <Qm>
+  Encoded in M:Vm
+  Is the 128-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dn>
+  Encoded in N:Vn
+  Is the 64-bit name of the first SIMD&FP source register, encoded in the "N:Vn"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the second SIMD&FP source register, encoded in the
+  "M:Vm" field.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Sn>
+  Encoded in Vn:N
+  Is the 32-bit name of the first SIMD&FP source register, encoded in the "Vn:N"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the second SIMD&FP source register, encoded in the
+  "Vm:M" field.
+
+
+
+.SS Operation
+
+ EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+ if advsimd then             // Advanced SIMD instruction
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             op1 = Elem[D[n+r], e, esize]; op2 = Elem[D[m+r], e, esize];
+             if maximum then
+                 Elem[D[d+r], e, esize] = FPMaxNum(op1, op2, StandardFPSCRValue());
+             else
+                 Elem[D[d+r], e, esize] = FPMinNum(op1, op2, StandardFPSCRValue());
+ else                        // VFP instruction
+     case esize of
+         when 16
+             if maximum then
+                 S[d] = Zeros(16) : FPMaxNum(S[n]<15:0>, S[m]<15:0>, FPSCR);
+             else
+                 S[d] = Zeros(16) : FPMinNum(S[n]<15:0>, S[m]<15:0>, FPSCR);
+         when 32
+             if maximum then
+                 S[d] = FPMaxNum(S[n], S[m], FPSCR);
+             else
+                 S[d] = FPMinNum(S[n], S[m], FPSCR);
+         when 64
+             if maximum then
+                 D[d] = FPMaxNum(D[n], D[m], FPSCR);
+             else
+                 D[d] = FPMinNum(D[n], D[m], FPSCR);
+

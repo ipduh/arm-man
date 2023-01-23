@@ -1,0 +1,90 @@
+.nh
+.TH "FMOV (scalar, immediate) -- A64" "7" " "  "instruction" "float"
+.SS FMOV (scalar, immediate)
+ Floating-point move immediate (scalar)
+
+ Floating-point move immediate (scalar). This instruction copies a floating-
+ point immediate constant into the SIMD&FP destination register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Floating point constant in 8 bits - A64 - imm8f
+ 
+                                                                   
+       29                                                          
+     30 |              21                                          
+   31 | |        24  22 |              13    10         5         0
+    | | |         |   | |               |     |         |         |
+  |0|0|0|1 1 1 1 0|. .|1|. . . . . . . .|1 0 0|0 0 0 0 0|. . . . .|
+  |   |           |     |                     |         |
+  `-M `-S         |     `-imm8                `-imm5    `-Rd
+                  `-ftype
+  
+  
+ 
+.SS Half-precision(ftype == 11)
+ 
+ FMOV  <Hd>, #<imm>
+.SS Single-precision(ftype == 00)
+ 
+ FMOV  <Sd>, #<imm>
+.SS Double-precision(ftype == 01)
+ 
+ FMOV  <Dd>, #<imm>
+ 
+ integer d = UInt(Rd);
+ 
+ integer datasize;
+ case ftype of
+     when '00' datasize = 32;
+     when '01' datasize = 64;
+     when '10' UNDEFINED;
+     when '11'
+         if HaveFP16Ext() then
+             datasize = 16;
+         else
+             UNDEFINED;
+ 
+ bits(datasize) imm = VFPExpandImm(imm8);
+ 
+ CheckFPAdvSIMDEnabled64();
+ 
+ V[d] = imm;
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in Rd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Hd>
+  Encoded in Rd
+  Is the 16-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Sd>
+  Encoded in Rd
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <imm>
+  Encoded in imm8
+  Is a signed floating-point constant with 3-bit exponent and normalized 4 bits
+  of precision, encoded in the "imm8" field. For details of the range of
+  constants available and the encoding of <imm>, see Modified immediate
+  constants in A64 floating-point instructions.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ 
+ V[d] = imm;
+

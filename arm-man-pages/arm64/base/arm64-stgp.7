@@ -1,0 +1,189 @@
+.nh
+.TH "STGP -- A64" "7" " "  "instruction" "general"
+.SS STGP
+ Store Allocation Tag and Pair of registers
+
+ Store Allocation Tag and Pair of registers stores an Allocation Tag and two
+ 64-bit doublewords to memory, from two registers. The address used for the
+ store is calculated from the base register and an immediate signed offset
+ scaled by the Tag granule. The Allocation Tag is calculated from the Logical
+ Address Tag in the base register.
+
+ This instruction generates an Unchecked access.
+
+
+It has encodings from 3 classes: Post-index, Pre-index and Signed offset
+
+.SS Post-index - A64 - STGP_64_ldstpair_post
+ 
+                                                                   
+                                                                   
+     30      26      22                                            
+   31 |    27 |    23 |            15        10         5         0
+    | |     | |     | |             |         |         |         |
+  |0|1|1 0 1|0|0 0 1|0|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  | |       |       | |             |         |         |
+  | |       `-V     | `-simm7       `-Xt2     `-Xn      `-Xt
+  | `-opc<0>        `-L
+  `-opc<1>
+  
+  
+ 
+.SS Post-index
+ 
+ STGP  <Xt1>, <Xt2>, [<Xn|SP>], #<imm>
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ integer t2 = UInt(Xt2);
+ bits(64) offset = LSL(SignExtend(simm7, 64), LOG2_TAG_GRANULE);
+ boolean writeback = TRUE;
+ boolean postindex = TRUE;
+.SS Pre-index - A64 - STGP_64_ldstpair_pre
+ 
+                                                                   
+                                                                   
+     30      26      22                                            
+   31 |    27 |    23 |            15        10         5         0
+    | |     | |     | |             |         |         |         |
+  |0|1|1 0 1|0|0 1 1|0|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  | |       |       | |             |         |         |
+  | |       `-V     | `-simm7       `-Xt2     `-Xn      `-Xt
+  | `-opc<0>        `-L
+  `-opc<1>
+  
+  
+ 
+.SS Pre-index
+ 
+ STGP  <Xt1>, <Xt2>, [<Xn|SP>, #<imm>]!
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ integer t2 = UInt(Xt2);
+ bits(64) offset = LSL(SignExtend(simm7, 64), LOG2_TAG_GRANULE);
+ boolean writeback = TRUE;
+ boolean postindex = FALSE;
+.SS Signed offset - A64 - STGP_64_ldstpair_off
+ 
+                                                                   
+                                                                   
+     30      26      22                                            
+   31 |    27 |    23 |            15        10         5         0
+    | |     | |     | |             |         |         |         |
+  |0|1|1 0 1|0|0 1 0|0|. . . . . . .|. . . . .|. . . . .|. . . . .|
+  | |       |       | |             |         |         |
+  | |       `-V     | `-simm7       `-Xt2     `-Xn      `-Xt
+  | `-opc<0>        `-L
+  `-opc<1>
+  
+  
+ 
+.SS Signed offset
+ 
+ STGP  <Xt1>, <Xt2>, [<Xn|SP>{, #<imm>}]
+ 
+ integer n = UInt(Xn);
+ integer t = UInt(Xt);
+ integer t2 = UInt(Xt2);
+ bits(64) offset = LSL(SignExtend(simm7, 64), LOG2_TAG_GRANULE);
+ boolean writeback = FALSE;
+ boolean postindex = FALSE;
+ 
+ bits(64) address;
+ bits(64) data1;
+ bits(64) data2;
+ 
+ SetTagCheckedInstruction(FALSE);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data1 = X[t];
+ data2 = X[t2];
+ 
+ if !postindex then
+     address = address + offset;
+ 
+ Mem[address, 8, AccType_NORMAL] = data1;
+ Mem[address+8, 8, AccType_NORMAL] = data2;
+ 
+ AArch64.MemTag[address, AccType_NORMAL] = AArch64.AllocationTagFromAddress(address);
+ 
+ if writeback then
+     if postindex then
+         address = address + offset;
+ 
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+ 
+
+.SS Assembler Symbols
+
+ <Xt1>
+  Encoded in Xt
+  Is the 64-bit name of the first general-purpose register to be transferred,
+  encoded in the "Xt" field.
+
+ <Xt2>
+  Encoded in Xt2
+  Is the 64-bit name of the second general-purpose register to be transferred,
+  encoded in the "Xt2" field.
+
+ <Xn|SP>
+  Encoded in Xn
+  Is the 64-bit name of the general-purpose base register or stack pointer,
+  encoded in the "Xn" field.
+
+ <imm>
+  Encoded in simm7
+  For the post-index and pre-index variant: is the signed immediate offset, a
+  multiple of 16 in the range -1024 to 1008, encoded in the "simm7" field.
+
+ <imm>
+  Encoded in simm7
+  For the signed offset variant: is the optional signed immediate offset, a
+  multiple of 16 in the range -1024 to 1008, defaulting to 0 and encoded in the
+  "simm7" field.
+
+
+
+.SS Operation
+
+ bits(64) address;
+ bits(64) data1;
+ bits(64) data2;
+ 
+ SetTagCheckedInstruction(FALSE);
+ 
+ if n == 31 then
+     CheckSPAlignment();
+     address = SP[];
+ else
+     address = X[n];
+ 
+ data1 = X[t];
+ data2 = X[t2];
+ 
+ if !postindex then
+     address = address + offset;
+ 
+ Mem[address, 8, AccType_NORMAL] = data1;
+ Mem[address+8, 8, AccType_NORMAL] = data2;
+ 
+ AArch64.MemTag[address, AccType_NORMAL] = AArch64.AllocationTagFromAddress(address);
+ 
+ if writeback then
+     if postindex then
+         address = address + offset;
+ 
+     if n == 31 then
+         SP[] = address;
+     else
+         X[n] = address;
+

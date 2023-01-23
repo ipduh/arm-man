@@ -1,0 +1,134 @@
+.nh
+.TH "SMLABB, SMLABT, SMLATB, SMLATT -- AArch32" "7" " "  "instruction" "general"
+.SS SMLABB, SMLABT, SMLATB, SMLATT
+ Signed Multiply Accumulate (halfwords)
+
+ Signed Multiply Accumulate (halfwords) performs a signed multiply accumulate
+ operation. The multiply acts on two signed 16-bit quantities, taken from either
+ the bottom or the top half of their respective source registers. The other
+ halves of these source registers are ignored.  The 32-bit product is added to a
+ 32-bit accumulate value and the result is written to the destination register.
+
+ If overflow occurs during the addition of the accumulate value, the instruction
+ sets PSTATE.Q to 1. It is not possible for overflow to occur during the
+ multiplication.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28        23  21 |      16      12       8 7 6 5 4       0
+          |         |   | |       |       |       | | | | |       |
+  |. . . .|0 0 0 1 0|0 0|0|. . . .|. . . .|. . . .|1|.|.|0|. . . .|
+  |                 |     |       |       |         | |   |
+  `-cond(!= 1111)   `-opc `-Rd    `-Ra    `-Rm      | `-N `-Rn
+                                                    `-M
+  
+  
+ 
+.SS SMLABB(M == 0 && N == 0)
+ 
+ SMLABB{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLABT(M == 1 && N == 0)
+ 
+ SMLABT{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLATB(M == 0 && N == 1)
+ 
+ SMLATB{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLATT(M == 1 && N == 1)
+ 
+ SMLATT{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+ 
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);  a = UInt(Ra);
+ n_high = (N == '1');  m_high = (M == '1');
+ if d == 15 || n == 15 || m == 15 || a == 15 then UNPREDICTABLE;
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                                                                   
+                   08    05      01      12       8   6 5 4       0
+                    |     |       |       |       |   | | |       |
+   1 1 1 1 1 0 1 1 0|0 0 1|. . . .|. . . .|. . . .|0 0|.|.|. . . .|
+                    |     |       |       |           | | |
+                    `-op1 `-Rn    |       `-Rd        | | `-Rm
+                                  `-Ra(!= 1111)       | `-M
+                                                      `-N
+  
+  
+ 
+.SS SMLABB(N == 0 && M == 0)
+ 
+ SMLABB{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLABT(N == 0 && M == 1)
+ 
+ SMLABT{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLATB(N == 1 && M == 0)
+ 
+ SMLATB{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+.SS SMLATT(N == 1 && M == 1)
+ 
+ SMLATT{<c>}{<q>} <Rd>, <Rn>, <Rm>, <Ra>
+ 
+ if Ra == '1111' then SEE "SMULBB, SMULBT, SMULTB, SMULTT";
+ d = UInt(Rd);  n = UInt(Rn);  m = UInt(Rm);  a = UInt(Ra);
+ n_high = (N == '1');  m_high = (M == '1');
+ if d == 15 || n == 15 || m == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand1 = if n_high then R[n]<31:16> else R[n]<15:0>;
+     operand2 = if m_high then R[m]<31:16> else R[m]<15:0>;
+     result = SInt(operand1) * SInt(operand2) + SInt(R[a]);
+     R[d] = result<31:0>;
+     if result != SInt(result<31:0>) then  // Signed overflow
+         PSTATE.Q = '1';
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Rd>
+  Encoded in Rd
+  Is the general-purpose destination register, encoded in the "Rd" field.
+
+ <Rn>
+  Encoded in Rn
+  Is the first general-purpose source register holding the multiplicand in the
+  bottom or top half (selected by <x>), encoded in the "Rn" field.
+
+ <Rm>
+  Encoded in Rm
+  Is the second general-purpose source register holding the multiplier in the
+  bottom or top half (selected by <y>), encoded in the "Rm" field.
+
+ <Ra>
+  Encoded in Ra
+  Is the third general-purpose source register holding the addend, encoded in
+  the "Ra" field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     operand1 = if n_high then R[n]<31:16> else R[n]<15:0>;
+     operand2 = if m_high then R[m]<31:16> else R[m]<15:0>;
+     result = SInt(operand1) * SInt(operand2) + SInt(R[a]);
+     R[d] = result<31:0>;
+     if result != SInt(result<31:0>) then  // Signed overflow
+         PSTATE.Q = '1';
+

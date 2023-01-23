@@ -1,0 +1,139 @@
+.nh
+.TH "VDUP (general-purpose register) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VDUP (general-purpose register)
+ Duplicate general-purpose register to vector
+
+ Duplicate general-purpose register to vector duplicates an element from a
+ general-purpose register into every element of the destination vector.
+
+ The destination vector elements can be 8-bit, 16-bit, or 32-bit fields. The
+ source element is the least significant 8, 16, or 32 bits of the general-
+ purpose register. There is no distinction between data types.
+
+ Depending on settings in the CPACR, NSACR, and HCPTR registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                                          
+         28      24 | | |20      16      12       8 7 6 5 4 3 2 1 0
+          |       | | | | |       |       |       | | | | | | | | |
+  |. . . .|1 1 1 0|1|.|.|0|. . . .|. . . .|1 0 1 1|.|0|.|1|0|0|0|0|
+  |                 | | | |       |               |   |
+  `-cond(!= 1111)   | | | `-Vd    `-Rt            `-D `-E
+                    | | `-L
+                    | `-Q
+                    `-B
+  
+  
+ 
+.SS A1
+ 
+ VDUP{<c>}{<q>}.<size> <Qd>, <Rt>
+ 
+ VDUP{<c>}{<q>}.<size> <Dd>, <Rt>
+ 
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd);  t = UInt(Rt);  regs = if Q == '0' then 1 else 2;
+ case B:E of
+     when '00'  esize = 32;  elements = 2;
+     when '01'  esize = 16;  elements = 4;
+     when '10'  esize = 8;   elements = 8;
+     when '11'  UNDEFINED;
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                       06                                          
+                     07 |                                          
+                   08 | |                                          
+                 09 | | |05      01      12       8 7 6 5 4 3 2 1 0
+                  | | | | |       |       |       | | | | | | | | |
+   1 1 1 0 1 1 1 0|1|.|.|0|. . . .|. . . .|1 0 1 1|.|0|.|1|0|0|0|0|
+                    | | | |       |               |   |
+                    | | | `-Vd    `-Rt            `-D `-E
+                    | | `-L
+                    | `-Q
+                    `-B
+  
+  
+ 
+.SS T1
+ 
+ VDUP{<c>}{<q>}.<size> <Qd>, <Rt>
+ 
+ VDUP{<c>}{<q>}.<size> <Dd>, <Rt>
+ 
+ if Q == '1' && Vd<0> == '1' then UNDEFINED;
+ d = UInt(D:Vd);  t = UInt(Rt);  regs = if Q == '0' then 1 else 2;
+ case B:E of
+     when '00'  esize = 32;  elements = 2;
+     when '01'  esize = 16;  elements = 4;
+     when '10'  esize = 8;   elements = 8;
+     when '11'  UNDEFINED;
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     scalar = R[t]<esize-1:0>;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             Elem[D[d+r],e,esize] = scalar;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields. Arm strongly recommends that any VDUP
+  instruction is unconditional, see Conditional execution.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <size>
+  The data size for the elements of the destination vector. It must be one of:
+  8Encoded as [b, e] = 0b10.                                         16Encoded
+  as [b, e] = 0b01.                                         32Encoded as [b, e]
+  = 0b00.
+
+ <Qd>
+  The destination vector for a quadword operation.
+
+ <Dd>
+  The destination vector for a doubleword operation.
+
+ <Rt>
+  The Arm source register.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDEnabled();
+     scalar = R[t]<esize-1:0>;
+     for r = 0 to regs-1
+         for e = 0 to elements-1
+             Elem[D[d+r],e,esize] = scalar;
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

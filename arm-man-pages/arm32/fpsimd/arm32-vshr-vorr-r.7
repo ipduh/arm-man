@@ -1,0 +1,107 @@
+.nh
+.TH "VSHR (zero) -- AArch32" "7" " "  "alias" "fpsimd"
+.SS VSHR (zero)
+ VSHR is an alias of VORR
+
+ Vector Shift Right
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                     22                                            
+                   23 |                                            
+                 24 | |                                            
+               25 | | |  20      16      12       8 7 6 5 4       0
+                | | | |   |       |       |       | | | | |       |
+   1 1 1 1 0 0 1|0|0|.|1 0|. . . .|. . . .|0 0 0 1|.|.|.|1|. . . .|
+                |   | |   |       |       |       | | | | |
+                `-U | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VSHR{<c>}{<q>}.<dt> <Dd>, <Dm>, #0
+ 
+ VORR{<c>}{<q>}{.<dt>} <Dd>, <Dm>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VSHR{<c>}{<q>}.<dt> <Qd>, <Qm>, #0
+ 
+ VORR{<c>}{<q>}{.<dt>} <Qd>, <Qm>, <Qm>
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+         13          07                                            
+       14 |        08 |  05      01      12       8 7 6 5 4       0
+        | |         | |   |       |       |       | | | | |       |
+   1 1 1|0|1 1 1 1 0|.|1 0|. . . .|. . . .|0 0 0 1|.|.|.|1|. . . .|
+        |           | |   |       |       |       | | | | |
+        `-U         | |   `-Vn    `-Vd    `-opc   | | | | `-Vm
+                    | `-size                      | | | `-o1
+                    `-D                           | | `-M
+                                                  | `-Q
+                                                  `-N
+  
+  
+ 
+.SS 64-bit SIMD vector(Q == 0)
+ 
+ VSHR{<c>}{<q>}.<dt> <Dd>, <Dm>, #0
+ 
+ VORR{<c>}{<q>}{.<dt>} <Dd>, <Dm>, <Dm>
+.SS 128-bit SIMD vector(Q == 1)
+ 
+ VSHR{<c>}{<q>}.<dt> <Qd>, <Qm>, #0
+ 
+ VORR{<c>}{<q>}{.<dt>} <Qd>, <Qm>, <Qm>
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  For encoding A1: see Standard assembler syntax fields. This encoding must be
+  unconditional.
+
+ <c>
+  For encoding T1: see Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  Is the data type for the elements of the vectors, and must be one of: S8, S16,
+  S32, S64, U8, U16, U32 or U64.
+
+ <Qd>
+  Encoded in D:Vd
+  Is the 128-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field as <Qd>*2.
+
+ <Qm>
+  Encoded in N:Vn" and "M:Vm
+  Is the 128-bit name of the SIMD&FP source register, encoded in the "N:Vn" and
+  "M:Vm" field as <Qm>*2.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Dm>
+  Encoded in N:Vn" and "M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "N:Vn" and
+  "M:Vm" field.
+
+
+
+.SS Operation
+
+ The manual of VORR gives pseudocode for VSHR.

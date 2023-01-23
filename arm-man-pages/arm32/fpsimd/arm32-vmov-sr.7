@@ -1,0 +1,141 @@
+.nh
+.TH "VMOV (scalar to general-purpose register) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VMOV (scalar to general-purpose register)
+ Copy a vector element to a general-purpose register with sign or zero extension
+
+ Copy a vector element to a general-purpose register with sign or zero extension
+ copies a byte, halfword, or word from an Advanced SIMD scalar to a general-
+ purpose register. Bytes and halfwords can be either zero-extended or sign-
+ extended.
+
+ On a Floating-point-only system, this instruction transfers one word from the
+ upper or lower half of a double-precision floating-point register to a general-
+ purpose register. This is an identical operation to the Advanced SIMD single
+ word transfer.
+
+ For more information about scalars see Advanced SIMD scalars.
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                   23    20                                        
+         28      24 |  21 |      16      12       8 7   5 4 3 2 1 0
+          |       | |   | |       |       |       | |   | | | | | |
+  |. . . .|1 1 1 0|.|. .|1|. . . .|. . . .|1 0 1 1|.|. .|1|0|0|0|0|
+  |               | |   | |       |               | |
+  `-cond(!= 1111) | |   | `-Vn    `-Rt            | `-opc2
+                  | |   `-L                       `-N
+                  | `-opc1
+                  `-U
+  
+  
+ 
+.SS A1
+ 
+ VMOV{<c>}{<q>}{.<dt>} <Rt>, <Dn[x]>
+ 
+ case U:opc1:opc2 of
+     when 'x1xxx'  advsimd = TRUE;  esize = 8;  index = UInt(opc1<0>:opc2);
+     when 'x0xx1'  advsimd = TRUE;  esize = 16;  index = UInt(opc1<0>:opc2<1>);
+     when '00x00'  advsimd = FALSE;  esize = 32;  index = UInt(opc1<0>);
+     when '10x00'  UNDEFINED;
+     when 'x0x10'  UNDEFINED;
+ t = UInt(Rt);  n = UInt(N:Vn);  unsigned = (U == '1');
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                   08    05                                        
+                 09 |  06 |      01      12       8 7   5 4 3 2 1 0
+                  | |   | |       |       |       | |   | | | | | |
+   1 1 1 0 1 1 1 0|.|. .|1|. . . .|. . . .|1 0 1 1|.|. .|1|0|0|0|0|
+                  | |   | |       |               | |
+                  | |   | `-Vn    `-Rt            | `-opc2
+                  | |   `-L                       `-N
+                  | `-opc1
+                  `-U
+  
+  
+ 
+.SS T1
+ 
+ VMOV{<c>}{<q>}{.<dt>} <Rt>, <Dn[x]>
+ 
+ case U:opc1:opc2 of
+     when 'x1xxx'  advsimd = TRUE;  esize = 8;  index = UInt(opc1<0>:opc2);
+     when 'x0xx1'  advsimd = TRUE;  esize = 16;  index = UInt(opc1<0>:opc2<1>);
+     when '00x00'  advsimd = FALSE;  esize = 32;  index = UInt(opc1<0>);
+     when '10x00'  UNDEFINED;
+     when 'x0x10'  UNDEFINED;
+ t = UInt(Rt);  n = UInt(N:Vn);  unsigned = (U == '1');
+ if t == 15 then UNPREDICTABLE; // Armv8-A removes UNPREDICTABLE for R13
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if unsigned then
+         R[t] = ZeroExtend(Elem[D[n],index,esize], 32);
+     else
+         R[t] = SignExtend(Elem[D[n],index,esize], 32);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <dt>
+  The data type. It must be one of:
+  S8Encoded as U = 0, opc1<1> = 1. [x] is encoded in opc1<0>, opc2.
+  S16Encoded as U = 0, opc1<1> = 0, opc2<0> = 1. [x] is encoded in opc1<0>,
+  opc2<1>.                                         U8Encoded as U = 1, opc1<1> =
+  1. [x] is encoded in opc1<0>, opc2.
+  U16Encoded as U = 1, opc1<1> = 0, opc2<0> = 1. [x] is encoded in opc1<0>,
+  opc2<1>.                                         32Encoded as U = 0, opc1<1> =
+  0, opc2 = 0b00. [x] is encoded in opc1<0>.
+  omittedEquivalent to 32.
+
+ <Rt>
+  The destination general-purpose register.
+
+ <Dn[x]>
+  The scalar. For details of how [x] is encoded see the description of <dt>.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckAdvSIMDOrVFPEnabled(TRUE, advsimd);
+     if unsigned then
+         R[t] = ZeroExtend(Elem[D[n],index,esize], 32);
+     else
+         R[t] = SignExtend(Elem[D[n],index,esize], 32);
+
+
+.SS Operational Notes
+
+ 
+ If CPSR.DIT is 1 and this instruction passes its condition execution check: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

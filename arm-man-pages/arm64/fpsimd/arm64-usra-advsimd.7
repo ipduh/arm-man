@@ -1,0 +1,187 @@
+.nh
+.TH "USRA -- A64" "7" " "  "instruction" "advsimd"
+.SS USRA
+ Unsigned Shift Right and Accumulate (immediate)
+
+ Unsigned Shift Right and Accumulate (immediate). This instruction reads each
+ vector element in the source SIMD&FP register, right shifts each result by an
+ immediate value, and accumulates the final results with the vector elements of
+ the destination SIMD&FP register. All the values in this instruction are
+ unsigned integer values. The results are truncated. For rounded results, see
+ URSRA.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - USRA_asisdshf_R
+ 
+                                           11                      
+                                         12 |                      
+       29                              13 | |                      
+     30 |          23      19    16  14 | | |10         5         0
+      | |           |       |     |   | | | | |         |         |
+   0 1|1|1 1 1 1 1 0|. . . .|. . .|0 0|0|1|0|1|. . . . .|. . . . .|
+      |             |       |         | |     |         |
+      `-U           |       `-immb    | `-o0  `-Rn      `-Rd
+                    `-immh(!= 0000)   `-o1
+  
+  
+ 
+.SS Scalar
+ 
+ USRA  <V><d>, <V><n>, #<shift>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if immh<3> != '1' then UNDEFINED;
+ integer esize = 8 << 3;
+ integer datasize = esize;
+ integer elements = 1;
+ 
+ integer shift = (esize * 2) - UInt(immh:immb);
+ boolean unsigned = (U == '1');
+ boolean round = (o1 == '1');
+ boolean accumulate = (o0 == '1');
+.SS Vector - A64 - USRA_asimdshf_R
+ 
+                                           11                      
+       29                                12 |                      
+     30 |                              13 | |                      
+   31 | |          23      19    16  14 | | |10         5         0
+    | | |           |       |     |   | | | | |         |         |
+   0|.|1|0 1 1 1 1 0|. . . .|. . .|0 0|0|1|0|1|. . . . .|. . . . .|
+    | |             |       |         | |     |         |
+    | `-U           |       `-immb    | `-o0  `-Rn      `-Rd
+    `-Q             `-immh(!= 0000)   `-o1
+  
+  
+ 
+.SS Vector
+ 
+ USRA  <Vd>.<T>, <Vn>.<T>, #<shift>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ 
+ if immh == '0000' then SEE(asimdimm);
+ if immh<3>:Q == '10' then UNDEFINED;
+ integer esize = 8 << HighestSetBit(immh);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ integer shift = (esize * 2) - UInt(immh:immb);
+ boolean unsigned = (U == '1');
+ boolean round = (o1 == '1');
+ boolean accumulate = (o0 == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand  = V[n];
+ bits(datasize) operand2;
+ bits(datasize) result;
+ integer round_const = if round then (1 << (shift - 1)) else 0;
+ integer element;
+ 
+ operand2 = if accumulate then V[d] else Zeros();
+ for e = 0 to elements-1
+     element = (Int(Elem[operand, e, esize], unsigned) + round_const) >> shift;
+     Elem[result, e, esize] = Elem[operand2, e, esize] + element<esize-1:0>;
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <V>
+  Encoded in immh
+  Is a width specifier,
+
+  immh <V>      
+  0xxx RESERVED 
+  1xxx D        
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, in the "Rd" field.
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in immh:Q
+  Is an arrangement specifier,
+
+  immh Q <T>                                  
+  0000 x SEE Advanced SIMD modified immediate 
+  0001 0 8B                                   
+  0001 1 16B                                  
+  001x 0 4H                                   
+  001x 1 8H                                   
+  01xx 0 2S                                   
+  01xx 1 4S                                   
+  1xxx 0 RESERVED                             
+  1xxx 1 2D                                   
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <shift>
+  Encoded in immh:immb
+  For the scalar variant: is the right shift amount, in the range 1 to 64,
+
+  immh <shift>               
+  0xxx RESERVED              
+  1xxx (128-UInt(immh:immb)) 
+
+ <shift>
+  Encoded in immh:immb
+  For the vector variant: is the right shift amount, in the range 1 to the
+  element width in bits,
+
+  immh <shift>                              
+  0000 SEE Advanced SIMD modified immediate 
+  0001 (16-UInt(immh:immb))                 
+  001x (32-UInt(immh:immb))                 
+  01xx (64-UInt(immh:immb))                 
+  1xxx (128-UInt(immh:immb))                
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand  = V[n];
+ bits(datasize) operand2;
+ bits(datasize) result;
+ integer round_const = if round then (1 << (shift - 1)) else 0;
+ integer element;
+ 
+ operand2 = if accumulate then V[d] else Zeros();
+ for e = 0 to elements-1
+     element = (Int(Elem[operand, e, esize], unsigned) + round_const) >> shift;
+     Elem[result, e, esize] = Elem[operand2, e, esize] + element<esize-1:0>;
+ 
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

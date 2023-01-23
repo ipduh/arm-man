@@ -1,0 +1,125 @@
+.nh
+.TH "UZP1, UZP2 (predicates)" "7" " "  "instruction" "sve"
+.SS UZP1, UZP2 (predicates)
+ Concatenate even or odd elements from two predicates
+
+ Concatenate adjacent even or odd-numbered elements from the first and second
+ source predicates and place in elements of the destination predicate. This
+ instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 2 classes: Even and Odd
+
+.SS Even - A64 - uzp1_p_pp_
+ 
+                                             10                    
+                                           11 |                    
+                                         12 | |                    
+                 24  22  20      16    13 | | | 9       5 4       0
+                  |   |   |       |     | | | | |       | |       |
+   0 0 0 0 0 1 0 1|. .|1 0|. . . .|0 1 0|0|1|0|0|. . . .|0|. . . .|
+                  |       |             | | |   |         |
+                  `-size  `-Pm          | | `-H `-Pn      `-Pd
+                                        | `-opc<0>
+                                        `-opc<1>
+  
+  
+ 
+.SS Even
+ 
+ UZP1    <Pd>.<T>, <Pn>.<T>, <Pm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Pn);
+ integer m = UInt(Pm);
+ integer d = UInt(Pd);
+ integer part = 0;
+.SS Odd - A64 - uzp2_p_pp_
+ 
+                                             10                    
+                                           11 |                    
+                                         12 | |                    
+                 24  22  20      16    13 | | | 9       5 4       0
+                  |   |   |       |     | | | | |       | |       |
+   0 0 0 0 0 1 0 1|. .|1 0|. . . .|0 1 0|0|1|1|0|. . . .|0|. . . .|
+                  |       |             | | |   |         |
+                  `-size  `-Pm          | | `-H `-Pn      `-Pd
+                                        | `-opc<0>
+                                        `-opc<1>
+  
+  
+ 
+.SS Odd
+ 
+ UZP2    <Pd>.<T>, <Pn>.<T>, <Pm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Pn);
+ integer m = UInt(Pm);
+ integer d = UInt(Pd);
+ integer part = 1;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) operand1 = P[n];
+ bits(PL) operand2 = P[m];
+ bits(PL) result;
+ 
+ bits(PL*2) zipped = operand2:operand1;
+ for e = 0 to elements-1
+     Elem[result, e, esize DIV 8] = Elem[zipped, 2*e+part, esize DIV 8];
+ 
+ P[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+ <Pm>
+  Encoded in Pm
+  Is the name of the second source scalable predicate register, encoded in the
+  "Pm" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) operand1 = P[n];
+ bits(PL) operand2 = P[m];
+ bits(PL) result;
+ 
+ bits(PL*2) zipped = operand2:operand1;
+ for e = 0 to elements-1
+     Elem[result, e, esize DIV 8] = Elem[zipped, 2*e+part, esize DIV 8];
+ 
+ P[d] = result;
+

@@ -1,0 +1,100 @@
+.nh
+.TH "SUB (vectors, unpredicated)" "7" " "  "instruction" "sve"
+.SS SUB (vectors, unpredicated)
+ Subtract vectors (unpredicated)
+
+ Subtract all elements of the second source vector from corresponding elements
+ of the first source vector and place the results in the corresponding elements
+ of the destination vector. This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+
+.SS SVE - A64 - sub_z_zz_
+ 
+                                                                   
+                                                                   
+                       21                    10                    
+                 24  22 |        16    13  11 |         5         0
+                  |   | |         |     |   | |         |         |
+   0 0 0 0 0 1 0 0|. .|1|. . . . .|0 0 0|0 0|1|. . . . .|. . . . .|
+                  |     |               |   | |         |
+                  |     `-Zm            |   | `-Zn      `-Zd
+                  `-size                |   `-opc<0>
+                                        `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ SUB     <Zd>.<T>, <Zn>.<T>, <Zm>.<T>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = element1 - element2;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  Is the name of the second source scalable vector register, encoded in the "Zm"
+  field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, e, esize];
+     Elem[result, e, esize] = element1 - element2;
+ 
+ Z[d] = result;
+

@@ -1,0 +1,122 @@
+.nh
+.TH "SABA -- A64" "7" " "  "instruction" "advsimd"
+.SS SABA
+ Signed Absolute difference and Accumulate
+
+ Signed Absolute difference and Accumulate. This instruction subtracts the
+ elements of the vector of the second source SIMD&FP register from the
+ corresponding elements of the first source SIMD&FP register, and accumulates
+ the absolute values of the results into the elements of the vector of the
+ destination SIMD&FP register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Three registers of the same type - A64 - SABA_asimdsame_only
+ 
+                                                                   
+       29                                    10                    
+     30 |              21                  11 |                    
+   31 | |        24  22 |        16      12 | |         5         0
+    | | |         |   | |         |       | | |         |         |
+   0|.|0|0 1 1 1 0|. .|1|. . . . .|0 1 1 1|1|1|. . . . .|. . . . .|
+    | |           |     |                 |   |         |
+    | `-U         |     `-Rm              |   `-Rn      `-Rd
+    `-Q           `-size                  `-ac
+  
+  
+ 
+.SS Three registers of the same type
+ 
+ SABA  <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ if size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = if Q == '1' then 128 else 64;
+ integer elements = datasize DIV esize;
+ 
+ boolean unsigned = (U == '1');
+ boolean accumulate = (ac == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ bits(esize) absdiff;
+ 
+ result = if accumulate then V[d] else Zeros();
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     absdiff = Abs(element1 - element2)<esize-1:0>;
+     Elem[result, e, esize] = Elem[result, e, esize] + absdiff;
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <T>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <T>      
+  00   0 8B       
+  00   1 16B      
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   x RESERVED 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand1 = V[n];
+ bits(datasize) operand2 = V[m];
+ bits(datasize) result;
+ integer element1;
+ integer element2;
+ bits(esize) absdiff;
+ 
+ result = if accumulate then V[d] else Zeros();
+ for e = 0 to elements-1
+     element1 = Int(Elem[operand1, e, esize], unsigned);
+     element2 = Int(Elem[operand2, e, esize], unsigned);
+     absdiff = Abs(element1 - element2)<esize-1:0>;
+     Elem[result, e, esize] = Elem[result, e, esize] + absdiff;
+ V[d] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

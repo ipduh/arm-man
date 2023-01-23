@@ -1,0 +1,116 @@
+.nh
+.TH "MSR (immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS MSR (immediate)
+ Move immediate value to Special register
+
+ Move immediate value to Special register moves selected bits of an immediate
+ value to the corresponding bits in the APSR, CPSR, or SPSR_<current_mode>.
+
+ Because of the Do-Not-Modify nature of its reserved bits, the immediate form of
+ MSR is normally only useful at the Application level for writing to APSR_nzcvq
+ (CPSR_f).
+
+ If an MSR (immediate) moves selected bits of an immediate value to the CPSR,
+ the PE checks whether the value being written to PSTATE.M is legal. See Illegal
+ changes to PSTATE.M.
+
+ An MSR (immediate) executed in User mode:
+
+ Is constrained unpredictable if it attempts to update the SPSR.
+
+ Is constrained unpredictable if it attempts to update the SPSR.
+
+ Otherwise, does not update any CPSR field that is accessible only at EL1 or
+ higher,
+
+
+ An MSR (immediate) executed in System mode is constrained unpredictable if it
+ attempts to update the SPSR.
+
+ The CPSR.E bit is writable from any mode using an MSR instruction.  Arm
+ deprecates using this to change its value.
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+ Related encodings: Move Special Register and Hints (immediate).
+
+
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20      16 | | |12                       0
+          |         | |   |       | | | | |                       |
+  |. . . .|0 0 1 1 0|.|1 0|. . . .|1|1|1|1|. . . . . . . . . . . .|
+  |                 |     |               |
+  `-cond(!= 1111)   `-R   `-mask          `-imm12
+  
+  
+ 
+.SS A1(!(R == 0 && mask == 0000))
+ 
+ MSR{<c>}{<q>} <spec_reg>, #<imm>
+ 
+ if mask == '0000' && R == '0' then SEE "Related encodings";
+ imm32 = A32ExpandImm(imm12);  write_spsr = (R == '1');
+ if mask == '0000' then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if write_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             SPSRWriteByInstr(imm32, mask);
+     else
+         // Attempts to change to an illegal mode will invoke the Illegal Execution state mechanism
+         CPSRWriteByInstr(imm32, mask);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <spec_reg>
+  Encoded in mask
+  Is one of:                        APSR_<bits>.             CPSR_<fields>.
+  SPSR_<fields>.                      For CPSR and SPSR, <fields> is a sequence
+  of one or more of the following:
+  cmask<0> = '1' to enable writing of bits<7:0> of the destination PSR.
+  xmask<1> = '1' to enable writing of bits<15:8> of the destination PSR.
+  smask<2> = '1' to enable writing of bits<23:16> of the destination PSR.
+  fmask<3> = '1' to enable writing of bits<31:24> of the destination PSR.
+  For APSR, <bits> is one of nzcvq, g, or nzcvqg. These map to the following
+  CPSR_<fields> values:                        APSR_nzcvq is the same as CPSR_f
+  (mask== '1000').             APSR_g is the same as CPSR_s (mask == '0100').
+  APSR_nzcvqg is the same as CPSR_fs (mask == '1100').                      Arm
+  recommends the APSR_<bits> forms when only the N, Z, C, V, Q, and GE[3:0] bits
+  are being written. For more information, see The Application Program Status
+  Register, APSR.
+
+ <imm>
+  Is an immediate value. See Modified immediate constants in A32 instructions
+  for the range of values.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     if write_spsr then
+         if PSTATE.M IN {M32_User,M32_System} then
+             UNPREDICTABLE;
+         else
+             SPSRWriteByInstr(imm32, mask);
+     else
+         // Attempts to change to an illegal mode will invoke the Illegal Execution state mechanism
+         CPSRWriteByInstr(imm32, mask);
+

@@ -1,0 +1,149 @@
+.nh
+.TH "BFM -- A64" "7" " "  "instruction" "general"
+.SS BFM
+ Bitfield Move
+
+ Bitfield Move is usually accessed via one of its aliases, which are always
+ preferred for disassembly.
+
+ If <imms> is greater than or equal to <immr>, this copies a bitfield of
+ (<imms>-<immr>+1) bits starting from bit position <immr> in the source register
+ to the least significant bits of the destination register.
+
+ If <imms> is less than <immr>, this copies a bitfield of (<imms>+1) bits from
+ the least significant bits of the source register to bit position
+ (regsize-<immr>) of the destination register, where regsize is the destination
+ register size of 32 or 64 bits.
+
+ In both cases the other bits of the destination register remain unchanged.
+
+
+
+.SS Leaving other bits unchanged - A64 - nofill
+ 
+                                                                   
+                                                                   
+                     22                                            
+   31  29          23 |          16          10         5         0
+    |   |           | |           |           |         |         |
+  |.|0 1|1 0 0 1 1 0|.|. . . . . .|. . . . . .|. . . . .|. . . . .|
+  | |               | |           |           |         |
+  | `-opc           | `-immr      `-imms      `-Rn      `-Rd
+  `-sf              `-N
+  
+  
+ 
+.SS 32-bit(sf == 0 && N == 0)
+ 
+ BFM  <Wd>, <Wn>, #<immr>, #<imms>
+.SS 64-bit(sf == 1 && N == 1)
+ 
+ BFM  <Xd>, <Xn>, #<immr>, #<imms>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer datasize = if sf == '1' then 64 else 32;
+ 
+ boolean inzero;
+ boolean extend;
+ integer R;
+ integer S;
+ bits(datasize) wmask;
+ bits(datasize) tmask;
+ 
+ case opc of
+     when '00' inzero = TRUE;  extend = TRUE;    // SBFM
+     when '01' inzero = FALSE; extend = FALSE;   // BFM
+     when '10' inzero = TRUE;  extend = FALSE;   // UBFM
+     when '11' UNDEFINED;
+ 
+ if sf == '1' && N != '1' then UNDEFINED;
+ if sf == '0' && (N != '0' || immr<5> != '0' || imms<5> != '0') then UNDEFINED;
+ 
+ R = UInt(immr);
+ S = UInt(imms);
+ (wmask, tmask) = DecodeBitMasks(N, imms, immr, FALSE);
+ 
+ bits(datasize) dst = if inzero then Zeros() else X[d];
+ bits(datasize) src = X[n];
+ 
+ // perform bitfield move on low bits
+ bits(datasize) bot = (dst AND NOT(wmask)) OR (ROR(src, R) AND wmask);
+ 
+ // determine extension bits (sign, zero or dest register)
+ bits(datasize) top = if extend then Replicate(src<S>) else dst;
+ 
+ // combine extension bits and result bits
+ X[d] = (top AND NOT(tmask)) OR (bot AND tmask);
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Wn>
+  Encoded in Rn
+  Is the 32-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xn>
+  Encoded in Rn
+  Is the 64-bit name of the general-purpose source register, encoded in the "Rn"
+  field.
+
+ <immr>
+  Encoded in immr
+  For the 32-bit variant: is the right rotate amount, in the range 0 to 31,
+  encoded in the "immr" field.
+
+ <immr>
+  Encoded in immr
+  For the 64-bit variant: is the right rotate amount, in the range 0 to 63,
+  encoded in the "immr" field.
+
+ <imms>
+  Encoded in imms
+  For the 32-bit variant: is the leftmost bit number to be moved from the
+  source, in the range 0 to 31, encoded in the "imms" field.
+
+ <imms>
+  Encoded in imms
+  For the 64-bit variant: is the leftmost bit number to be moved from the
+  source, in the range 0 to 63, encoded in the "imms" field.
+
+
+
+.SS Operation
+
+ bits(datasize) dst = if inzero then Zeros() else X[d];
+ bits(datasize) src = X[n];
+ 
+ // perform bitfield move on low bits
+ bits(datasize) bot = (dst AND NOT(wmask)) OR (ROR(src, R) AND wmask);
+ 
+ // determine extension bits (sign, zero or dest register)
+ bits(datasize) top = if extend then Replicate(src<S>) else dst;
+ 
+ // combine extension bits and result bits
+ X[d] = (top AND NOT(tmask)) OR (bot AND tmask);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

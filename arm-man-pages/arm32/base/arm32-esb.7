@@ -1,0 +1,87 @@
+.nh
+.TH "ESB -- AArch32" "7" " "  "instruction" "general"
+.SS ESB
+ Error Synchronization Barrier
+
+ Error Synchronization Barrier is an error synchronization event that might also
+ update DISR and VDISR. This instruction can be used at all Exception levels and
+ in Debug state.
+
+ In Debug state, this instruction behaves as if SError interrupts are masked at
+ all Exception levels. See Error Synchronization Barrier in the ARM(R)
+ Reliability, Availability, and Serviceability (RAS) Specification, ARMv8, for
+ ARMv8-A architecture profile.
+
+ If the RAS Extension is not implemented, this instruction executes as a NOP.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20      16 | | |12                       0
+          |         | |   |       | | | | |                       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0 0 0|1|1|1|1|0 0 0 0 0 0 0 1 0 0 0 0|
+  |                 |     |               |
+  `-cond(!= 1111)   `-R   `-imm4          `-imm12
+  
+  
+ 
+.SS A1
+ 
+ ESB{<c>}{<q>}
+ 
+ if !HaveRASExt() then EndOfInstruction();  // Instruction executes as NOP
+ if cond != '1110' then UNPREDICTABLE;      // ESB must be encoded with AL condition
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|0 0 0 1|0 0 0 0|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T1
+ 
+ ESB{<c>}.W
+ 
+ if !HaveRASExt() then EndOfInstruction();  // Instruction executes as NOP
+ if InITBlock() then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     SynchronizeErrors();
+     AArch32.ESBOperation();
+     if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then AArch32.vESBOperation();
+     TakeUnmaskedSErrorInterrupts();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+     SynchronizeErrors();
+     AArch32.ESBOperation();
+     if PSTATE.EL IN {EL0, EL1} && EL2Enabled() then AArch32.vESBOperation();
+     TakeUnmaskedSErrorInterrupts();
+

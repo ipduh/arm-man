@@ -1,0 +1,208 @@
+.nh
+.TH "MOVI -- A64" "7" " "  "instruction" "advsimd"
+.SS MOVI
+ Move Immediate (vector)
+
+ Move Immediate (vector). This instruction places an immediate constant into
+ every vector element of the destination SIMD&FP register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Advanced SIMD - A64 - advsimd
+ 
+                                 16                                
+       29                      17 |          10                    
+     30 |                    18 | |        11 |                    
+   31 | |                  19 | | |      12 | | 9 8 7 6 5         0
+    | | |                   | | | |       | | | | | | | |         |
+   0|.|.|0 1 1 1 1 0 0 0 0 0|.|.|.|. . . .|0|1|.|.|.|.|.|. . . . .|
+    | |                     | | | |       |   | | | | | |
+    | `-op                  | | | `-cmode |   | | | | | `-Rd
+    `-Q                     | | `-c       |   | | | | `-h
+                            | `-b         |   | | | `-g
+                            `-a           |   | | `-f
+                                          |   | `-e
+                                          |   `-d
+                                          `-o2
+  
+  
+ 
+.SS 8-bit(op == 0 && cmode == 1110)
+ 
+ MOVI  <Vd>.<T>, #<imm8>{, LSL #0}
+.SS 16-bit shifted immediate(op == 0 && cmode == 10x0)
+ 
+ MOVI  <Vd>.<T>, #<imm8>{, LSL #<amount>}
+.SS 32-bit shifted immediate(op == 0 && cmode == 0xx0)
+ 
+ MOVI  <Vd>.<T>, #<imm8>{, LSL #<amount>}
+.SS 32-bit shifting ones(op == 0 && cmode == 110x)
+ 
+ MOVI  <Vd>.<T>, #<imm8>, MSL #<amount>
+.SS 64-bit scalar(Q == 0 && op == 1 && cmode == 1110)
+ 
+ MOVI  <Dd>, #<imm>
+.SS 64-bit vector(Q == 1 && op == 1 && cmode == 1110)
+ 
+ MOVI  <Vd>.2D, #<imm>
+ 
+ integer rd = UInt(Rd);
+ 
+ integer datasize = if Q == '1' then 128 else 64;
+ bits(datasize) imm;
+ bits(64) imm64;
+ 
+ ImmediateOp operation;
+ case cmode:op of
+     when '0xx00' operation = ImmediateOp_MOVI;
+     when '0xx01' operation = ImmediateOp_MVNI;
+     when '0xx10' operation = ImmediateOp_ORR;
+     when '0xx11' operation = ImmediateOp_BIC;
+     when '10x00' operation = ImmediateOp_MOVI;
+     when '10x01' operation = ImmediateOp_MVNI;
+     when '10x10' operation = ImmediateOp_ORR;
+     when '10x11' operation = ImmediateOp_BIC;
+     when '110x0' operation = ImmediateOp_MOVI;
+     when '110x1' operation = ImmediateOp_MVNI;
+     when '1110x' operation = ImmediateOp_MOVI;
+     when '11110' operation = ImmediateOp_MOVI;
+     when '11111' 
+         // FMOV Dn,#imm is in main FP instruction set
+         if Q == '0' then UNDEFINED;
+         operation = ImmediateOp_MOVI;
+ 
+ imm64 = AdvSIMDExpandImm(op, cmode, a:b:c:d:e:f:g:h);
+ imm = Replicate(imm64, datasize DIV 64);
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand;
+ bits(datasize) result;
+ 
+ case operation of
+     when ImmediateOp_MOVI
+         result = imm;
+     when ImmediateOp_MVNI
+         result = NOT(imm);
+     when ImmediateOp_ORR
+         operand = V[rd];
+         result = operand OR imm;
+     when ImmediateOp_BIC
+         operand = V[rd];
+         result = operand AND NOT(imm);
+ 
+ V[rd] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Dd>
+  Encoded in Rd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "Rd"
+  field.
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <imm>
+  Encoded in a:b:c:d:e:f:g:h
+  Is a 64-bit immediate
+  'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffffgggggggghhhhhhhh', encoded in
+  "a:b:c:d:e:f:g:h".
+
+ <T>
+  Encoded in Q
+  For the 8-bit variant: is an arrangement specifier,
+
+  Q <T> 
+  0 8B  
+  1 16B 
+
+ <T>
+  Encoded in Q
+  For the 16-bit variant: is an arrangement specifier,
+
+  Q <T> 
+  0 4H  
+  1 8H  
+
+ <T>
+  Encoded in Q
+  For the 32-bit variant: is an arrangement specifier,
+
+  Q <T> 
+  0 2S  
+  1 4S  
+
+ <imm8>
+  Encoded in a:b:c:d:e:f:g:h
+  Is an 8-bit immediate encoded in "a:b:c:d:e:f:g:h".
+
+ <amount>
+  Encoded in cmode<1>
+  For the 16-bit shifted immediate variant: is the shift amount
+
+  cmode<1> <amount> 
+  0        0        
+  1        8        
+
+   defaulting to 0 if LSL is omitted.
+
+ <amount>
+  Encoded in cmode<2:1>
+  For the 32-bit shifted immediate variant: is the shift amount
+
+  cmode<2:1> <amount> 
+  00         0        
+  01         8        
+  10         16       
+  11         24       
+
+   defaulting to 0 if LSL is omitted.
+
+ <amount>
+  Encoded in cmode<0>
+  For the 32-bit shifting ones variant: is the shift amount
+
+  cmode<0> <amount> 
+  0        8        
+  1        16       
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize) operand;
+ bits(datasize) result;
+ 
+ case operation of
+     when ImmediateOp_MOVI
+         result = imm;
+     when ImmediateOp_MVNI
+         result = NOT(imm);
+     when ImmediateOp_ORR
+         operand = V[rd];
+         result = operand OR imm;
+     when ImmediateOp_BIC
+         operand = V[rd];
+         result = operand AND NOT(imm);
+ 
+ V[rd] = result;
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

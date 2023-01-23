@@ -1,0 +1,107 @@
+.nh
+.TH "SXTL, SXTL2 -- A64" "7" " "  "alias" "advsimd"
+.SS SXTL, SXTL2
+ SXTL is an alias of SSHLL
+
+ Signed extend Long
+
+ Signed extend Long. This instruction duplicates each vector element in the
+ lower or upper half of the source SIMD&FP register into a vector, and writes
+ the vector to the destination SIMD&FP register. The destination vector elements
+ are twice as long as the source vector elements. All the values in this
+ instruction are signed integer values.
+
+ The SXTL instruction extracts the source vector from the lower half of the
+ source register, while the SXTL2 instruction extracts the source vector from
+ the upper half of the source register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+
+.SS Vector - A64 - SSHLL_asimdshf_L
+ 
+                                                                   
+       29                                                          
+     30 |                                    10                    
+   31 | |          23      19    16        11 |         5         0
+    | | |           |       |     |         | |         |         |
+   0|.|0|0 1 1 1 1 0|. . . .|0 0 0|1 0 1 0 0|1|. . . . .|. . . . .|
+    | |             |       |     |           |         |
+    | `-U           |       |     `-opcode    `-Rn      `-Rd
+    `-Q             |       `-immb
+                    `-immh(!= 0000)
+  
+  
+ 
+.SS Vector
+ 
+ SXTL{2}  <Vd>.<Ta>, <Vn>.<Tb>
+ 
+ SSHLL{2}  <Vd>.<Ta>, <Vn>.<Tb>, #0
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ta>
+  Encoded in immh
+  Is an arrangement specifier,
+
+  immh <Ta>                                 
+  0000 SEE Advanced SIMD modified immediate 
+  0001 8H                                   
+  001x 4S                                   
+  01xx 2D                                   
+  1xxx RESERVED                             
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the SIMD&FP source register, encoded in the "Rn" field.
+
+ <Tb>
+  Encoded in immh:Q
+  Is an arrangement specifier,
+
+  immh Q <Tb>                                 
+  0000 x SEE Advanced SIMD modified immediate 
+  0001 0 8B                                   
+  0001 1 16B                                  
+  001x 0 4H                                   
+  001x 1 8H                                   
+  01xx 0 2S                                   
+  01xx 1 4S                                   
+  1xxx x RESERVED                             
+
+
+
+.SS Operation
+
+ The manual of SSHLL gives pseudocode for SXTL.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

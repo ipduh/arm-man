@@ -1,0 +1,113 @@
+.nh
+.TH "CPY (scalar)" "7" " "  "instruction" "sve"
+.SS CPY (scalar)
+ Copy general-purpose register to vector elements (predicated)
+
+ Copy the general-purpose scalar source register to each active element in the
+ destination vector. Inactive elements in the destination vector register remain
+ unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - cpy_z_p_r_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                13    10         5         0
+                  |   |                 |     |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 1 0 0 0 1 0 1|. . .|. . . . .|. . . . .|
+                  |                     |     |         |
+                  `-size                `-Pg  `-Rn      `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ CPY     <Zd>.<T>, <Pg>/M, <R><n|SP>
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer n = UInt(Rn);
+ integer d = UInt(Zd);
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(64) operand1;
+ if n == 31 then
+     operand1 = SP[];
+ else
+     operand1 = X[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = operand1<esize-1:0>;
+ 
+ Z[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <R>
+  Encoded in size
+  Is a width specifier,
+
+  size <R> 
+  01   W   
+  x0   W   
+  11   X   
+
+ <n|SP>
+  Encoded in Rn
+  Is the number [0-30] of the general-purpose source register or the name SP
+  (31), encoded in the "Rn" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(64) operand1;
+ if n == 31 then
+     operand1 = SP[];
+ else
+     operand1 = X[n];
+ bits(VL) result = Z[d];
+ 
+ for e = 0 to elements-1
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = operand1<esize-1:0>;
+ 
+ Z[d] = result;
+

@@ -1,0 +1,115 @@
+.nh
+.TH "VCVT (between double-precision and single-precision) -- AArch32" "7" " "  "instruction" "fpsimd"
+.SS VCVT (between double-precision and single-precision)
+ Convert between double-precision and single-precision
+
+ Convert between double-precision and single-precision does one of the
+ following:
+
+
+ Depending on settings in the CPACR, NSACR, HCPTR, and FPEXC registers, and the
+ Security state and PE mode in which the instruction is executed, an attempt to
+ execute the instruction might be undefined, or trapped to Hyp mode. For more
+ information see Enabling Advanced SIMD and floating-point support.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                     22    19                                      
+         28        23 |  20 |    16      12  10   8 7 6 5 4       0
+          |         | |   | |     |       |   |   | | | | |       |
+  |. . . .|1 1 1 0 1|.|1 1|0|1 1 1|. . . .|1 0|1 x|1|1|.|0|. . . .|
+  |                 |     | |     |           |   |   |   |
+  `-cond(!= 1111)   `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Single-precision to double-precision(size == 10)
+ 
+ VCVT{<c>}{<q>}.F64.F32 <Dd>, <Sm>
+.SS Double-precision to single-precision(size == 11)
+ 
+ VCVT{<c>}{<q>}.F32.F64 <Sd>, <Dm>
+ 
+ double_to_single = (size == '11');
+ d = if double_to_single then UInt(Vd:D) else UInt(D:Vd);
+ m = if double_to_single then UInt(M:Vm) else UInt(Vm:M);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                     07    04                                      
+                   08 |  05 |    01      12  10   8 7 6 5 4       0
+                    | |   | |     |       |   |   | | | | |       |
+   1 1 1 0 1 1 1 0 1|.|1 1|0|1 1 1|. . . .|1 0|1 x|1|1|.|0|. . . .|
+                    |     | |     |           |   |   |   |
+                    `-D   | |     `-Vd        |   |   `-M `-Vm
+                          | `-opc2            |   `-o3
+                          `-o1                `-size
+  
+  
+ 
+.SS Single-precision to double-precision(size == 10)
+ 
+ VCVT{<c>}{<q>}.F64.F32 <Dd>, <Sm>
+.SS Double-precision to single-precision(size == 11)
+ 
+ VCVT{<c>}{<q>}.F32.F64 <Sd>, <Dm>
+ 
+ double_to_single = (size == '11');
+ d = if double_to_single then UInt(Vd:D) else UInt(D:Vd);
+ m = if double_to_single then UInt(M:Vm) else UInt(Vm:M);
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if double_to_single then
+         S[d] = FPConvert(D[m], FPSCR);
+     else
+         D[d] = FPConvert(S[m], FPSCR);
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <Sd>
+  Encoded in Vd:D
+  Is the 32-bit name of the SIMD&FP destination register, encoded in the "Vd:D"
+  field.
+
+ <Dm>
+  Encoded in M:Vm
+  Is the 64-bit name of the SIMD&FP source register, encoded in the "M:Vm"
+  field.
+
+ <Dd>
+  Encoded in D:Vd
+  Is the 64-bit name of the SIMD&FP destination register, encoded in the "D:Vd"
+  field.
+
+ <Sm>
+  Encoded in Vm:M
+  Is the 32-bit name of the SIMD&FP source register, encoded in the "Vm:M"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();  CheckVFPEnabled(TRUE);
+     if double_to_single then
+         S[d] = FPConvert(D[m], FPSCR);
+     else
+         D[d] = FPConvert(S[m], FPSCR);
+

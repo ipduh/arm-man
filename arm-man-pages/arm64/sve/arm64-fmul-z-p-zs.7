@@ -1,0 +1,109 @@
+.nh
+.TH "FMUL (immediate)" "7" " "  "instruction" "sve"
+.SS FMUL (immediate)
+ Floating-point multiply by immediate (predicated)
+
+ Multiply by an immediate each active floating-point element of the source
+ vector, and destructively place the results in the corresponding elements of
+ the source vector. The immediate may take the value +0.5 or +2.0 only. Inactive
+ elements in the destination vector register remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - fmul_z_p_zs_
+ 
+                                                                   
+                                                                   
+                                 16                                
+                 24  22    19  17 |    13    10       6 5         0
+                  |   |     |   | |     |     |       | |         |
+   0 1 1 0 0 1 0 1|. .|0 1 1|0 1|0|1 0 0|. . .|0 0 0 0|.|. . . . .|
+                  |         |   |       |             | |
+                  `-size    |   |       `-Pg          | `-Zdn
+                            |   `-opc<0>              `-i1
+                            `-opc<2:1>
+  
+  
+ 
+.SS SVE
+ 
+ FMUL    <Zdn>.<T>, <Pg>/M, <Zdn>.<T>, <const>
+ 
+ if !HaveSVE() then UNDEFINED;
+ if size == '00' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer g = UInt(Pg);
+ integer dn = UInt(Zdn);
+ bits(esize) imm = if i1 == '0' then FPPointFive('0') else FPTwo('0');
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = FPMul(element1, imm, FPCR);
+     else
+         Elem[result, e, esize] = element1;
+ 
+ Z[dn] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zdn>
+  Encoded in Zdn
+  Is the name of the source and destination scalable vector register, encoded in
+  the "Zdn" field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T>      
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   D        
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <const>
+  Encoded in i1
+  Is the floating-point immediate value,
+
+  i1 <const> 
+  0  #0.5    
+  1  #2.0    
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ bits(PL) mask = P[g];
+ bits(VL) operand1 = Z[dn];
+ bits(VL) result;
+ 
+ for e = 0 to elements-1
+     bits(esize) element1 = Elem[operand1, e, esize];
+     if ElemP[mask, e, esize] == '1' then
+         Elem[result, e, esize] = FPMul(element1, imm, FPCR);
+     else
+         Elem[result, e, esize] = element1;
+ 
+ Z[dn] = result;
+

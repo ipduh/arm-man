@@ -1,0 +1,81 @@
+.nh
+.TH "MOV (SIMD&FP scalar, predicated)" "7" " "  "alias" "sve"
+.SS MOV (SIMD&FP scalar, predicated)
+ MOV is an alias of CPY
+
+ Move SIMD&FP scalar register to vector elements (predicated)
+
+ Move the SIMD & floating-point scalar source register to each active element in
+ the destination vector. Inactive elements in the destination vector register
+ remain unmodified.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : True
+
+
+
+.SS SVE - A64 - cpy_z_p_v_
+ 
+                                                                   
+                                                                   
+                                                                   
+                 24  22                13    10         5         0
+                  |   |                 |     |         |         |
+   0 0 0 0 0 1 0 1|. .|1 0 0 0 0 0 1 0 0|. . .|. . . . .|. . . . .|
+                  |                     |     |         |
+                  `-size                `-Pg  `-Vn      `-Zd
+  
+  
+ 
+.SS SVE
+ 
+ MOV     <Zd>.<T>, <Pg>/M, <V><n>
+ 
+ CPY     <Zd>.<T>, <Pg>/M, <V><n>
+ 
+
+.SS Assembler Symbols
+
+ <Zd>
+  Encoded in Zd
+  Is the name of the destination scalable vector register, encoded in the "Zd"
+  field.
+
+ <T>
+  Encoded in size
+  Is the size specifier,
+
+  size <T> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register P0-P7, encoded in the
+  "Pg" field.
+
+ <V>
+  Encoded in size
+  Is a width specifier,
+
+  size <V> 
+  00   B   
+  01   H   
+  10   S   
+  11   D   
+
+ <n>
+  Encoded in Vn
+  Is the number [0-31] of the source SIMD&FP register, encoded in the "Vn"
+  field.
+
+
+
+.SS Operation
+
+ The manual of CPY gives pseudocode for MOV.

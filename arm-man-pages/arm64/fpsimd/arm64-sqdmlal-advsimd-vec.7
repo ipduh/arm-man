@@ -1,0 +1,219 @@
+.nh
+.TH "SQDMLAL, SQDMLAL2 (vector) -- A64" "7" " "  "instruction" "advsimd"
+.SS SQDMLAL, SQDMLAL2 (vector)
+ Signed saturating Doubling Multiply-Add Long
+
+ Signed saturating Doubling Multiply-Add Long. This instruction multiplies
+ corresponding signed integer values in the lower or upper half of the vectors
+ of the two source SIMD&FP registers, doubles the results, and accumulates the
+ final results with the vector elements of the destination SIMD&FP register. The
+ destination vector elements are twice as long as the elements that are
+ multiplied.
+
+ If overflow occurs with any of the results, those results are saturated. If
+ saturation occurs, the cumulative saturation bit FPSR.QC is set.
+
+ The SQDMLAL instruction extracts each source vector from the lower half of each
+ source register, while the SQDMLAL2 instruction extracts each source vector
+ from the upper half of each source register.
+
+ Depending on the settings in the CPACR_EL1, CPTR_EL2, and CPTR_EL3 registers,
+ and the current Security state and Exception level, an attempt to execute the
+ instruction might be trapped.
+
+
+It has encodings from 2 classes: Scalar and Vector
+
+.SS Scalar - A64 - SQDMLAL_asisddiff_only
+ 
+                                                                   
+                                         12                        
+       29              21              13 |                        
+     30 |        24  22 |        16  14 | |  10         5         0
+      | |         |   | |         |   | | |   |         |         |
+   0 1|0|1 1 1 1 0|. .|1|. . . . .|1 0|0|1|0 0|. . . . .|. . . . .|
+      |           |     |             |       |         |
+      `-U         |     `-Rm          `-o1    `-Rn      `-Rd
+                  `-size
+  
+  
+ 
+.SS Scalar
+ 
+ SQDMLAL  <Va><d>, <Vb><n>, <Vb><m>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if size == '00' || size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = esize;
+ integer elements = 1;
+ integer part = 0;
+ 
+ boolean sub_op = (o1 == '1');
+.SS Vector - A64 - SQDMLAL_asimddiff_L
+ 
+                                                                   
+       29                                12                        
+     30 |              21              13 |                        
+   31 | |        24  22 |        16  14 | |  10         5         0
+    | | |         |   | |         |   | | |   |         |         |
+   0|.|0|0 1 1 1 0|. .|1|. . . . .|1 0|0|1|0 0|. . . . .|. . . . .|
+    | |           |     |             |       |         |
+    | `-U         |     `-Rm          `-o1    `-Rn      `-Rd
+    `-Q           `-size
+  
+  
+ 
+.SS Vector
+ 
+ SQDMLAL{2}  <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Tb>
+ 
+ integer d = UInt(Rd);
+ integer n = UInt(Rn);
+ integer m = UInt(Rm);
+ 
+ if size == '00' || size == '11' then UNDEFINED;
+ integer esize = 8 << UInt(size);
+ integer datasize = 64;
+ integer part = UInt(Q);
+ integer elements = datasize DIV esize;
+ 
+ boolean sub_op = (o1 == '1');
+ 
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize)   operand1 = Vpart[n, part];
+ bits(datasize)   operand2 = Vpart[m, part];
+ bits(2*datasize) operand3 = V[d];
+ bits(2*datasize) result;
+ integer element1;
+ integer element2;
+ bits(2*esize) product;
+ integer accum;
+ boolean sat1;
+ boolean sat2;
+ 
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     element2 = SInt(Elem[operand2, e, esize]);
+     (product, sat1) = SignedSatQ(2 * element1 * element2, 2*esize);
+     if sub_op then
+         accum = SInt(Elem[operand3, e, 2*esize]) - SInt(product);
+     else
+         accum = SInt(Elem[operand3, e, 2*esize]) + SInt(product);
+     (Elem[result, e, 2*esize], sat2) = SignedSatQ(accum, 2*esize);
+     if sat1 || sat2 then FPSR.QC = '1';
+ 
+ V[d] = result;
+ 
+
+.SS Assembler Symbols
+
+ 2
+  Encoded in Q
+  Is the second and upper half specifier. If present it causes the operation to
+  be performed on the upper 64 bits of the registers holding the narrower
+  elements, and is
+
+  Q 2         
+  0 [absent]  
+  1 [present] 
+
+ <Vd>
+  Encoded in Rd
+  Is the name of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Ta>
+  Encoded in size
+  Is an arrangement specifier,
+
+  size <Ta>     
+  00   RESERVED 
+  01   4S       
+  10   2D       
+  11   RESERVED 
+
+ <Vn>
+  Encoded in Rn
+  Is the name of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <Tb>
+  Encoded in size:Q
+  Is an arrangement specifier,
+
+  size Q <Tb>     
+  00   x RESERVED 
+  01   0 4H       
+  01   1 8H       
+  10   0 2S       
+  10   1 4S       
+  11   x RESERVED 
+
+ <Vm>
+  Encoded in Rm
+  Is the name of the second SIMD&FP source register, encoded in the "Rm" field.
+
+ <Va>
+  Encoded in size
+  Is the destination width specifier,
+
+  size <Va>     
+  00   RESERVED 
+  01   S        
+  10   D        
+  11   RESERVED 
+
+ <d>
+  Encoded in Rd
+  Is the number of the SIMD&FP destination register, encoded in the "Rd" field.
+
+ <Vb>
+  Encoded in size
+  Is the source width specifier,
+
+  size <Vb>     
+  00   RESERVED 
+  01   H        
+  10   S        
+  11   RESERVED 
+
+ <n>
+  Encoded in Rn
+  Is the number of the first SIMD&FP source register, encoded in the "Rn" field.
+
+ <m>
+  Encoded in Rm
+  Is the number of the second SIMD&FP source register, encoded in the "Rm"
+  field.
+
+
+
+.SS Operation
+
+ CheckFPAdvSIMDEnabled64();
+ bits(datasize)   operand1 = Vpart[n, part];
+ bits(datasize)   operand2 = Vpart[m, part];
+ bits(2*datasize) operand3 = V[d];
+ bits(2*datasize) result;
+ integer element1;
+ integer element2;
+ bits(2*esize) product;
+ integer accum;
+ boolean sat1;
+ boolean sat2;
+ 
+ for e = 0 to elements-1
+     element1 = SInt(Elem[operand1, e, esize]);
+     element2 = SInt(Elem[operand2, e, esize]);
+     (product, sat1) = SignedSatQ(2 * element1 * element2, 2*esize);
+     if sub_op then
+         accum = SInt(Elem[operand3, e, 2*esize]) - SInt(product);
+     else
+         accum = SInt(Elem[operand3, e, 2*esize]) + SInt(product);
+     (Elem[result, e, 2*esize], sat2) = SignedSatQ(accum, 2*esize);
+     if sat1 || sat2 then FPSR.QC = '1';
+ 
+ V[d] = result;
+

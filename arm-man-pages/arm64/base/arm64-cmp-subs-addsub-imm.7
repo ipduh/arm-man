@@ -1,0 +1,82 @@
+.nh
+.TH "CMP (immediate) -- A64" "7" " "  "alias" "general"
+.SS CMP (immediate)
+ CMP is an alias of SUBS
+
+ Compare (immediate)
+
+ Compare (immediate) subtracts an optionally-shifted immediate value from a
+ register value. It updates the condition flags based on the result, and
+ discards the result.
+
+
+
+.SS Setting the condition flags - A64 - s
+ 
+                                                                   
+       29                                                          
+     30 |            22                                            
+   31 | |          23 |                      10         5         0
+    | | |           | |                       |         |         |
+  |.|1|1|1 0 0 0 1 0|.|. . . . . . . . . . . .|. . . . .|1 1 1 1 1|
+  | | |             | |                       |         |
+  | | `-S           | `-imm12                 `-Rn      `-Rd
+  | `-op            `-sh
+  `-sf
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CMP  <Wn|WSP>, #<imm>{, <shift>}
+ 
+ SUBS WZR, <Wn|WSP>, #<imm> {, <shift>}
+.SS 64-bit(sf == 1)
+ 
+ CMP  <Xn|SP>, #<imm>{, <shift>}
+ 
+ SUBS XZR, <Xn|SP>, #<imm> {, <shift>}
+ 
+
+.SS Assembler Symbols
+
+ <Wn|WSP>
+  Encoded in Rn
+  Is the 32-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Rn" field.
+
+ <Xn|SP>
+  Encoded in Rn
+  Is the 64-bit name of the source general-purpose register or stack pointer,
+  encoded in the "Rn" field.
+
+ <imm>
+  Encoded in imm12
+  Is an unsigned immediate, in the range 0 to 4095, encoded in the "imm12"
+  field.
+
+ <shift>
+  Encoded in sh
+  Is the optional left shift to apply to the immediate, defaulting to LSL #0 and
+
+  sh <shift> 
+  0  LSL #0  
+  1  LSL #12 
+
+
+
+.SS Operation
+
+ The manual of SUBS gives pseudocode for CMP.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

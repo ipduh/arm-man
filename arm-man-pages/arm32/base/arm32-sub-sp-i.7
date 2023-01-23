@@ -1,0 +1,207 @@
+.nh
+.TH "SUB, SUBS (SP minus immediate) -- AArch32" "7" " "  "instruction" "general"
+.SS SUB, SUBS (SP minus immediate)
+ Subtract from SP (immediate)
+
+ Subtract from SP (immediate) subtracts an immediate value from the SP value,
+ and writes the result to the destination register.
+
+ If the destination register is not the PC, the SUBS variant of the instruction
+ updates the condition flags based on the result.
+
+ The field descriptions for <Rd> identify the encodings where the PC is
+ permitted as the destination register. If the destination register is the PC:
+
+ The SUB variant of the instruction is an interworking branch, see Pseudocode
+ description of operations on the AArch32 general-purpose registers and the PC.
+
+ The SUBS variant of the instruction performs an exception return without the
+ use of the stack. Arm deprecates use of this instruction. However, in this
+ case:
+ The PE branches to the address written to the PC, and restores PSTATE from
+ SPSR_<current_mode>.
+
+ The PE checks SPSR_<current_mode> for an illegal return event.  See Illegal
+ return events from AArch32 state.
+
+ The instruction is undefined in Hyp mode.
+
+ The instruction is constrained unpredictable in User mode and System mode.
+
+
+
+ For more information about the constrained unpredictable behavior of this
+ instruction, see Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1, T2 and T3).
+
+.SS A1 - A32
+ 
+                                                                   
+                                                                   
+                         20                                        
+         28      24    21 |      16      12                       0
+          |       |     | |       |       |                       |
+  |. . . .|0 0 1 0|0 1 0|.|1 1 0 1|. . . .|. . . . . . . . . . . .|
+  |               |     | |       |       |
+  `-cond(!= 1111) `-opc | `-Rn    `-Rd    `-imm12
+                        `-S
+  
+  
+ 
+.SS SUB(S == 0)
+ 
+ SUB{<c>}{<q>} {<Rd>,} SP, #<const>
+.SS SUBS(S == 1)
+ 
+ SUBS{<c>}{<q>} {<Rd>,} SP, #<const>
+ 
+ d = UInt(Rd);  setflags = (S == '1');  imm32 = A32ExpandImm(imm12);
+.SS T1 - T32
+ 
+                                                                   
+                                                                   
+                    7                                              
+                  8 |             0                                
+                  | |             |                                
+   1 0 1 1 0 0 0 0|1|. . . . . . .|                                
+                  | |
+                  | `-imm7
+                  `-S
+  
+  
+ 
+.SS T1
+ 
+ SUB{<c>}{<q>} {SP,} SP, #<imm7>
+ 
+ d = 13;  setflags = FALSE;  imm32 = ZeroExtend(imm7:'00', 32);
+.SS T2 - T32
+ 
+                                                                   
+               10                                                  
+             11 |        05        15                              
+           12 | |      06 |      01 |    12       8               0
+            | | |       | |       | |     |       |               |
+   1 1 1 1 0|.|0|1 1 0 1|.|1 1 0 1|0|. . .|. . . .|. . . . . . . .|
+            |   |       | |         |     |       |
+            `-i `-op1   | `-Rn      |     `-Rd    `-imm8
+                        `-S         `-imm3
+  
+  
+ 
+.SS SUB(S == 0)
+ 
+ SUB{<c>}.W {<Rd>,} SP, #<const>
+ 
+ SUB{<c>}{<q>} {<Rd>,} SP, #<const>
+.SS SUBS(S == 1 && Rd != 1111)
+ 
+ SUBS{<c>}{<q>} {<Rd>,} SP, #<const>
+ 
+ if Rd == '1111' && S == '1' then SEE "CMP (immediate)";
+ d = UInt(Rd);  setflags = (S == '1');  imm32 = T32ExpandImm(i:imm3:imm8);
+ if d == 15 && !setflags then UNPREDICTABLE;
+.SS T3 - T32
+ 
+                       06                                          
+                     07 |                                          
+             11    08 | |          15                              
+           12 |  09 | | |05      01 |    12       8               0
+            | |   | | | | |       | |     |       |               |
+   1 1 1 1 0|.|1 0|1|0|1|0|1 1 0 1|0|. . .|. . . .|. . . . . . . .|
+            |     |   |   |         |     |       |
+            `-i   |   |   `-Rn      |     `-Rd    `-imm8
+                  |   `-o2          `-imm3
+                  `-o1
+  
+  
+ 
+.SS T3
+ 
+ SUB{<c>}{<q>} {<Rd>,} SP, #<imm12>
+ 
+ SUBW{<c>}{<q>} {<Rd>,} SP, #<imm12>
+ 
+ d = UInt(Rd);  setflags = FALSE;  imm32 = ZeroExtend(i:imm3:imm8, 32);
+ if d == 15 then UNPREDICTABLE;
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(SP, NOT(imm32), '1');
+     if d == 15 then          // Can only occur for A32 encoding
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ SP,
+  Is the stack pointer.
+
+ <imm7>
+  Encoded in imm7
+  Is the unsigned immediate, a multiple of 4, in the range 0 to 508, encoded in
+  the "imm7" field as <imm7>/4.
+
+ <Rd>
+  Encoded in Rd
+  For encoding A1: is the general-purpose destination register, encoded in the
+  "Rd" field. If omitted, this register is the SP. If the PC is used:
+  For the SUB variant, the instruction is a branch to the address calculated by
+  the operation. This is an interworking branch, see Pseudocode description of
+  operations on the AArch32 general-purpose registers and the PC.
+  For the SUBS variant, the instruction performs an exception return, that
+  restores PSTATE from SPSR_<current_mode>. Arm deprecates use of this
+  instruction unless <Rn> is the LR.
+
+ <Rd>
+  Encoded in Rd
+  For encoding T2 and T3: is the general-purpose destination register, encoded
+  in the "Rd" field. If omitted, this register is the SP.
+
+ <imm12>
+  Encoded in i:imm3:imm8
+  Is a 12-bit unsigned immediate, in the range 0 to 4095, encoded in the
+  "i:imm3:imm8" field.
+
+ <const>
+  Encoded in imm12
+  For encoding A1: an immediate value. See Modified immediate constants in A32
+  instructions for the range of values.
+
+ <const>
+  Encoded in i:imm3:imm8
+  For encoding T2: an immediate value. See Modified immediate constants in T32
+  instructions for the range of values.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+     (result, nzcv) = AddWithCarry(SP, NOT(imm32), '1');
+     if d == 15 then          // Can only occur for A32 encoding
+         if setflags then
+             ALUExceptionReturn(result);
+         else
+             ALUWritePC(result);
+     else
+         R[d] = result;
+         if setflags then
+             PSTATE.<N,Z,C,V> = nzcv;
+

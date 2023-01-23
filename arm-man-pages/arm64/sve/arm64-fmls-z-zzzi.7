@@ -1,0 +1,191 @@
+.nh
+.TH "FMLS (indexed)" "7" " "  "instruction" "sve"
+.SS FMLS (indexed)
+ Floating-point fused multiply-subtract by indexed elements (Zda = Zda + -Zn *
+ Zm[indexed])
+
+ Multiply all floating-point elements within each 128-bit segment of the first
+ source vector by the specified element in the corresponding second source
+ vector segment. The products are then destructively subtracted without
+ intermediate rounding from the corresponding elements of the addend and
+ destination vector.
+
+ The elements within the second source vector are specified using an immediate
+ index which selects the same element position within each 128-bit vector
+ segment. The index range is from 0 to one less than the number of elements per
+ 128-bit segment, encoded in 1 to 3 bits depending on the size of the element.
+ This instruction is unpredicated.
+
+ Status : Green
+
+ Predicated : False
+
+ takes_pred_movprfx : False
+
+
+It has encodings from 3 classes: Half-precision, Single-precision and Double-precision
+
+.SS Half-precision - A64 - fmls_z_zzzi_h
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                    10                    
+                 24 | | |  19    16        11 |         5         0
+                  | | | |   |     |         | |         |         |
+   0 1 1 0 0 1 0 0|0|.|1|. .|. . .|0 0 0 0 0|1|. . . . .|. . . . .|
+                    |   |   |               | |         |
+                    |   |   `-Zm            | `-Zn      `-Zda
+                    |   `-i3l               `-op
+                    `-i3h
+  
+  
+ 
+.SS Half-precision
+ 
+ FMLS    <Zda>.H, <Zn>.H, <Zm>.H[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 16;
+ integer index = UInt(i3h:i3l);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ boolean op1_neg = TRUE;
+ boolean op3_neg = FALSE;
+.SS Single-precision - A64 - fmls_z_zzzi_s
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                    10                    
+                 24 | | |  19    16        11 |         5         0
+                  | | | |   |     |         | |         |         |
+   0 1 1 0 0 1 0 0|1|0|1|. .|. . .|0 0 0 0 0|1|. . . . .|. . . . .|
+                  | |   |   |               | |         |
+                  | |   |   `-Zm            | `-Zn      `-Zda
+                  | |   `-i2                `-op
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Single-precision
+ 
+ FMLS    <Zda>.S, <Zn>.S, <Zm>.S[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 32;
+ integer index = UInt(i2);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ boolean op1_neg = TRUE;
+ boolean op3_neg = FALSE;
+.SS Double-precision - A64 - fmls_z_zzzi_d
+ 
+                       21                                          
+                     22 |                                          
+                   23 | |                    10                    
+                 24 | | |20      16        11 |         5         0
+                  | | | | |       |         | |         |         |
+   0 1 1 0 0 1 0 0|1|1|1|.|. . . .|0 0 0 0 0|1|. . . . .|. . . . .|
+                  | |   | |                 | |         |
+                  | |   | `-Zm              | `-Zn      `-Zda
+                  | |   `-i1                `-op
+                  | `-size<0>
+                  `-size<1>
+  
+  
+ 
+.SS Double-precision
+ 
+ FMLS    <Zda>.D, <Zn>.D, <Zm>.D[<imm>]
+ 
+ if !HaveSVE() then UNDEFINED;
+ integer esize = 64;
+ integer index = UInt(i1);
+ integer n = UInt(Zn);
+ integer m = UInt(Zm);
+ integer da = UInt(Zda);
+ boolean op1_neg = TRUE;
+ boolean op3_neg = FALSE;
+ 
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result = Z[da];
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, s, esize];
+     bits(esize) element3 = Elem[result, e, esize];
+     if op1_neg then element1 = FPNeg(element1);
+     if op3_neg then element3 = FPNeg(element3);
+     Elem[result, e, esize] = FPMulAdd(element3, element1, element2, FPCR);
+ 
+ Z[da] = result;
+ 
+
+.SS Assembler Symbols
+
+ <Zda>
+  Encoded in Zda
+  Is the name of the third source and destination scalable vector register,
+  encoded in the "Zda" field.
+
+ <Zn>
+  Encoded in Zn
+  Is the name of the first source scalable vector register, encoded in the "Zn"
+  field.
+
+ <Zm>
+  Encoded in Zm
+  For the half-precision and single-precision variant: is the name of the second
+  source scalable vector register Z0-Z7, encoded in the "Zm" field.
+
+ <Zm>
+  Encoded in Zm
+  For the double-precision variant: is the name of the second source scalable
+  vector register Z0-Z15, encoded in the "Zm" field.
+
+ <imm>
+  Encoded in i3h:i3l
+  For the half-precision variant: is the immediate index, in the range 0 to 7,
+  encoded in the "i3h:i3l" fields.
+
+ <imm>
+  Encoded in i2
+  For the single-precision variant: is the immediate index, in the range 0 to 3,
+  encoded in the "i2" field.
+
+ <imm>
+  Encoded in i1
+  For the double-precision variant: is the immediate index, in the range 0 to 1,
+  encoded in the "i1" field.
+
+
+
+.SS Operation
+
+ CheckSVEEnabled();
+ integer elements = VL DIV esize;
+ integer eltspersegment = 128 DIV esize;
+ bits(VL) operand1 = Z[n];
+ bits(VL) operand2 = Z[m];
+ bits(VL) result = Z[da];
+ 
+ for e = 0 to elements-1
+     integer segmentbase = e - e MOD eltspersegment;
+     integer s = segmentbase + index;
+     bits(esize) element1 = Elem[operand1, e, esize];
+     bits(esize) element2 = Elem[operand2, s, esize];
+     bits(esize) element3 = Elem[result, e, esize];
+     if op1_neg then element1 = FPNeg(element1);
+     if op3_neg then element3 = FPNeg(element3);
+     Elem[result, e, esize] = FPMulAdd(element3, element1, element2, FPCR);
+ 
+ Z[da] = result;
+

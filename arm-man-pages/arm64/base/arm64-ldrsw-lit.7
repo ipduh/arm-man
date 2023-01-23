@@ -1,0 +1,105 @@
+.nh
+.TH "LDRSW (literal) -- A64" "7" " "  "instruction" "general"
+.SS LDRSW (literal)
+ Load Register Signed Word (literal)
+
+ Load Register Signed Word (literal) calculates an address from the PC value and
+ an immediate offset, loads a word from memory, and writes it to a register. For
+ information about memory accesses, see Load/Store addressing modes.
+
+
+
+.SS Literal - A64 - LDRSW_64_loadlit
+ 
+                                                                   
+                                                                   
+             26                                                    
+     30    27 |  24                                     5         0
+      |     | |   |                                     |         |
+  |1 0|0 1 1|0|0 0|. . . . . . . . . . . . . . . . . . .|. . . . .|
+  |         |     |                                     |
+  `-opc     `-V   `-imm19                               `-Rt
+  
+  
+ 
+.SS Literal
+ 
+ LDRSW  <Xt>, <label>
+ 
+ integer t = UInt(Rt);
+ MemOp memop = MemOp_LOAD;
+ boolean signed = FALSE;
+ integer size;
+ bits(64) offset;
+ 
+ case opc of
+     when '00'
+         size = 4;
+     when '01'
+         size = 8;
+     when '10'
+         size = 4;
+         signed = TRUE;
+     when '11'
+         memop = MemOp_PREFETCH;
+ 
+ offset = SignExtend(imm19:'00', 64);
+ boolean tag_checked = FALSE;
+ 
+ bits(64) address = PC[] + offset;
+ bits(size*8) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ case memop of
+     when MemOp_LOAD
+         data = Mem[address, size, AccType_NORMAL];
+         if signed then
+             X[t] = SignExtend(data, 64);
+         else
+             X[t] = data;
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+ 
+
+.SS Assembler Symbols
+
+ <Xt>
+  Encoded in Rt
+  Is the 64-bit name of the general-purpose register to be loaded, encoded in
+  the "Rt" field.
+
+ <label>
+  Encoded in imm19
+  Is the program label from which the data is to be loaded. Its offset from the
+  address of this instruction, in the range +/-1MB, is encoded as "imm19" times
+  4.
+
+
+
+.SS Operation
+
+ bits(64) address = PC[] + offset;
+ bits(size*8) data;
+ 
+ if HaveMTEExt() then
+     SetTagCheckedInstruction(tag_checked);
+ 
+ case memop of
+     when MemOp_LOAD
+         data = Mem[address, size, AccType_NORMAL];
+         if signed then
+             X[t] = SignExtend(data, 64);
+         else
+             X[t] = data;
+ 
+     when MemOp_PREFETCH
+         Prefetch(address, t<4:0>);
+
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1, the timing of this instruction is insensitive to the value of the data being loaded or stored.

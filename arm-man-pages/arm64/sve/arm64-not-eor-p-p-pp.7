@@ -1,0 +1,63 @@
+.nh
+.TH "NOT (predicate)" "7" " "  "alias" "sve"
+.SS NOT (predicate)
+ NOT is an alias of EOR
+
+ Bitwise invert predicate
+
+ Bitwise invert each active element of the source predicate, and place the
+ results in the corresponding elements of the destination predicate. Inactive
+ elements in the destination predicate register are set to zero. Does not set
+ the condition flags.
+
+ Status : Green
+
+ Predicated : True
+
+ takes_pred_movprfx : False
+
+
+
+.SS Not setting the condition flags - A64 - eor_p_p_pp_z
+ 
+                                                                   
+                     22                                            
+                   23 |                                            
+                 24 | |  20      16  14      10 9       5 4       0
+                  | | |   |       |   |       | |       | |       |
+   0 0 1 0 0 1 0 1|0|0|0 0|. . . .|0 1|. . . .|1|. . . .|0|. . . .|
+                  | |     |           |       | |       | |
+                  | `-S   `-Pm        `-Pg    | `-Pn    | `-Pd
+                  `-op                        `-o2      `-o3
+  
+  
+ 
+.SS Not setting the condition flags
+ 
+ NOT     <Pd>.B, <Pg>/Z, <Pn>.B
+ 
+ EOR <Pd>.B, <Pg>/Z, <Pn>.B, <Pg>.B
+ 
+
+.SS Assembler Symbols
+
+ <Pd>
+  Encoded in Pd
+  Is the name of the destination scalable predicate register, encoded in the
+  "Pd" field.
+
+ <Pg>
+  Encoded in Pg
+  Is the name of the governing scalable predicate register, encoded in the "Pg"
+  field.
+
+ <Pn>
+  Encoded in Pn
+  Is the name of the first source scalable predicate register, encoded in the
+  "Pn" field.
+
+
+
+.SS Operation
+
+ The manual of EOR gives pseudocode for NOT.

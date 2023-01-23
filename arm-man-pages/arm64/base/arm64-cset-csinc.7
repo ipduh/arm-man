@@ -1,0 +1,73 @@
+.nh
+.TH "CSET -- A64" "7" " "  "alias" "general"
+.SS CSET
+ CSET is an alias of CSINC
+
+ Conditional Set
+
+ Conditional Set sets the destination register to 1 if the condition is TRUE,
+ and otherwise sets it to 0.
+
+
+
+.SS Integer - A64 - general
+ 
+                                                                   
+       29                                    10                    
+     30 |                                  11 |                    
+   31 | |              21        16      12 | |         5         0
+    | | |               |         |       | | |         |         |
+  |.|0|0|1 1 0 1 0 1 0 0|1 1 1 1 1|. . . .|0|1|1 1 1 1 1|. . . . .|
+  | | |                 |         |         | |         |
+  | | `-S               `-Rm      |         | `-Rn      `-Rd
+  | `-op                          |         `-o2
+  `-sf                            `-cond(!= 111x)
+  
+  
+ 
+.SS 32-bit(sf == 0)
+ 
+ CSET  <Wd>, <cond>
+ 
+ CSINC <Wd>, WZR, WZR, invert(<cond>)
+.SS 64-bit(sf == 1)
+ 
+ CSET  <Xd>, <cond>
+ 
+ CSINC <Xd>, XZR, XZR, invert(<cond>)
+ 
+
+.SS Assembler Symbols
+
+ <Wd>
+  Encoded in Rd
+  Is the 32-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <Xd>
+  Encoded in Rd
+  Is the 64-bit name of the general-purpose destination register, encoded in the
+  "Rd" field.
+
+ <cond>
+  Encoded in cond
+  Is one of the standard conditions, excluding AL and NV, encoded in the "cond"
+  field with its least significant bit inverted.
+
+
+
+.SS Operation
+
+ The manual of CSINC gives pseudocode for CSET.
+
+.SS Operational Notes
+
+ 
+ If PSTATE.DIT is 1: 
+ 
+ The execution time of this instruction is independent of: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.
+ The response of this instruction to asynchronous exceptions does not vary based on: 
+ The values of the data supplied in any of its registers.
+ The values of the NZCV flags.

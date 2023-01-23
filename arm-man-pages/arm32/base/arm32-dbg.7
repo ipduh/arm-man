@@ -1,0 +1,75 @@
+.nh
+.TH "DBG -- AArch32" "7" " "  "instruction" "general"
+.SS DBG
+ Debug hint
+
+ In Armv8, DBG executes as a NOP. Arm deprecates any use of the DBG instruction.
+
+ For more information about the constrained unpredictable behavior, see
+ Architectural Constraints on UNPREDICTABLE behaviors.
+
+
+It has encodings from the following instruction sets:  A32 (A1) and  T32 (T1).
+
+.SS A1 - A32
+ 
+                                       13                          
+                                     14 |                          
+                     22            15 | |                          
+         28        23 |  20  18  16 | | |12               4       0
+          |         | |   |   |   | | | | |               |       |
+  |. . . .|0 0 1 1 0|0|1 0|0 0|0 0|1|1|1|1|0 0 0 0 1 1 1 1|. . . .|
+  |                 |     |   |                           |
+  `-cond(!= 1111)   `-R   |   `-imm4<1:0>                 `-option
+                          `-imm4<3:2>
+  
+  
+ 
+.SS A1
+ 
+ DBG{<c>}{<q>} #<option>
+ 
+ // DBG executes as a NOP. The 'option' field is ignored
+.SS T1 - T32
+ 
+                               02          11                      
+                             03 |        12 |                      
+                           04 | |      13 | |                      
+                         05 | | |01  14 | | |     8       4       0
+                          | | | | |   | | | |     |       |       |
+   1 1 1 1 0 0 1 1 1 0 1 0|1|1|1|1|1 0|0|0|0|0 0 0|1 1 1 1|. . . .|
+                                                  |       |
+                                                  `-hint  `-option
+  
+  
+ 
+.SS T1
+ 
+ DBG{<c>}{<q>} #<option>
+ 
+ // DBG executes as a NOP. The 'option' field is ignored
+ 
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+ 
+
+.SS Assembler Symbols
+
+ <c>
+  See Standard assembler syntax fields.
+
+ <q>
+  See Standard assembler syntax fields.
+
+ <option>
+  Encoded in option
+  Is a 4-bit unsigned immediate, in the range 0 to 15, encoded in the "option"
+  field.
+
+
+
+.SS Operation
+
+ if ConditionPassed() then
+     EncodingSpecificOperations();
+
