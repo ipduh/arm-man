@@ -2,6 +2,15 @@
 arm (Advanced RISC Machines) man(ual) pages
 <br>
 <br>
+
+#### arm-man-pages directory
+The ./arm-main-pages directory contains instruction indexes <br>
+and a man page for each instruction in the A32/T32 and A64 Instruction Sets <br>
+of the Armv8-A v86A xml specification.
+
+<br>
+<br>
+
 #### Install arm manual pages
   If, you just want the arm-man pages you
 do not need to congigure or run the generator.
@@ -14,18 +23,9 @@ See install.sh
 
 <br>
 <br>
-### Examples
+#### Examples
+<br>
 
-##### arm-man-pages directory
-The ./arm-main-pages directory contains instruction indexes <br>
-and a man page for each instruction in the A32/T32 and A64 Instruction Sets <br>
-of the Armv8-A v86A xml specification.
-
-##### arm-man man
-```
-$ man ./arm-man-pages/arm.7
-$ man arm
-```
 
 ##### Armv8-A A32/T32 Instruction Set Index
 ```
