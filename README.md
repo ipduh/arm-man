@@ -21,29 +21,33 @@ ie /usr/local/share/man/man7/
 <br>
 See install.sh
 
-<br>
-<br>
-#### Examples
-<br>
 
 
-##### Armv8-A A32/T32 Instruction Set Index
+##### A32/T32 Instruction Sets Index
 ```
 $ man ./arm-man-pages/arm32.7
 $ man arm32
+```
+
+##### Lookup command in A32/T32
+```
 $ man arm32 |grep add |grep sp
-   arm32-add-sp-i     Add to SP (immediate).
-   arm32-add-sp-r     Add to SP (register).
+   arm32-add-sp-i    Add to SP (immediate).
+   arm32-add-sp-r    Add to SP (register).
 $ man arm32-add-sp-i
 ```
 
-##### Armv8-A A64 Instruction Set Index
+##### A64 Instruction Set Index
 ```
 $ man ./arm-man-pages/arm64.7
 $ man arm64
+```
+
+##### Lookup command in A32/T32
+```
 $ man arm64 |grep movz
-  arm64-mov-movz                Move (wide immediate): an alias of MOVZ.
-  arm64-movz                    Move wide with zero.
+  arm64-mov-movz    Move (wide immediate): an alias of MOVZ.
+  arm64-movz        Move wide with zero.
 $ man arm64-movz
 ```
 
