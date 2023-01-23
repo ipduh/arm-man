@@ -24,23 +24,17 @@ See install.sh
 
 
 
-##### A32/T32 Instruction Sets Index
+##### A32/T32 Instruction Set(s) Index
 ```
 $ man ./arm-man-pages/arm32.7
-```
-```
 $ man arm32
 ```
 
-##### Lookup command in A32/T32
+##### Lookup command in the A32/T32 instruction set(s)
 ```
 $ man arm32 |grep add |grep sp
-```
-```
    arm32-add-sp-i    Add to SP (immediate).
    arm32-add-sp-r    Add to SP (register).
-```
-```
 $ man arm32-add-sp-i
 ```
 
@@ -50,7 +44,7 @@ $ man ./arm-man-pages/arm64.7
 $ man arm64
 ```
 
-##### Lookup command in A32/T32
+##### Lookup command in the A64 Instruction set.
 ```
 $ man arm64 |grep movz
   arm64-mov-movz    Move (wide immediate): an alias of MOVZ.
@@ -92,4 +86,6 @@ $ ./arm-man.py
 
 ```
 
+<br>
+<br>
 
