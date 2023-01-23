@@ -4,7 +4,7 @@ arm (Advanced RISC Machines) man(ual) pages
 <br>
 
 #### arm-man-pages directory
-contains instruction indexes <br>
+  Contains instruction indexes <br>
 a man page for each instruction in the <br>
 A32/T32 and A64 Instruction Sets <br>
 of the Armv8-A v86A xml specification.
@@ -13,14 +13,14 @@ of the Armv8-A v86A xml specification.
 <br>
 
 #### Install arm manual pages
-  If, you just want the arm-man pages you
-do not need to congigure or run the generator.
-<br>
-Just copy the contents of the ./arm-man-pages directory
-into your local man-pages/man-section directory.
-ie /usr/local/share/man/man7/
+  If, you just want the arm-man pages you <br>
+do not need to congigure or run the generator. <br>
+Just copy the contents of the ./arm-man-pages directory <br>
+into your local man-pages/man-section directory, <br>
+eg /usr/local/share/man/man7/
 <br>
 See install.sh
+<br>
 
 
 
@@ -68,7 +68,7 @@ $ man arm
 <br>
 
 ##### Arm86A_xml
-Armv8-A v86A, the xml used to produce the man pages.
+Armv8-A v86A, the xml spec used to produce the arm-man pages.
 
 <br>
 <br>
