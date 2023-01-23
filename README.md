@@ -4,8 +4,9 @@ arm (Advanced RISC Machines) man(ual) pages
 <br>
 
 #### arm-man-pages directory
-The ./arm-main-pages directory contains instruction indexes <br>
-and a man page for each instruction in the A32/T32 and A64 Instruction Sets <br>
+contains instruction indexes <br>
+a man page for each instruction in the <br>
+A32/T32 and A64 Instruction Sets <br>
 of the Armv8-A v86A xml specification.
 
 <br>
@@ -26,14 +27,20 @@ See install.sh
 ##### A32/T32 Instruction Sets Index
 ```
 $ man ./arm-man-pages/arm32.7
+```
+```
 $ man arm32
 ```
 
 ##### Lookup command in A32/T32
 ```
 $ man arm32 |grep add |grep sp
+```
+```
    arm32-add-sp-i    Add to SP (immediate).
    arm32-add-sp-r    Add to SP (register).
+```
+```
 $ man arm32-add-sp-i
 ```
 
