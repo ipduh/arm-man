@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-ARMMAN_VERSION = '0.4'
-ARMMAN_NAME = 'arm-man'
-ARMMAN_AUTH = 'g0, george@ipduh.com'
-ARMMAN_REPO = 'https://github.com/ipduh/arm-man'
+# ARMMAN_VERSION = '0.4'
+# ARMMAN_NAME = 'arm-man'
+# ARMMAN_AUTH = 'g0, george@ipduh.com'
+# ARMMAN_REPO = 'https://github.com/ipduh/arm-man'
 
 import os
 import sys
@@ -147,7 +147,7 @@ def draw_man(inst_xml, man_out=1):
                                     for tablelm in list(defchild):
                                         if tablelm.tag == 'tgroup':
                                             if tablelm.attrib.get('cols').isdigit():
-                                                ''' 
+                                                '''
                                                 # some of the xml is broken here e.g. at_sys.xml
                                                 for i in range(0, int(tablelm.attrib.get('cols'))):
                                                     table_cols.append([])

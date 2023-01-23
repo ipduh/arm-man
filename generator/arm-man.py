@@ -10,7 +10,6 @@ import armxmlproc
 import xml.etree.ElementTree as Et
 import os
 
-
 def about_man(out_man_file):
     arm_va = "Arm{}-{}".format(ARM_VERSION, ARM_ARCHITECTURE_PROFILE)
     arm = ".\"Generator {} v{}, {}\n".format(ARMMAN_NAME, ARMMAN_VERSION, ARMMAN_REPO)
