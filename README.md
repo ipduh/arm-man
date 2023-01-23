@@ -1,9 +1,10 @@
 # arm-man
 arm (Advanced RISC Machines) man(ual) pages
 
-**arm-man-pages**
-A man page for each instruction in the A32/T32 and A64 Instruction Sets
-in the Armv8-A v86A xml specification.
+# arm-man-pages
+The ./arm-main-pages directory contains a man page
+for each instruction in the A32/T32 and A64 Instruction Sets
+of the Armv8-A v86A xml specification.
 
 arm.7  , arm-man man
 arm32.7, The A32/T32 Instruction set index
