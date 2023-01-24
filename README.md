@@ -60,10 +60,6 @@ $ man arm
 
 <br>
 <br>
-
-##### Arm86A_xml
-Armv8-A v86A, the xml spec used to produce the arm-man pages.
-
 <br>
 <br>
 
