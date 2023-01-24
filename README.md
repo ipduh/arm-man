@@ -14,7 +14,7 @@ of the Armv8-A v86A xml specification.
 
 #### Install arm manual pages
   If, you just want the arm-man pages you <br>
-do not need to congigure or run the generator. <br>
+do not need to configure or run the generator. <br>
 Just copy the contents of the ./arm-man-pages directory <br>
 into your local man-pages/man-section directory, <br>
 eg /usr/local/share/man/man7/
