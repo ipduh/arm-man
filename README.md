@@ -3,9 +3,9 @@ arm (Advanced RISC Machines) man(ual) pages
 <br>
 <br>
 
-#### arm-man-pages directory
-  Contains instruction indexes <br>
-a man page for each instruction in the <br>
+#### ./arm-man-pages directory
+  Contains an index for each instruction set <br>
+and a man page for each instruction in the <br>
 A32/T32 and A64 Instruction Sets <br>
 of the Armv8-A v86A xml specification.
 
@@ -24,13 +24,13 @@ See install.sh
 
 
 
-##### A32/T32 Instruction Set(s) Index
+##### A32/T32 Instruction Sets Index
 ```
 $ man ./arm-man-pages/arm32.7
 $ man arm32
 ```
 
-##### Lookup command in the A32/T32 instruction set(s)
+##### Lookup command in the A32/T32 instruction sets
 ```
 $ man arm32 |grep add |grep sp
    arm32-add-sp-i    Add to SP (immediate).
@@ -44,7 +44,7 @@ $ man ./arm-man-pages/arm64.7
 $ man arm64
 ```
 
-##### Lookup command in the A64 Instruction set.
+##### Lookup command in the A64 Instruction Set.
 ```
 $ man arm64 |grep movz
   arm64-mov-movz    Move (wide immediate): an alias of MOVZ.
