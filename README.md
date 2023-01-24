@@ -69,6 +69,7 @@ Armv8-A v86A, the xml spec used to produce the arm-man pages.
 
 ##### Generate man pages from the spec xml.
 ```
+$ tar xvzf arm86A_xml.tar.gz
 $ cd generator
 $ ./arm-man.py
 )) arm-man v0.4, https://github.com/ipduh/arm-man
