@@ -21,7 +21,8 @@ arm (Advanced RISC Machines) man(ual) pages
 
 <br>
 <br>
-#### Synopis
+
+#### Synopsis
  Man pages for the arm architecture generated <br>
  programmaticaly from  the xml spec
 
