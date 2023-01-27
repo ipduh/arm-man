@@ -47,9 +47,11 @@ into your local man-pages/man-section directory, <br>
 eg /usr/local/share/man/man7/
 <br>
 <br>
-See install.sh
-<br>
 
+See install.sh
+
+<br>
+<br>
 
 
 ##### A32/T32 Instruction Sets Index
