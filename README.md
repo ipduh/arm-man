@@ -3,6 +3,32 @@ arm (Advanced RISC Machines) man(ual) pages
 <br>
 <br>
 
+
+```
+
+                      /\________/\
+                  |  /____    ____\  |
+                  |_/     \__/     \_|
+                  [_       __       _]
+                    \_____/  \_____/
+                     |    ____    |
+  __ _ _ __ _ __ ___  \   \__/   /
+ / _` | '__| '_ ` _ \/_\__  __ _/_\_
+| (_| | |  | | | | | | '  \/ _` | ' \
+ \__,_|_|  |_| |_| |_|_|_|_\__,_|_||_|
+
+```
+
+<br>
+<br>
+#### Synopis
+ Man pages for the arm architecture generated <br>
+ programmaticaly from  the xml spec
+
+<br>
+<br>
+
+
 #### ./arm-man-pages directory
   Contains an index for each instruction set <br>
 and a man page for each instruction in the <br>
@@ -18,6 +44,7 @@ do not need to configure or run the generator. <br>
 Just copy the contents of the ./arm-man-pages directory <br>
 into your local man-pages/man-section directory, <br>
 eg /usr/local/share/man/man7/
+<br>
 <br>
 See install.sh
 <br>
