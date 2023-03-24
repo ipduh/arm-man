@@ -24,7 +24,7 @@ arm (Advanced RISC Machines) man(ual) pages
 
 #### Synopsis
  Man pages for the arm architecture generated <br>
- programmaticaly from  the xml spec
+ programmaticaly from  the arm XML Specification.
 
 <br>
 <br>
@@ -93,10 +93,11 @@ $ man arm
 <br>
 <br>
 
-##### Generate man pages from the spec xml.
+##### Generate man pages from the arm XML Specification.
 ```
 $ tar xvzf arm86A_xml.tar.gz
 $ cd generator
+$ pyenv global 3.6.15
 $ ./arm-man.py
 )) arm-man v0.4, https://github.com/ipduh/arm-man
 
